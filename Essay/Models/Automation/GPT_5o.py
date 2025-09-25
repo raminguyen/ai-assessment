@@ -1,8 +1,8 @@
 # ================== HYPERPARAMS ==================
 MODEL_NAME        = "gemini-2.5-flash"
-WINDOW_SIZE       = (1280, 800)  # width, height
+WINDOW_SIZE       = (600, 800)  # width, height
 PROMPTS_JSON_PATH = "/Users/ramihuunguyen/Documents/PhD/AI-Assessment/Essay/Input/prompts1.json"
-RUBRIC_TXT_PATH   = "/Users/ramihuunguyen/Documents/PhD/AI-Assessment/Essay/Rubrics/aacu_rubrics.txt"
+RUBRIC_JSON_PATH = "/Users/ramihuunguyen/Documents/PhD/AI-Assessment/Essay/Rubrics/aacu_rubrics.json"
 OUT_DIR           = "outputs"
 OUT_TXT           = "outputs/combined.txt"
 COMBINED_JSON     = "outputs/final_results.json"
@@ -29,27 +29,19 @@ Path(OUT_DIR).mkdir(parents=True, exist_ok=True)
 with open(PROMPTS_JSON_PATH, "r", encoding="utf-8") as f:
     prompts = json.load(f)
 
-# load rubric text directly
-with open(RUBRIC_TXT_PATH, "r", encoding="utf-8") as f:
-    rubric_text = f.read()
+# Load JSON config containing step2 prompt and rubric
+with open(RUBRIC_JSON_PATH, "r", encoding="utf-8") as f:
+    config = json.load(f)
 
 # unpack prompts
-p1 = prompts["step1_first_prompt"]
+p1 = f"""{prompts['step1_first_prompt']}"""
 
-p2 = (
-    prompts["step2_scoring_prompt"]
-    + "\n\n"
-    + "Use the following rubric EXACTLY as provided. Do not summarize. Send STEP2 as a single message.\n"
-    + "<<<RUBRIC_START>>>\n"
-    + "```text\n"
-    + rubric_text
-    + "\n```"
-    + "\n<<<RUBRIC_END>>>"
-)
+# Combine step2 scoring prompt with rubric text in one block
+p2 = config["step2_scoring_prompt"]
 
-p3 = prompts["step3_revision_prompt"]
+p3 = f"""{prompts['step3_revision_prompt']}"""
 
-p4 = prompts["step4_final_polish_prompt"]
+p4 = f"""{prompts['step4_final_polish_prompt']}"""
 
 # single chat: send 4 prompts sequentially, then post a combined message
 login_task = f"""
@@ -58,42 +50,59 @@ login_task = f"""
    - Email: {CHATGPT_EMAIL}
    - Password: {CHATGPT_PASS}
    If redirected to Google login, click Continue and finish sign-in.
+
 3) Wait until the home/chat page is fully loaded.
 
 4) In ONE chat thread, send these prompts SEQUENTIALLY (wait for completion each time):
-   [STEP1] {p1}
-   # ✅ IMPORTANT: STEP2 must be posted as ONE message, verbatim, including rubrics.
-   [STEP3] {p3}
-   [STEP4] {p4}
+   [STEP1] input the first prompt {p1}
 
-5) After STEP4 finishes, send ONE final combined message with this exact format:
-   ===== BEGIN_COMBINED_RESULTS =====
-   --- STEP1 RESPONSE START ---
-   (paste full STEP1 answer)
-   --- STEP1 RESPONSE END ---
+   wait for STEP1 to finish in 5s, then key enter prompt, and wait for 10s to get the answer.
 
-   --- STEP2 RESPONSE START ---
-   (paste full STEP2 answer)
-   --- STEP2 RESPONSE END ---
+   then scroll down to see the full answer.
 
-   --- STEP3 RESPONSE START ---
-   (paste full STEP3 answer)
-   --- STEP3 RESPONSE END ---
+   [STEP2] input the second prompt  {p2}
 
-   --- STEP4 RESPONSE START ---
-   (paste full STEP4 answer)
-   --- STEP4 RESPONSE END ---
-   ===== END_COMBINED_RESULTS =====
+    wait for STEP2 to input full prompts in 40s, then key enter prompt, and wait for 20s to get the answer.
 
-6) Post ONLY that combined message as the final output.
+    then scroll down to see the full answer.
 
-7) Save EXACTLY that final combined message into the text file "{Path(OUT_TXT).name}".
+   [STEP3] input the third prompt {p3}
+
+    wait for STEP3 to input full prompts in 20s, then key enter prompt, and wait for 10s to get the answer.
+
+   [STEP4] input the fourth prompt {p4}
+
+    wait for STEP4 to input full prompts in 20s, then key enter prompt, and wait for 10s to get the answer.
+
+    After done, wait for 10s to ensure the final response is fully loaded. Expored the full text of all steps and final result to text files.
+
 """
 
-agent = Agent(task=login_task, llm=ChatGoogle(model=MODEL_NAME))
+# ================== PARAMS ==================
+OUT_TXT = "outputs/final_result.txt"
+MODEL_NAME = "gemini-2.5-flash"
+# ============================================
 
-history = agent.run_sync()
-result  = history.final_result()
+from browser_use import Agent, ChatGoogle
+import os
+
+agent = Agent(task=login_task, llm=ChatGoogle(model=MODEL_NAME))
+history = agent.run_sync()  # use await agent.run() if you're async
+
+# all steps + final result
+steps = history.extracted_content() or []
+last  = history.final_result()  # only last step
+
+os.makedirs(os.path.dirname(OUT_TXT), exist_ok=True)
+with open(OUT_TXT, "w", encoding="utf-8") as f:
+    for i, txt in enumerate(steps, 1):
+        f.write(f"=== STEP {i} ===\n{txt}\n\n")
+    if last and (not steps or last != steps[-1]):
+        f.write(f"=== FINAL RESULT ===\n{last}\n")
+
+print(f"✅ Saved: {OUT_TXT}")
+
+"""
 
 if result:
     with open(OUT_TXT, "w", encoding="utf-8") as f:
@@ -123,3 +132,5 @@ if result:
     print(f"🎉 Combined JSON: {COMBINED_JSON}")
 else:
     print("⚠️ No final result received; nothing saved.")
+
+"""
