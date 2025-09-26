@@ -56,25 +56,11 @@ login_task = f"""
 4) In ONE chat thread, send these prompts SEQUENTIALLY (wait for completion each time):
    [STEP1] input the first prompt {p1}
 
-   wait for STEP1 to finish in 5s, then key enter prompt, and wait for 10s to get the answer.
-
-   then scroll down to see the full answer.
-
    [STEP2] input the second prompt  {p2}
-
-    wait for STEP2 to input full prompts in 40s, then key enter prompt, and wait for 20s to get the answer.
-
-    then scroll down to see the full answer.
-
+ 
    [STEP3] input the third prompt {p3}
 
-    wait for STEP3 to input full prompts in 20s, then key enter prompt, and wait for 10s to get the answer.
-
    [STEP4] input the fourth prompt {p4}
-
-    wait for STEP4 to input full prompts in 20s, then key enter prompt, and wait for 10s to get the answer.
-
-    After done, wait for 10s to ensure the final response is fully loaded. Expored the full text of all steps and final result to text files.
 
 """
 
@@ -86,21 +72,23 @@ MODEL_NAME = "gemini-2.5-flash"
 from browser_use import Agent, ChatGoogle
 import os
 
-agent = Agent(task=login_task, llm=ChatGoogle(model=MODEL_NAME))
+
+agent = Agent(
+    task=login_task,
+    llm=ChatGoogle(model=MODEL_NAME),
+)
+
 history = agent.run_sync()  # use await agent.run() if you're async
 
-# all steps + final result
-steps = history.extracted_content() or []
-last  = history.final_result()  # only last step
+last = history.final_result()  # only last step
 
 os.makedirs(os.path.dirname(OUT_TXT), exist_ok=True)
 with open(OUT_TXT, "w", encoding="utf-8") as f:
-    for i, txt in enumerate(steps, 1):
-        f.write(f"=== STEP {i} ===\n{txt}\n\n")
-    if last and (not steps or last != steps[-1]):
-        f.write(f"=== FINAL RESULT ===\n{last}\n")
+    if last:
+        f.write(last)
 
 print(f"✅ Saved: {OUT_TXT}")
+
 
 """
 
