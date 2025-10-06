@@ -1,5 +1,5 @@
 # ================== HYPERPARAMS ==================
-PROVIDER          = "claude"  # "chatgpt" | "gemini" | "copilot"
+PROVIDER          = "gemini"  # "chatgpt" | "gemini" | "copilot"
 MODEL_NAME        = "gemini-2.5-flash"
 WINDOW_SIZE       = (600, 800)
 PROMPTS_JSON_PATH = "/Users/ramihuunguyen/Documents/PhD/AI-Assessment/Essay/Input/prompts1.json"
