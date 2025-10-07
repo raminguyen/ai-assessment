@@ -9,7 +9,7 @@ RUBRIC_PATH       = "aacu_rubrics.json"
 
 # =================================================
 
-from browser_use import Agent, ChatGoogle
+from browser_use import Agent, ChatGoogle, ChatOllama
 from dotenv import load_dotenv
 from pathlib import Path
 import os, json, asyncio
@@ -32,11 +32,8 @@ if not EMAIL or not PASS:
     raise ValueError(f"{PROVIDER.upper()} email/password missing in .env")
 
 # --- read Gemini draft file ---
-raw_text = Path(GEMINI_DRAFT_PATH).read_text(encoding="utf-8")
+essay_text = Path(GEMINI_DRAFT_PATH).read_text(encoding="utf-8")
 
-# --- extract only the essay text between </query> and </result> ---
-match = re.search(r"</query>\s*<result>\s*(.*?)\s*</result>", raw_text, re.DOTALL)
-essay_text = match.group(1).strip() if match else raw_text.strip()
 
 # --- read AACU rubric JSON: get only the prompt text (no key name) ---
 with open(RUBRIC_PATH, "r", encoding="utf-8") as rf:
@@ -56,33 +53,35 @@ def split_into_n(text, n=3):
     cuts = [round(i * L / n) for i in range(n + 1)]
     return [text[cuts[i]:cuts[i+1]] for i in range(n)]
 
-# --- print total length ---
-print("Total length of p2:", len(p2))
-
-# --- save p2 to text file ---
-output_path = Path("p2_full_text.txt")
-output_path.write_text(p2, encoding="utf-8")
-
 # --- split and sanity checks ---
-parts = split_into_n(p2, 3)
-p1_part, p2_part, p3_part = parts
+parts = split_into_n(p2, 6)
+p1_part, p2_part, p3_part, p4_part, p5_part, p6_part = parts
 
-WAIT_BETWEEN_PARTS_SEC = 15
+WAIT_BETWEEN_PARTS_SEC = 10
 WAIT_AFTER_PARTS_SEC = 15
 
 # --- tasks per provider (short, direct) ---
 if PROVIDER == "gemini":
     login_task = f"""
+
+Follow step by step instructions:
+    
 1) Go to {TARGET_URLS['gemini']} and sign in:
    - Email: {EMAIL}
    - Password: {PASS}
 
 2) Wait for the compose box to be ready.
-3) First type {p1_part} into chatbot (DO NOT PRESS ENTER)
-4) Second type {p2_part} into chatbot  (DO NOT PRESS ENTER)
-5) Third type {p3_part} into chatbot (DO NOT PRESS ENTER)
-6) Enter to send.
-7) Grab the response text.
+3) First type {p1_part}. Wait {WAIT_BETWEEN_PARTS_SEC} seconds. Do not key enter yet.
+4) Second type {p2_part}. Wait {WAIT_BETWEEN_PARTS_SEC} seconds. Do not key enter yet.
+5) Third type {p3_part}. Wait {WAIT_BETWEEN_PARTS_SEC} seconds. Do not key enter yet.
+6) Fourth type {p4_part} Wait {WAIT_BETWEEN_PARTS_SEC} seconds. Do not key enter yet. 
+7) Fifth type {p5_part}  Wait {WAIT_BETWEEN_PARTS_SEC} seconds. Do not key enter yet.
+8) Fifth type {p6_part} Wait {WAIT_BETWEEN_PARTS_SEC} seconds. Then key enter.
+9) Wait 45 seconds to ensure response is done.
+10) Grab the response text.
+11) Next, type following prompt: {p3} and then hit Enter to hit send. 
+12) Wait 45 seconds to ensure response is done.
+13) Grab the response text.
 
 """
 
@@ -110,7 +109,6 @@ elif PROVIDER == "claude":
 3) Wait until the chat input box is ready.
 4) Paste this prompt and send:
    {p1}
-5) Grab the response text.
 """
     
 else:
@@ -163,33 +161,27 @@ except RuntimeError:
     loop = asyncio.get_event_loop()
     loop.run_until_complete(agent.close())
 
-# --- save results ---
-result_text = extract_text(result)
+# --- io paths ---
+Path(OUT_DIR).mkdir(parents=True, exist_ok=True)
 
-# Split result text into p2 and p3 responses
-# Assuming p2 corresponds to grading of the model and p3 to revising the essay
+tag = PROVIDER.lower()
 
-parts = result_text.split(p3)
-grading_of_model = parts[0].strip() if len(parts) > 0 else "" # grading of model
-revised_essay = parts[1].strip() if len(parts) > 1 else "" # revised essay
+OUT_TXT        = f"{OUT_DIR}/{tag}_ste2_draft1.txt"
+OUT_RUN_JSON   = f"{OUT_DIR}/{tag}_step2_result.json"
+OUT_DRAFT_JSON = f"{OUT_DIR}/{tag}_step2_draft1.json"
 
-# Save grading of model (p2 result)
-grading_path = os.path.join(OUT_DIR, f"{PROVIDER}_grading_of_model.txt")
-with open(grading_path, "w", encoding="utf-8") as f:
-    f.write(grading_of_model)
+# --- save ---
+draft_text = extract_text(result)
+with open(OUT_TXT, "w", encoding="utf-8") as f:
+    f.write(draft_text)
 
-# Save grading of model as JSON
-grading_json_path = os.path.join(OUT_DIR, f"{PROVIDER}_grading_of_model.json")
-with open(grading_json_path, "w", encoding="utf-8") as f:
-    json.dump({"grading_of_model": grading_of_model}, f, indent=2)
+with open(OUT_DRAFT_JSON, "w", encoding="utf-8") as f:
+    json.dump({"provider": PROVIDER, "draft_text": draft_text}, f, ensure_ascii=False, indent=2)
 
-# Save revised essay (p3 result)
-revised_essay_path = os.path.join(OUT_DIR, f"{PROVIDER}_revised_essay.txt")
-with open(revised_essay_path, "w", encoding="utf-8") as f:
-    f.write(revised_essay)
+with open(OUT_RUN_JSON, "w", encoding="utf-8") as f:
+    json.dump(dump_json(result), f, ensure_ascii=False, indent=2)
 
-# Save revised essay as JSON
-revised_essay_json_path = os.path.join(OUT_DIR, f"{PROVIDER}_revised_essay.json")
-with open(revised_essay_json_path, "w", encoding="utf-8") as f:
-    json.dump({"revised_essay": revised_essay}, f, indent=2)
 
+print(f"[OK] {PROVIDER} draft saved: {OUT_TXT}")
+print(f"[OK] {PROVIDER} draft.json saved: {OUT_DRAFT_JSON}")
+print(f".[OK] {PROVIDER} run.json saved: {OUT_RUN_JSON}")
