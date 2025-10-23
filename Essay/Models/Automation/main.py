@@ -39,7 +39,7 @@ if __name__ == "__main__":
         "-w", "--website",
         type = str,
         required = True,
-        choices = ["chatgpt", "gemini", "claude", "corpilot"]
+        choices = ["chatgpt", "gemini", "claude", "copilot"]
     )
     argument = parser.parse_args()
 

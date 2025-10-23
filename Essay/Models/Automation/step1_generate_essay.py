@@ -65,7 +65,7 @@ class AIrunner:
             3) Wait for 15 seconds for user log in with their security codes.
             4) Paste this prompt {first_prompt} and send:
             5) Wait for 15 seconds for the response to be generated.
-            6) Wait for 30 seconds for the response to be extracted.
+            6) Wait for 90 seconds for the response to be extracted. Ensure extracted responses exactly. 
             6) Grab the response text. 
 
             """
