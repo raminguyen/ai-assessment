@@ -1,11 +1,23 @@
+import os
+
+os.environ["BROWSER_USE_CONFIG_DIR"] = os.path.join(os.getcwd(), "browser_config")
+
 from browser_use import Agent, ChatGoogle
 from dotenv import load_dotenv
-import os
 import sys 
 import json
 import asyncio
 from pydantic import BaseModel 
 from jsonresults import*
+
+
+base_direction = os.path.dirname(os.path.abspath(__file__))
+
+prompts_json_path = os.path.join(base_direction, "prompts1.json")
+
+
+with open(prompts_json_path, "r", encoding='utf-8') as f:
+    first_prompt = str(json.load(f)['step1_first_prompt'])
 
 class AIrunner:
     def __init__(self, email=None, password=None):
@@ -34,6 +46,9 @@ class AIrunner:
             "claude": "https://claude.ai/login"
         }
         self.url = target_website.get(website, None)
+
+    #2. Define hyperparameters and paths
+
 
     #Step 2: Send prompt  
     def send_prompt(self, prompt, interactive=True):
@@ -66,40 +81,8 @@ class AIrunner:
         result = result.action_results()
         result = result 
         agent.close()
-        save_result_as_json(result)
-        
-# Main code
+        save_result_as_json(result, filename="final_result.json", provider=self.provider)
 
-#1. Define hyperparameters and paths
-
-prompts_json_path = "/Users/ramihuunguyen/Documents/PhD/AI-Assessment/Essay/Models/Automation/prompts1.json"
-
-#sys.exit() #stop execution here for now
-
-with open(prompts_json_path, "r", encoding='utf-8') as f:
-    first_prompt = str(json.load(f)['step1_first_prompt'])
-
-#1a: Load email and password.
-
-load_dotenv()
-
-EMAIL = os.getenv("EMAIL")
-
-PASSWORD  = os.getenv("PASS")
-    
-#2.: Initialize AIrunner
-
-runner = AIrunner(email=EMAIL, password=PASSWORD)
-
-#3.: Set a target website
-
-runner.target_website("chatgpt")
-
-#4: Generate an essay
-
-generate_essay = runner.send_prompt(first_prompt, interactive=True)
-
-result = runner.agent(generate_essay)
 
 
 
