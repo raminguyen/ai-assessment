@@ -15,6 +15,7 @@ EMAIL = os.getenv("EMAIL")
 PASSWORD  = os.getenv("PASS")
 
 
+
 base_direction = os.path.dirname(os.path.abspath(__file__))
 
 prompts_json_path = os.path.join(base_direction, "prompts1.json")
@@ -26,11 +27,6 @@ with open(prompts_json_path, "r", encoding='utf-8') as f:
 
 
 if __name__ == "__main__":
-
-
-    import os
-    os.environ["BROWSER_USE_CONFIG_DIR"] = os.path.join(os.getcwd(), "browser_config")
-
 
     #1: Define parse command line argument
     parser = argparse.ArgumentParser(description="Run AI agent for ChatGPT, Gemini, ClaudeAI, or Copilot")
@@ -47,6 +43,7 @@ if __name__ == "__main__":
     bot = AIrunner(email=EMAIL, password=PASSWORD) 
 
     #3: Define a website
+    
     bot.provider = argument.website
     bot.target_website(argument.website) #target website
 

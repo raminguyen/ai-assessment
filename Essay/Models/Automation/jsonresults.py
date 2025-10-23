@@ -31,13 +31,31 @@ def save_result_as_json(result, filename="final_result.json", provider=None):
     for item in reversed(serializable):
         if isinstance(item, dict) and "extracted_content" in item and "<result>" in item["extracted_content"]:
             match = re.search(r"<result>(.*?)</result>", item["extracted_content"], re.DOTALL)
+            
             if match:
                 result_text = match.group(1).strip()
                 extracted_path = os.path.join(save_dir, "final_extracted.json")
                 with open(extracted_path, "w", encoding="utf-8") as f:
                     json.dump({"result": result_text}, f, ensure_ascii=False, indent=2)
                 print(f"✅ Extracted result saved to: {extracted_path}")
+
+                break
+    for item in reversed(serializable):
+        
+        if isinstance(item, dict) and "long_term_memory" in item:
+            match = re.search(r"(https?://\S+)", item["long_term_memory"])
+            
+            if match:
+
+                link = match.group(1)
+                link_path = os.path.join(save_dir, "extracted_link.json")
+
+                with open(link_path, "w", encoding="utf-8") as f:
+                    json.dump({"link": link}, f, ensure_ascii=False, indent=2)
+                    
+                print(f"✅ Link extracted and saved to: {link_path}")
                 break
 
+    #6:Extract link from this
     return save_path
 

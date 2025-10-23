@@ -2,7 +2,7 @@ import os
 
 os.environ["BROWSER_USE_CONFIG_DIR"] = os.path.join(os.getcwd(), "browser_config")
 
-from browser_use import Agent, ChatGoogle
+from browser_use import Agent, ChatGoogle, ChatOpenAI
 from dotenv import load_dotenv
 import sys 
 import json
@@ -31,10 +31,21 @@ class AIrunner:
     def getllms(self):
         
         self.provider == "gemini"
-        
-        self.model_name = "gemini-2.5-flash"
-
+        self.model_name = "gemini-flash-latest"
         return ChatGoogle(model=self.model_name)
+    
+    # def getllms(self):
+    #     # set provider and model
+    #     self.provider = "chatgpt"
+    #     self.model_name = "gpt-5-2025-08-07"
+
+    #     OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
+
+    #     # create ChatOpenAI instance
+    #     llm = ChatOpenAI(model=self.model_name, api_key=OPENAI_API_KEY)
+    #     llm.model = self.model_name 
+
+    #     return llm
     
     #Step 2: open target website
 
@@ -49,7 +60,6 @@ class AIrunner:
 
     #2. Define hyperparameters and paths
 
-
     #Step 2: Send prompt  
     def send_prompt(self, prompt, interactive=True):
 
@@ -62,8 +72,8 @@ class AIrunner:
             2) Click "Sign in". Use:
                 - Email: {self.email}
                 - Password: {self.password}
-            3) Wait for 15 seconds for user log in with their security codes.
-            4) Paste this prompt {first_prompt} and send:
+            3) Wait for 20 seconds for user log in with their security codes.
+            4) Paste this prompt {first_prompt} and click key enter.
             5) Wait for 15 seconds for the response to be generated.
             6) Wait for 90 seconds for the response to be extracted. Ensure extracted responses exactly. 
             6) Grab the response text. 
