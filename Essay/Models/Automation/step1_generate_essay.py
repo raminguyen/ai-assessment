@@ -2,13 +2,17 @@ import os
 
 os.environ["BROWSER_USE_CONFIG_DIR"] = os.path.join(os.getcwd(), "browser_config")
 
-from browser_use import Agent, ChatGoogle, ChatOpenAI
+from browser_use import Agent, ChatGoogle, ChatOpenAI, Browser
 from dotenv import load_dotenv
 import sys 
 import json
 import asyncio
 from pydantic import BaseModel 
 from jsonresults import*
+
+# 2️⃣ Create Chrome profile
+
+
 
 base_direction = os.path.dirname(os.path.abspath(__file__))
 assignment_prompt_path = os.path.join(base_direction, "assignmentprompt.json")
@@ -85,9 +89,21 @@ class AIrunner:
 
 
       #Step 3: run agent
+
+
     def agent(self, prompt, interactive=None):
+        
         llm = self.getllms()
-        agent = Agent(task=prompt, llm=llm)
+
+
+        # browser = Browser(
+        #     executable_path='/Applications/Google Chrome.app/Contents/MacOS/Google Chrome',
+        #     user_data_dir='~/Library/Application Support/Google/Chrome'
+
+        #     )
+
+        agent = Agent(task=prompt, llm=llm, browser=None)
+
         result = agent.run_sync()
         result = result.action_results()
         result = result 
