@@ -1,5 +1,0 @@
-{
-  "step1_first_prompt": "Let's write a 1000 word fully written college essay, plus at least 5 citations from peer-reviewed articles in the end of essay not embedded links, that answers this question: Consider the following problem: In the morning, when Professor Catlove opens a new can of cat food, his cats run into the kitchen purring and meowing and rubbing their backs against his legs. What examples, if any, of classical conditioning, operant conditioning, and social learning are at work in this brief scene? Note that both the cats and the professor might be exhibiting conditioned behavior here.",
-  "step3_revision_prompt": "I would like help revising the essay to hit a full 20/20.",
-  "step4_final_polish_prompt": "I would like to deliver a fully revised final version of the essay with these changes integrated smoothly.'"
-}

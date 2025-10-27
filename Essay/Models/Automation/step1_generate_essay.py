@@ -10,22 +10,22 @@ import asyncio
 from pydantic import BaseModel 
 from jsonresults import*
 
-
 base_direction = os.path.dirname(os.path.abspath(__file__))
+assignment_prompt_path = os.path.join(base_direction, "assignmentprompt.json")
 
-prompts_json_path = os.path.join(base_direction, "prompts1.json")
-
-
-with open(prompts_json_path, "r", encoding='utf-8') as f:
-    first_prompt = str(json.load(f)['step1_first_prompt'])
+with open(assignment_prompt_path, "r", encoding="utf-8") as f:
+    data = json.load(f)
 
 class AIrunner:
-    def __init__(self, email=None, password=None):
+    def __init__(self, email=None, password=None, assignment_number=1):
         self.email = email
         self.password = password
         self.provider = None
         self.model_name = None
         self.url = None
+        self.assignment_number = assignment_number
+        assignment_key = f"assignment_{self.assignment_number}_prompt"
+        self.assignment_prompt = data.get(assignment_key, "Assignment prompt not found.")
 
     #Step 1: get model
     def getllms(self):
@@ -73,7 +73,8 @@ class AIrunner:
                 - Email: {self.email}
                 - Password: {self.password}
             3) Wait for 20 seconds for user log in with their security codes.
-            4) Paste this prompt {first_prompt} and click key enter.
+            4) Paste this prompt {self.assignment_prompt} and click key enter.
+            5) Wait for 15 seconds before move to the next step.
             5) Wait for 15 seconds for the response to be generated.
             6) Wait for 90 seconds for the response to be extracted. Ensure extracted responses exactly. 
             6) Grab the response text. 
@@ -91,7 +92,7 @@ class AIrunner:
         result = result.action_results()
         result = result 
         agent.close()
-        save_result_as_json(result, filename="final_result.json", provider=self.provider)
+        save_result_as_json(result, filename="final_result.json", provider=self.provider, assignment_number=self.assignment_number)
 
 
 

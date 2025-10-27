@@ -1,22 +1,25 @@
 import os, json, re
 
-import os, json, re
-
-def save_result_as_json(result, filename="final_result.json", provider=None):
+def save_result_as_json(result, filename="final_result.json", provider=None, assignment_number=None):
     """
     Save agent result into a folder named after the provider (chatgpt, gemini, claude, copilot).
     """
 
-    # 1️⃣ Create a provider-specific folder (default if none)
-    
+    if assignment_number:
+        base_dir = os.path.join(os.getcwd(), f"assignment_{assignment_number}")
+    else:
+        base_dir = os.path.join(os.getcwd(), "default_assignment")
+
     provider_folder = provider if provider else "default"
-    save_dir = os.path.join(os.getcwd(), provider_folder)
+
+    save_dir = os.path.join(base_dir, provider_folder)
+
     os.makedirs(save_dir, exist_ok=True)
 
-    # 2️⃣ Full path for the main JSON file
+    # Full path for JSON file
     save_path = os.path.join(save_dir, filename)
 
-    # 3️⃣ Convert model outputs into serializable JSON
+    # Convert model outputs into serializable JSON
     serializable = [
         r.model_dump(exclude_none=True) if hasattr(r, "model_dump") else str(r)
         for r in result
@@ -40,6 +43,7 @@ def save_result_as_json(result, filename="final_result.json", provider=None):
                 print(f"✅ Extracted result saved to: {extracted_path}")
 
                 break
+            
     for item in reversed(serializable):
         
         if isinstance(item, dict) and "long_term_memory" in item:
