@@ -6,9 +6,9 @@ def save_result_as_json(result, filename="final_result.json", provider=None, ess
     """
 
     if essay_number:
-        base_dir = os.path.join(os.getcwd(), f"essay_{essay_number}")
+        base_dir = os.path.join(os.getcwd(), f"tuned_essay_{essay_number}")
     else:
-        base_dir = os.path.join(os.getcwd(), "default_essay")
+        base_dir = os.path.join(os.getcwd(), "default_tuned_essay")
 
     provider_folder = provider if provider else "default"
 
