@@ -69,7 +69,7 @@ class AIrunner:
         essay_dir = os.path.join(
             self.base_direction,
             "..",
-            f"essay_{self.argument.assignment}",
+            f"essay_{self.argument.essay}",
             self.argument.folder
         )
 
@@ -103,7 +103,7 @@ class AIrunner:
     #2. Define hyperparameters and paths
 
     #Step 2: Send prompt  
-    def send_prompt(self, prompt, interactive=True):
+    def send_prompt(self, prompt, website):
 
         words = self.second_prompt.split()
 
@@ -128,8 +128,50 @@ class AIrunner:
         """
 
 
-        if interactive:
+        # if website == "chatgpt":
 
+        #     prompt = f"""
+
+        #     Follow this instructions step by step:
+
+        #     1) Go to {self.url}
+
+        #     2) Click "Sign in". Use:
+
+        #         - Email: {self.email}
+            
+        #     3) Click Next, choose passkey, after that, click Continue or Next.
+
+        #     4) Wait for 20 seconds for user log in with their security codes.
+
+        #     5) Paste this prompt {part1}.
+
+        #     6) Paste this prompt {part2}.
+
+        #     7) Paste this prompt {part3}.
+
+        #     8) Paste this prompt {part4}.
+
+        #     9) Paste this prompt {part5}.
+
+        #     10) Enter to submit the prompt.
+
+        #     11) Extract all responses in 40 seconds.
+
+        #     12) Paste this prompt {followup_prompt}.
+
+        #     13) Wait for 60 seconds for the response to be generated. 
+            
+        #     14) Extract all responses in 40 seconds.
+
+        #     15) End the session.
+
+        #     """
+
+        #     return prompt
+        
+        if website == "gemini":
+            
             prompt = f"""
 
             Follow this instructions step by step:
@@ -139,29 +181,32 @@ class AIrunner:
             2) Click "Sign in". Use:
 
                 - Email: {self.email}
-                - Password: {self.password}
+            
+            3) Click Next, choose passkey, after that, click Continue or Next.
 
-            3) Wait for 20 seconds for user log in with their security codes.
+            4) Wait for 20 seconds for user log in with their security codes.
 
-            4) Paste this prompt {part1}.
+            5) Paste this prompt {part1}.
 
-            5) Paste this prompt {part2}.
+            6) Paste this prompt {part2}.
 
-            6) Paste this prompt {part3}.
+            7) Paste this prompt {part3}.
 
-            7) Paste this prompt {part4}.
+            8) Paste this prompt {part4}.
 
-            8) Paste this prompt {part5}.
+            9) Paste this prompt {part5}.
 
-            6) Enter to submit the prompt.
+            10) Enter to submit the prompt.
 
-            7) Wait for 30 seconds before move to the next step.
+            11) Extract all responses in 40 seconds.
 
-            8) Paste this prompt {followup_prompt}.
+            12) Paste this prompt {followup_prompt}. Key "Enter" to submit.
 
-            9) Wait for 90 seconds for the response to be extracted. Ensure extracted responses exactly. 
+            13) Wait for 60 seconds for the response to be generated. 
 
-            10) Grab the response text. 
+            14) Extract all responses in 40 seconds.
+
+            15) End the session.
 
             """
 
@@ -196,7 +241,7 @@ class AIrunner:
         except Exception as e:
             print(f"[Warning] Failed to close session: {e}")
 
-        save_result_as_json(result, filename="final_result.json", provider=self.provider, essay_number=self.argument.assignment)
+        save_result_as_json(result, filename="final_result.json", provider=self.provider, essay_number=self.argument.essay)
 
 
 

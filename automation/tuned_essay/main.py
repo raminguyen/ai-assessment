@@ -31,7 +31,7 @@ if __name__ == "__main__":
     )
 
     parser.add_argument(
-        "-a","--assignment",
+        "-e","--essay",
         type=int,
         required=True,
         choices=[1,2,3],
@@ -67,16 +67,16 @@ if __name__ == "__main__":
 
     #3b: Define an assignment
     
-    assignment_number = argument.assignment
+    essay_number = argument.essay
     
-    assignment_key = f"assignment_{assignment_number}_prompt"
+    essay_key = f"essay_{essay_number}_prompt"
 
     second_prompt = bot.prepare_second_prompt()
 
     print("Second Prompt:", second_prompt)
 
     #4:Send prompt
-    prompt = bot.send_prompt(second_prompt, interactive=True)
+    prompt = bot.send_prompt(second_prompt, website=argument.website)
 
     #5: Run agent
     bot.agent(prompt)
