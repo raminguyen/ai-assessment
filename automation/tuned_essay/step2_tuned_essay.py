@@ -108,16 +108,17 @@ class AIrunner:
         words = self.second_prompt.split()
 
         n = len(words)
-        i1 = n // 5
-        i2 = 2 * n // 5
-        i3 = 3 * n // 5
-        i4 = 4 * n // 5
 
-        part1 = " ".join(words[:i1])
-        part2 = " ".join(words[i1:i2])
-        part3 = " ".join(words[i2:i3])
-        part4 = " ".join(words[i3:i4])
-        part5 = " ".join(words[i4:])
+        parts = []
+        start = 0
+
+        indices = [n * i // 6 for i in range(1, 6)]
+
+        for end in indices + [n]:
+            parts.append(" ".join(words[start:end]))
+            start = end
+
+        part1, part2, part3, part4, part5, part6 = parts
 
         followup_prompt = """
         
@@ -196,17 +197,21 @@ class AIrunner:
 
             9) Paste this prompt {part5}.
 
-            10) Enter to submit the prompt.
+            10) Paste this prompt {part6}.
 
-            11) Extract all responses in 40 seconds.
+            11) Enter to submit the prompt.
 
-            12) Paste this prompt {followup_prompt}. Key "Enter" to submit.
+            12) Extract all responses in 40 seconds.
 
-            13) Wait for 60 seconds for the response to be generated. 
+            13) Paste this prompt {followup_prompt}. Key "Enter" to submit.
 
-            14) Extract all responses in 40 seconds.
+            14) Wait for 60 seconds for the response to be generated. 
 
-            15) End the session.
+            15) Extract all responses in 40 seconds.
+
+            16) Click to open a canvas "Detailed 20/20 Rubric Evaluation" and extract all responses in 15 seconds.
+
+            16) End the session.
 
             """
 
