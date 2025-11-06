@@ -122,8 +122,8 @@ class AIrunner:
 
         followup_prompt = """
         
-        Generate a fully revised final version of the essay to achieve a full 20/20 score.
-
+        Yes, I would like to deliver a fully revised final version of the essay to hit a full 20/20. 
+        
         Also, please explain what changes were made in the essay to reach a perfect 20/20 based on the AAC&U rubric.
 
         """
@@ -171,7 +171,54 @@ class AIrunner:
 
         #     return prompt
         
-        if website == "gemini":
+        # if website == "gemini":
+            
+        #     prompt = f"""
+
+        #     Follow this instructions step by step:
+
+        #     1) Go to {self.url}
+
+        #     2) Click "Sign in". Use:
+
+        #         - Email: {self.email}
+            
+        #     3) Click Next, choose passkey, after that, click Continue or Next.
+
+        #     4) Wait for 20 seconds for user log in with their security codes.
+
+        #     5) Paste this prompt {part1}.
+
+        #     6) Paste this prompt {part2}.
+
+        #     7) Paste this prompt {part3}.
+
+        #     8) Paste this prompt {part4}.
+
+        #     9) Paste this prompt {part5}.
+
+        #     10) Paste this prompt {part6}.
+
+        #     11) Enter to submit the prompt.
+
+        #     12) Extract all responses in 40 seconds.
+
+        #     13) Paste this prompt {followup_prompt}. Key "Enter" to submit.
+
+        #     14) Wait for 60 seconds for the response to be generated. 
+
+        #     15) Extract all responses in 40 seconds.
+
+        #     16) Click to open a canvas "Detailed 20/20 Rubric Evaluation" and extract all responses in 15 seconds.
+
+        #     16) End the session.
+
+        #     """
+
+        #     return prompt
+        
+
+        if website == "copilot":
             
             prompt = f"""
 
@@ -191,39 +238,38 @@ class AIrunner:
 
             6) Paste this prompt {part2}.
 
-            7) Paste this prompt {part3}.
+            7) Paste this prompt {part3}, 
+            
+            8) Paste this prompt "Say Yes only" and click to send the prompt. 
 
-            8) Paste this prompt {part4}.
+            9) Paste this prompt {part4}.
 
-            9) Paste this prompt {part5}.
+            10) Paste this prompt {part5}.
 
-            10) Paste this prompt {part6}.
+            11) Paste this prompt {part6}.
 
-            11) Enter to submit the prompt.
+            12) Enter to submit the prompt.
 
-            12) Extract all responses in 40 seconds.
+            13) Extract all responses in 60 seconds.
 
-            13) Paste this prompt {followup_prompt}. Key "Enter" to submit.
+            14) Paste this prompt {followup_prompt}. Key "Enter" to submit.
 
-            14) Wait for 60 seconds for the response to be generated. 
+            15) Wait for 60 seconds for the response to be generated. 
 
-            15) Extract all responses in 40 seconds.
+            16) Extract all responses in 40 seconds.
 
-            16) Click to open a canvas "Detailed 20/20 Rubric Evaluation" and extract all responses in 15 seconds.
-
-            16) End the session.
+            17) End the session.
 
             """
 
             return prompt
-
+        
 
       #Step 3: run agent
 
     def agent(self, prompt, interactive=None):
         
         llm = self.getllms()
-
 
         # browser = Browser(
         #     executable_path='/Applications/Google Chrome.app/Contents/MacOS/Google Chrome',
