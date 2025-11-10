@@ -14,6 +14,7 @@ from jsonresults import*
 
 # 2️⃣ Create Chrome profile
 
+
 class AIrunner:
     def __init__(self, base_direction=None, argument=None, aacu_rubric_path=None,
                  email=None, password=None, assignment_number=1,
@@ -25,12 +26,13 @@ class AIrunner:
 
         self.email = email
         self.password = password
+        self.assignment_number = assignment_number
+        self.aacu_rubric_data = aacu_rubric_data
+
         self.provider = None
         self.model_name = None
         self.url = None
-        self.assignment_number = assignment_number
-        self.aacu_rubric_data = aacu_rubric_data
-        self.final_result_data = final_result_data
+ 
 
     #Step 1: get model
     def getllms(self):
@@ -64,6 +66,21 @@ class AIrunner:
         }
         self.url = target_website.get(website, None)
 
+    def prepare_first_prompt(self, first_prompt):
+
+        base_direction = os.path.dirname(os.path.abspath(__file__))
+        assignment_prompt_path = os.path.join(base_direction, "assignmentprompt.json")
+
+        with open(assignment_prompt_path, "r", encoding="utf-8") as f:
+            first_prompt = json.load(f)
+
+        first_prompt = list(first_prompt.values())[1]
+
+        self.first_prompt = first_prompt
+
+        print("First Prompt:", first_prompt)
+
+
     def prepare_second_prompt(self):
 
         essay_dir = os.path.join(
@@ -75,50 +92,48 @@ class AIrunner:
 
         essay_dir = os.path.abspath(essay_dir)
 
-        final_result_path = os.path.join(essay_dir, "final_extracted.json")
-
-        print("AACU", self.aacu_rubric_path)
-        print("essay direction", essay_dir)
-        print("final result", final_result_path)
+        #print("AACU", self.aacu_rubric_path)
+        #print("essay direction", essay_dir)
 
         with open(self.aacu_rubric_path, "r", encoding="utf-8") as f:
             aacu_rubric_data = json.load(f)
+       
+        second_prompt = aacu_rubric_data 
 
-        with open(final_result_path, "r", encoding="utf-8") as f:
-            final_result_data = json.load(f)
+        second_prompt = json.dumps(aacu_rubric_data, indent=2)
 
-        data = {**aacu_rubric_data, **final_result_data}
+        second_prompt = re.sub(r'\s+', ' ', second_prompt.strip().replace("\n", ""))
+    
+        second_prompt = list(aacu_rubric_data.values())[0]
 
-        second_prompt = ". ".join([f"{key}: {value}" for key, value in data.items()])
-
-        second_prompt = re.sub(r"[#*\\{}]", "", second_prompt).replace("\n", " ").strip()
-
-        # print(len(second_prompt.split()))
+        print("Second Prompt Length:", second_prompt)
 
         self.second_prompt = second_prompt
-        
-        return second_prompt
 
-
-    #2. Define hyperparameters and paths
-
-    #Step 2: Send prompt  
-    def send_prompt(self, prompt, website):
-
-        words = self.second_prompt.split()
+        words = second_prompt.split()
 
         n = len(words)
 
         parts = []
         start = 0
 
-        indices = [n * i // 6 for i in range(1, 6)]
+        indices = [n * i // 3 for i in range(1, 3)]
 
         for end in indices + [n]:
-            parts.append(" ".join(words[start:end]))
+            part = " ".join(words[start:end]).replace("\n", "").replace("\r", "")
+            parts.append(part)
             start = end
 
-        part1, part2, part3, part4, part5, part6 = parts
+        part1,  part2,  part3 =  parts
+        
+        return  part1,  part2,  part3
+
+    #2. Define hyperparameters and paths
+
+    #Step 2: Send prompt  
+    def send_prompt(self, website):
+
+        part1,  part2,  part3 = self.prepare_second_prompt()
 
         followup_prompt = """
         
@@ -128,97 +143,7 @@ class AIrunner:
 
         """
 
-
-        # if website == "chatgpt":
-
-        #     prompt = f"""
-
-        #     Follow this instructions step by step:
-
-        #     1) Go to {self.url}
-
-        #     2) Click "Sign in". Use:
-
-        #         - Email: {self.email}
-            
-        #     3) Click Next, choose passkey, after that, click Continue or Next.
-
-        #     4) Wait for 20 seconds for user log in with their security codes.
-
-        #     5) Paste this prompt {part1}.
-
-        #     6) Paste this prompt {part2}.
-
-        #     7) Paste this prompt {part3}.
-
-        #     8) Paste this prompt {part4}.
-
-        #     9) Paste this prompt {part5}.
-
-        #     10) Enter to submit the prompt.
-
-        #     11) Extract all responses in 40 seconds.
-
-        #     12) Paste this prompt {followup_prompt}.
-
-        #     13) Wait for 60 seconds for the response to be generated. 
-            
-        #     14) Extract all responses in 40 seconds.
-
-        #     15) End the session.
-
-        #     """
-
-        #     return prompt
-        
-        # if website == "gemini":
-            
-        #     prompt = f"""
-
-        #     Follow this instructions step by step:
-
-        #     1) Go to {self.url}
-
-        #     2) Click "Sign in". Use:
-
-        #         - Email: {self.email}
-            
-        #     3) Click Next, choose passkey, after that, click Continue or Next.
-
-        #     4) Wait for 20 seconds for user log in with their security codes.
-
-        #     5) Paste this prompt {part1}.
-
-        #     6) Paste this prompt {part2}.
-
-        #     7) Paste this prompt {part3}.
-
-        #     8) Paste this prompt {part4}.
-
-        #     9) Paste this prompt {part5}.
-
-        #     10) Paste this prompt {part6}.
-
-        #     11) Enter to submit the prompt.
-
-        #     12) Extract all responses in 40 seconds.
-
-        #     13) Paste this prompt {followup_prompt}. Key "Enter" to submit.
-
-        #     14) Wait for 60 seconds for the response to be generated. 
-
-        #     15) Extract all responses in 40 seconds.
-
-        #     16) Click to open a canvas "Detailed 20/20 Rubric Evaluation" and extract all responses in 15 seconds.
-
-        #     16) End the session.
-
-        #     """
-
-        #     return prompt
-        
-
-        if website == "copilot":
+        if website == "chatgpt":
             
             prompt = f"""
 
@@ -228,42 +153,42 @@ class AIrunner:
 
             2) Click "Sign in". Use:
 
-                - Email: {self.email}
+                - Email: {self.email} 
+                - Password: {self.password}
             
-            3) Click Next, choose passkey, after that, click Continue or Next.
+            3) Click Next.
 
             4) Wait for 20 seconds for user log in with their security codes.
 
-            5) Paste this prompt {part1}.
-
-            6) Paste this prompt {part2}.
-
-            7) Paste this prompt {part3}, 
+            5) Paste the first prompt {self.first_prompt}. Key "Enter" to submit the prompt. 
             
-            8) Paste this prompt "Say Yes only" and click to send the prompt. 
+            6) Wait for 60 seconds for the responses to be generated. 
+            
+            7) Extract all responses in 60 seconds.
 
-            9) Paste this prompt {part4}.
+            8) Paste this prompt {part1}.
+            
+            9) Paste this prompt {part2}.
+            
+            10) Paste this prompt {part3}.
 
-            10) Paste this prompt {part5}.
+            11) Wait for 10 seconds, then Press Enter to submit.
 
-            11) Paste this prompt {part6}.
-
-            12) Enter to submit the prompt.
-
+            12) Wait for 60 seconds for the responses to be generated. 
+            
             13) Extract all responses in 60 seconds.
 
-            14) Paste this prompt {followup_prompt}. Key "Enter" to submit.
+            14) Paste this prompt {followup_prompt}. Key "Enter" to submit the prompt. 
 
-            15) Wait for 60 seconds for the response to be generated. 
-
-            16) Extract all responses in 40 seconds.
+            15) Wait for 60 seconds for the responses to be generated. 
+            
+            16) Extract all responses in 60 seconds. 
 
             17) End the session.
 
             """
 
             return prompt
-        
 
       #Step 3: run agent
 
@@ -277,7 +202,14 @@ class AIrunner:
 
         #     )
 
-        agent = Agent(task=prompt, llm=llm, browser=None)
+        browser = Browser(
+            #executable_path="/Applications/Google Chrome.app/Contents/MacOS/Google Chrome",
+            #user_data_dir=os.path.expanduser("~/Library/Application Support/Google/Chrome"),
+            headless=False,
+            window_size={"width": 800, "height": 800},
+            )
+
+        agent = Agent(task=prompt, llm=llm, browser=browser)
 
         result = agent.run_sync()
         result = result.action_results()

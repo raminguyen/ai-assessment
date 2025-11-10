@@ -65,18 +65,25 @@ if __name__ == "__main__":
 
     bot.target_website(argument.website) #target website
 
-    #3b: Define an assignment
+    #3b: Define an essay
     
     essay_number = argument.essay
     
     essay_key = f"essay_{essay_number}_prompt"
 
-    second_prompt = bot.prepare_second_prompt()
 
-    print("Second Prompt:", second_prompt)
+    
+    first_prompt = bot.prepare_first_prompt(essay_number)
+    
+
+
+    bot.prepare_second_prompt()
+
+    #import sys
+    #sys.exit()  
 
     #4:Send prompt
-    prompt = bot.send_prompt(second_prompt, website=argument.website)
+    prompt = bot.send_prompt(website=argument.website)
 
     #5: Run agent
     bot.agent(prompt)
