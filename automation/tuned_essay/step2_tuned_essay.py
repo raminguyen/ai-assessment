@@ -172,8 +172,8 @@ class AIrunner:
             
             10) Paste this prompt {part3}.
 
-            11) Wait for 10 seconds, then Press Enter to submit.
-
+            11) Key "Enter" to submit the prompt. 
+            
             12) Wait for 60 seconds for the responses to be generated. 
             
             13) Extract all responses in 60 seconds.
@@ -189,6 +189,108 @@ class AIrunner:
             """
 
             return prompt
+        
+        if website == "claude":
+            
+            prompt = f"""
+
+            Follow this instructions step by step:
+
+            1) Go to {self.url}
+
+            2) Click "Sign in". Use:
+
+                - Email: {self.email} 
+                - Password: {self.password}
+            
+            3) Click Next.
+
+            4) Wait for 20 seconds for user log in with their security codes.
+
+            5) Paste the first prompt {self.first_prompt}. Key "Enter" to submit the prompt. 
+            
+            6) Wait for 60 seconds for the responses to be generated. 
+            
+            7) Extract all responses in 60 seconds.
+
+            8) Paste this prompt {part1}.
+            
+            9) Paste this prompt {part2}.
+            
+            10) Paste this prompt {part3}.
+
+            11) Key "Enter" to submit the prompt. 
+            
+            12) Wait for 60 seconds for the responses to be generated. 
+            
+            13) Extract all responses in 60 seconds.
+
+            14) Paste this prompt {followup_prompt}. Key "Enter" to submit the prompt.
+
+            15) Wait for 60 seconds for the responses to be generated. 
+            
+            16) Extract all responses in 60 seconds. 
+
+            17) End the session.
+
+            """
+
+            return prompt
+        
+ 
+        if website == "gemini" or website == "copilot":
+            
+            prompt = f"""
+
+            Follow this instructions step by step:
+
+            1) Go to {self.url}
+
+            2) Click "Sign in". Use:
+
+                - Email: {self.email} 
+                - Password: {self.password}
+            
+            3) Click Next.
+
+            4) Wait for 20 seconds for user log in with their security codes.
+
+            5) Paste the first prompt {self.first_prompt}. Key "Enter" to submit the prompt. 
+            
+            6) Wait for 60 seconds for the responses to be generated. 
+            
+            7) Extract all responses in 60 seconds.
+
+            8) Paste this prompt {part1}.
+
+            9) Wait for 5 seconds.
+            
+            10) Paste this prompt {part2}.
+
+            11) Wait for 5 seconds.
+
+            10) Paste this prompt {part3}.
+
+            12) Wait for 5 seconds.
+
+            13) Key "Enter" to submit the prompt. 
+            
+            14) Wait for 60 seconds for the responses to be generated. 
+            
+            15) Extract all responses in 60 seconds.
+
+            16) Paste this prompt {followup_prompt}. Key "Enter" to submit the prompt. 
+
+            17) Wait for 60 seconds for the responses to be generated. 
+            
+            18) Extract all responses in 60 seconds. 
+
+            19) End the session.
+
+            """
+
+            return prompt
+        
 
       #Step 3: run agent
 
@@ -206,7 +308,7 @@ class AIrunner:
             #executable_path="/Applications/Google Chrome.app/Contents/MacOS/Google Chrome",
             #user_data_dir=os.path.expanduser("~/Library/Application Support/Google/Chrome"),
             headless=False,
-            window_size={"width": 800, "height": 800},
+            #window_size={"width": 800, "height": 800},
             )
 
         agent = Agent(task=prompt, llm=llm, browser=browser)

@@ -12,8 +12,6 @@ from jsonresults import*
 
 # 2️⃣ Create Chrome profile
 
-
-
 base_direction = os.path.dirname(os.path.abspath(__file__))
 assignment_prompt_path = os.path.join(base_direction, "assignmentprompt.json")
 
@@ -79,9 +77,9 @@ class AIrunner:
             3) Wait for 20 seconds for user log in with their security codes.
             4) Paste this prompt {self.assignment_prompt} and click key enter.
             5) Wait for 15 seconds before move to the next step.
-            5) Wait for 15 seconds for the response to be generated.
-            6) Wait for 90 seconds for the response to be extracted. Ensure extracted responses exactly. 
-            6) Grab the response text. 
+            6) Wait for 30 seconds for the response to be generated.
+            7) Wait for 90 seconds for the response to be extracted. Ensure extracted responses exactly. 
+            8) Close the session.
 
             """
 

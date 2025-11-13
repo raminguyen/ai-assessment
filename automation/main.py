@@ -1,4 +1,4 @@
-from step1_generate_essay import AIrunner
+from step1_generate_essay_old import AIrunner
 from browser_use import Agent, ChatGoogle
 from dotenv import load_dotenv
 import os, json
