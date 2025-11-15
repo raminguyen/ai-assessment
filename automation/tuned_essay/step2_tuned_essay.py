@@ -40,7 +40,7 @@ class AIrunner:
         self.provider == "gemini"
         self.model_name = "gemini-2.5-flash"
 
-        return ChatGoogle(model=self.model_name)
+        return ChatGoogle(model=self.model_name, api_key=os.getenv("GOOGLE_API_KEY"))
     
     # def getllms(self):
     #     # set provider and model
@@ -143,6 +143,14 @@ class AIrunner:
 
         """
 
+        followup_prompt_claude = """
+        
+        Yes, I would like to deliver a fully revised final version of the 1000-word essay to hit a full 20/20. 
+        
+        Also, please explain what changes were made in the essay to reach a perfect 20/20 based on the AAC&U rubric.
+
+        """
+
         if website == "chatgpt":
             
             prompt = f"""
@@ -209,9 +217,9 @@ class AIrunner:
 
             5) Paste the first prompt {self.first_prompt}. Key "Enter" to submit the prompt. 
             
-            6) Wait for 60 seconds for the responses to be generated. 
+            6) Wait for 90 seconds for the responses to be generated. 
             
-            7) Extract all responses in 60 seconds.
+            7) Extract all responses in 90 seconds.
 
             8) Paste this prompt {part1}.
             
@@ -221,15 +229,15 @@ class AIrunner:
 
             11) Key "Enter" to submit the prompt. 
             
-            12) Wait for 60 seconds for the responses to be generated. 
+            12) Wait for 90 seconds for the responses to be generated. 
             
-            13) Extract all responses in 60 seconds.
+            13) Extract all responses in 90 seconds.
 
-            14) Paste this prompt {followup_prompt}. Key "Enter" to submit the prompt.
+            14) Paste this prompt {followup_prompt_claude}. Key "Enter" to submit the prompt.
 
-            15) Wait for 60 seconds for the responses to be generated. 
+            15) Wait for 90 seconds for the responses to be generated. 
             
-            16) Extract all responses in 60 seconds. 
+            16) Extract all responses in 90 seconds. 
 
             17) End the session.
 

@@ -1,0 +1,33 @@
+[
+  {
+    "is_done": false,
+    "long_term_memory": "Found initial url and automatically loaded it. Navigated to https://copilot.microsoft.com/",
+    "extracted_content": "🔗 Navigated to https://copilot.microsoft.com/",
+    "include_extracted_content_only_once": false,
+    "include_in_memory": false
+  },
+  {
+    "is_done": false,
+    "error": "('Missing key inputs argument! To use the Google AI API, provide (`api_key`) arguments. To use the Google Cloud API, provide (`vertexai`, `project` & `location`) arguments.', 502)",
+    "include_extracted_content_only_once": false,
+    "include_in_memory": false
+  },
+  {
+    "is_done": false,
+    "error": "('Missing key inputs argument! To use the Google AI API, provide (`api_key`) arguments. To use the Google Cloud API, provide (`vertexai`, `project` & `location`) arguments.', 502)",
+    "include_extracted_content_only_once": false,
+    "include_in_memory": false
+  },
+  {
+    "is_done": false,
+    "error": "('Missing key inputs argument! To use the Google AI API, provide (`api_key`) arguments. To use the Google Cloud API, provide (`vertexai`, `project` & `location`) arguments.', 502)",
+    "include_extracted_content_only_once": false,
+    "include_in_memory": false
+  },
+  {
+    "is_done": false,
+    "error": "('Missing key inputs argument! To use the Google AI API, provide (`api_key`) arguments. To use the Google Cloud API, provide (`vertexai`, `project` & `location`) arguments.', 502)",
+    "include_extracted_content_only_once": false,
+    "include_in_memory": false
+  }
+]
