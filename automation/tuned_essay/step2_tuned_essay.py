@@ -217,29 +217,41 @@ class AIrunner:
 
             5) Paste the first prompt {self.first_prompt}. Key "Enter" to submit the prompt. 
             
-            6) Wait for 90 seconds for the responses to be generated. 
-            
-            7) Extract all responses in 90 seconds.
+            6) Wait for 30 seconds for the responses to be generated. 
 
-            8) Paste this prompt {part1}.
+            7) Wait for 30 seconds for the responses to be generated.
             
-            9) Paste this prompt {part2}.
-            
-            10) Paste this prompt {part3}.
+            8) Extract all responses in 30 seconds.
 
-            11) Key "Enter" to submit the prompt. 
-            
-            12) Wait for 90 seconds for the responses to be generated. 
-            
-            13) Extract all responses in 90 seconds.
+            9) Extract all responses in 30 seconds.
 
-            14) Paste this prompt {followup_prompt_claude}. Key "Enter" to submit the prompt.
-
-            15) Wait for 90 seconds for the responses to be generated. 
+            10) Paste this prompt {part1}.
             
-            16) Extract all responses in 90 seconds. 
+            11) Paste this prompt {part2}.
+            
+            12) Paste this prompt {part3}.
 
-            17) End the session.
+            13) Key "Enter" to submit the prompt. 
+            
+            14) Wait for 30 seconds for the responses to be generated. 
+
+            15) Wait for 30 seconds for the responses to be generated.
+            
+            16) Extract all responses in 30 seconds.
+
+            17) Extract all responses in 30 seconds.
+
+            18) Paste this prompt {followup_prompt_claude}. Key "Enter" to submit the prompt.
+
+            19) Wait for 30 seconds for the responses to be generated. 
+
+            20) Wait for 30 seconds for the responses to be generated.
+            
+            21) Extract all responses in 30 seconds. 
+
+            22) Extract all responses in 30 seconds. 
+
+            23) End the session.
 
             """
 
@@ -254,10 +266,10 @@ class AIrunner:
 
             1) Go to {self.url}
 
-            2) Click "Sign in". Use:
+            2) Click "Sign in".:
 
-                - Email: {self.email} 
-                - Password: {self.password}
+                - First, type Email: {self.email}. Key Enter.
+                - Then, type Password: {self.password}. Key Enter.
             
             3) Click Next.
 
@@ -265,35 +277,45 @@ class AIrunner:
 
             5) Paste the first prompt {self.first_prompt}. Key "Enter" to submit the prompt. 
             
-            6) Wait for 60 seconds for the responses to be generated. 
-            
-            7) Extract all responses in 60 seconds.
+            6) Wait for 30 seconds for the responses to be generated. 
 
-            8) Paste this prompt {part1}.
-
-            9) Wait for 5 seconds.
+            7) Wait for 30 seconds for the responses to be generated. 
             
-            10) Paste this prompt {part2}.
+            8) Extract all responses in 30 seconds.
+
+            9) Extract all responses in 30 seconds.
+
+            10) Paste this prompt {part1}.
 
             11) Wait for 5 seconds.
-
-            10) Paste this prompt {part3}.
-
-            12) Wait for 5 seconds.
-
-            13) Key "Enter" to submit the prompt. 
             
-            14) Wait for 60 seconds for the responses to be generated. 
+            12) Paste this prompt {part2}.
+
+            13) Wait for 5 seconds.
+
+            14) Paste this prompt {part3}.
+
+            15) Wait for 5 seconds.
+
+            16) Key "Enter" to submit the prompt. 
             
-            15) Extract all responses in 60 seconds.
+            17) Wait for 30 seconds for the responses to be generated. 
 
-            16) Paste this prompt {followup_prompt}. Key "Enter" to submit the prompt. 
-
-            17) Wait for 60 seconds for the responses to be generated. 
+            18) Wait for 30 seconds for the responses to be generated.
             
-            18) Extract all responses in 60 seconds. 
+            19) Extract all responses in 30 seconds.
 
-            19) End the session.
+            20) Extract all responses in 30 seconds.
+
+            21) Paste this prompt {followup_prompt}. Key "Enter" to submit the prompt. 
+
+            22) Wait for 60 seconds for the responses to be generated. 
+
+            23) Wait for 30 seconds for the responses to be generated.
+            
+            24) Extract all responses in 60 seconds. 
+
+            25) End the session.
 
             """
 
@@ -318,8 +340,16 @@ class AIrunner:
             headless=False,
             #window_size={"width": 800, "height": 800},
             )
+        
+         # Create a permanent output folder
+        output_dir = os.path.join(os.getcwd(), "agent_output")
+        os.makedirs(output_dir, exist_ok=True)
 
-        agent = Agent(task=prompt, llm=llm, browser=browser)
+        agent = Agent(task=prompt, llm=llm, browser=browser,  available_file_paths=[output_dir],    
+        save_conversation_path=os.path.join(output_dir, "conversation.json"),
+        display_files_in_done_text=True,       # show saved files at end)
+
+        )
 
         result = agent.run_sync()
         result = result.action_results()
