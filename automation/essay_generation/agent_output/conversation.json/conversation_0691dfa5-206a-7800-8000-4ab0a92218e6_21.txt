@@ -1,0 +1,711 @@
+ system 
+You are an AI agent designed to operate in an iterative loop to automate browser tasks. Your ultimate goal is accomplishing the task provided in <user_request>.
+<intro>
+You excel at following tasks:
+1. Navigating complex websites and extracting precise information
+2. Automating form submissions and interactive web actions
+3. Gathering and saving information 
+4. Using your filesystem effectively to decide what to keep in your context
+5. Operate effectively in an agent loop
+6. Efficiently performing diverse web tasks
+</intro>
+<language_settings>
+- Default working language: **English**
+- Always respond in the same language as the user request
+</language_settings>
+<input>
+At every step, your input will consist of: 
+1. <agent_history>: A chronological event stream including your previous actions and their results.
+2. <agent_state>: Current <user_request>, summary of <file_system>, <todo_contents>, and <step_info>.
+3. <browser_state>: Current URL, open tabs, interactive elements indexed for actions, and visible page content.
+4. <browser_vision>: Screenshot of the browser with bounding boxes around interactive elements. If you used screenshot before, this will contain a screenshot.
+5. <read_state> This will be displayed only if your previous action was extract or read_file. This data is only shown in the current step.
+</input>
+<agent_history>
+Agent history will be given as a list of step information as follows:
+<step_{step_number}>:
+Evaluation of Previous Step: Assessment of last action
+Memory: Your memory of this step
+Next Goal: Your goal for this step
+Action Results: Your actions and their results
+</step_{step_number}>
+and system messages wrapped in <sys> tag.
+</agent_history>
+<user_request>
+USER REQUEST: This is your ultimate objective and always remains visible.
+- This has the highest priority. Make the user happy.
+- If the user request is very specific - then carefully follow each step and dont skip or hallucinate steps.
+- If the task is open ended you can plan yourself how to get it done.
+</user_request>
+<browser_state>
+1. Browser State will be given as:
+Current URL: URL of the page you are currently viewing.
+Open Tabs: Open tabs with their ids.
+Interactive Elements: All interactive elements will be provided in format as [index]<type>text</type> where
+- index: Numeric identifier for interaction
+- type: HTML element type (button, input, etc.)
+- text: Element description
+Examples:
+[33]<div>User form</div>
+\t*[35]<button aria-label='Submit form'>Submit</button>
+Note that:
+- Only elements with numeric indexes in [] are interactive
+- (stacked) indentation (with \t) is important and means that the element is a (html) child of the element above (with a lower index)
+- Elements tagged with a star `*[` are the new interactive elements that appeared on the website since the last step - if url has not changed. Your previous actions caused that change. Think if you need to interact with them, e.g. after input you might need to select the right option from the list.
+- Pure text elements without [] are not interactive.
+</browser_state>
+<browser_vision>
+If you used screenshot before, you will be provided with a screenshot of the current page with  bounding boxes around interactive elements. This is your GROUND TRUTH: reason about the image in your thinking to evaluate your progress.
+If an interactive index inside your browser_state does not have text information, then the interactive index is written at the top center of it's element in the screenshot.
+Use screenshot if you are unsure or simply want more information.
+</browser_vision>
+<browser_rules>
+Strictly follow these rules while using the browser and navigating the web:
+- Only interact with elements that have a numeric [index] assigned.
+- Only use indexes that are explicitly provided.
+- If research is needed, open a **new tab** instead of reusing the current one.
+- If the page changes after, for example, an input text action, analyse if you need to interact with new elements, e.g. selecting the right option from the list.
+- By default, only elements in the visible viewport are listed. Use scrolling tools if you suspect relevant content is offscreen which you need to interact with. Scroll ONLY if there are more pixels below or above the page.
+- You can scroll by a specific number of pages using the pages parameter (e.g., 0.5 for half page, 2.0 for two pages).
+- If a captcha appears, attempt solving it if possible. If not, use fallback strategies (e.g., alternative site, backtrack).
+- If expected elements are missing, try refreshing, scrolling, or navigating back.
+- If the page is not fully loaded, use the wait action.
+- You can call extract on specific pages to gather structured semantic information from the entire page, including parts not currently visible.
+- Call extract only if the information you are looking for is not visible in your <browser_state> otherwise always just use the needed text from the <browser_state>.
+- Calling the extract tool is expensive! DO NOT query the same page with the same extract query multiple times. Make sure that you are on the page with relevant information based on the screenshot before calling this tool.
+- If you fill an input field and your action sequence is interrupted, most often something changed e.g. suggestions popped up under the field.
+- If the action sequence was interrupted in previous step due to page changes, make sure to complete any remaining actions that were not executed. For example, if you tried to input text and click a search button but the click was not executed because the page changed, you should retry the click action in your next step.
+- If the <user_request> includes specific page information such as product type, rating, price, location, etc., try to apply filters to be more efficient.
+- The <user_request> is the ultimate goal. If the user specifies explicit steps, they have always the highest priority.
+- If you input into a field, you might need to press enter, click the search button, or select from dropdown for completion.
+- Don't login into a page if you don't have to. Don't login if you don't have the credentials. 
+- There are 2 types of tasks always first think which type of request you are dealing with:
+1. Very specific step by step instructions:
+- Follow them as very precise and don't skip steps. Try to complete everything as requested.
+2. Open ended tasks. Plan yourself, be creative in achieving them.
+- If you get stuck e.g. with logins or captcha in open-ended tasks you can re-evaluate the task and try alternative ways, e.g. sometimes accidentally login pops up, even though there some part of the page is accessible or you get some information via web search.
+- If you reach a PDF viewer, the file is automatically downloaded and you can see its path in <available_file_paths>. You can either read the file or scroll in the page to see more.
+</browser_rules>
+<file_system>
+- You have access to a persistent file system which you can use to track progress, store results, and manage long tasks.
+- Your file system is initialized with a `todo.md`: Use this to keep a checklist for known subtasks. Use `replace_file` tool to update markers in `todo.md` as first action whenever you complete an item. This file should guide your step-by-step execution when you have a long running task.
+- If you are writing a `csv` file, make sure to use double quotes if cell elements contain commas.
+- If the file is too large, you are only given a preview of your file. Use `read_file` to see the full content if necessary.
+- If exists, <available_file_paths> includes files you have downloaded or uploaded by the user. You can only read or upload these files but you don't have write access.
+- If the task is really long, initialize a `results.md` file to accumulate your results.
+- DO NOT use the file system if the task is less than 10 steps!
+</file_system>
+<task_completion_rules>
+You must call the `done` action in one of two cases:
+- When you have fully completed the USER REQUEST.
+- When you reach the final allowed step (`max_steps`), even if the task is incomplete.
+- If it is ABSOLUTELY IMPOSSIBLE to continue.
+The `done` action is your opportunity to terminate and share your findings with the user.
+- Set `success` to `true` only if the full USER REQUEST has been completed with no missing components.
+- If any part of the request is missing, incomplete, or uncertain, set `success` to `false`.
+- You can use the `text` field of the `done` action to communicate your findings and `files_to_display` to send file attachments to the user, e.g. `["results.md"]`.
+- Put ALL the relevant information you found so far in the `text` field when you call `done` action.
+- Combine `text` and `files_to_display` to provide a coherent reply to the user and fulfill the USER REQUEST.
+- You are ONLY ALLOWED to call `done` as a single action. Don't call it together with other actions.
+- If the user asks for specified format, such as "return JSON with following structure", "return a list of format...", MAKE sure to use the right format in your answer.
+- If the user asks for a structured output, your `done` action's schema will be modified. Take this schema into account when solving the task!
+</task_completion_rules>
+<action_rules>
+- You are allowed to use a maximum of 10 actions per step.
+If you are allowed multiple actions, you can specify multiple actions in the list to be executed sequentially (one after another).
+- If the page changes after an action, the sequence is interrupted and you get the new state.
+</action_rules>
+<efficiency_guidelines>
+You can output multiple actions in one step. Try to be efficient where it makes sense. Do not predict actions which do not make sense for the current page.
+**Recommended Action Combinations:**
+- `input` + `click` → Fill form field and submit/search in one step
+- `input` + `input` → Fill multiple form fields
+- `click` + `click` → Navigate through multi-step flows (when the page does not navigate between clicks)
+- `scroll` with pages 10 + `extract` → Scroll to the bottom of the page to load more content before extracting structured data
+- File operations + browser actions
+Do not try multiple different paths in one step. Always have one clear goal per step.
+Its important that you see in the next step if your action was successful, so do not chain actions which change the browser state multiple times, e.g.
+- do not use click and then navigate, because you would not see if the click was successful or not.
+- or do not use switch and switch together, because you would not see the state in between.
+- do not use input and then scroll, because you would not see if the input was successful or not.
+</efficiency_guidelines>
+<reasoning_rules>
+You must reason explicitly and systematically at every step in your `thinking` block.
+Exhibit the following reasoning patterns to successfully achieve the <user_request>:
+- Reason about <agent_history> to track progress and context toward <user_request>.
+- Analyze the most recent "Next Goal" and "Action Result" in <agent_history> and clearly state what you previously tried to achieve.
+- Analyze all relevant items in <agent_history>, <browser_state>, <read_state>, <file_system>, <read_state> and the screenshot to understand your state.
+- Explicitly judge success/failure/uncertainty of the last action. Never assume an action succeeded just because it appears to be executed in your last step in <agent_history>. For example, you might have "Action 1/1: Input '2025-05-05' into element 3." in your history even though inputting text failed. Always verify using <browser_vision> (screenshot) as the primary ground truth. If a screenshot is unavailable, fall back to <browser_state>. If the expected change is missing, mark the last action as failed (or uncertain) and plan a recovery.
+- If todo.md is empty and the task is multi-step, generate a stepwise plan in todo.md using file tools.
+- Analyze `todo.md` to guide and track your progress.
+- If any todo.md items are finished, mark them as complete in the file.
+- Analyze whether you are stuck, e.g. when you repeat the same actions multiple times without any progress. Then consider alternative approaches e.g. scrolling for more context or send_keys to interact with keys directly or different pages.
+- Analyze the <read_state> where one-time information are displayed due to your previous action. Reason about whether you want to keep this information in memory and plan writing them into a file if applicable using the file tools.
+- If you see information relevant to <user_request>, plan saving the information into a file.
+- Before writing data into a file, analyze the <file_system> and check if the file already has some content to avoid overwriting.
+- Decide what concise, actionable context should be stored in memory to inform future reasoning.
+- When ready to finish, state you are preparing to call done and communicate completion/results to the user.
+- Before done, use read_file to verify file contents intended for user output.
+- Always reason about the <user_request>. Make sure to carefully analyze the specific steps and information required. E.g. specific filters, specific form fields, specific information to search. Make sure to always compare the current trajactory with the user request and think carefully if thats how the user requested it.
+</reasoning_rules>
+<examples>
+Here are examples of good output patterns. Use them as reference but never copy them directly.
+<todo_examples>
+  "write_file": {
+    "file_name": "todo.md",
+    "content": "# ArXiv CS.AI Recent Papers Collection Task\n\n## Goal: Collect metadata for 20 most recent papers\n\n## Tasks:\n- [ ] Navigate to https://arxiv.org/list/cs.AI/recent\n- [ ] Initialize papers.md file for storing paper data\n- [ ] Collect paper 1/20: The Automated LLM Speedrunning Benchmark\n- [x] Collect paper 2/20: AI Model Passport\n- [ ] Collect paper 3/20: Embodied AI Agents\n- [ ] Collect paper 4/20: Conceptual Topic Aggregation\n- [ ] Collect paper 5/20: Artificial Intelligent Disobedience\n- [ ] Continue collecting remaining papers from current page\n- [ ] Navigate through subsequent pages if needed\n- [ ] Continue until 20 papers are collected\n- [ ] Verify all 20 papers have complete metadata\n- [ ] Final review and completion"
+  }
+</todo_examples>
+<evaluation_examples>
+- Positive Examples:
+"evaluation_previous_goal": "Successfully navigated to the product page and found the target information. Verdict: Success"
+"evaluation_previous_goal": "Clicked the login button and user authentication form appeared. Verdict: Success"
+- Negative Examples:
+"evaluation_previous_goal": "Failed to input text into the search bar as I cannot see it in the image. Verdict: Failure"
+"evaluation_previous_goal": "Clicked the submit button with index 15 but the form was not submitted successfully. Verdict: Failure"
+</evaluation_examples>
+<memory_examples>
+"memory": "Visited 2 of 5 target websites. Collected pricing data from Amazon ($39.99) and eBay ($42.00). Still need to check Walmart, Target, and Best Buy for the laptop comparison."
+"memory": "Found many pending reports that need to be analyzed in the main page. Successfully processed the first 2 reports on quarterly sales data and moving on to inventory analysis and customer feedback reports."
+</memory_examples>
+<next_goal_examples>
+"next_goal": "Click on the 'Add to Cart' button to proceed with the purchase flow."
+"next_goal": "Extract details from the first item on the page."
+</next_goal_examples>
+</examples>
+<output>
+You must ALWAYS respond with a valid JSON in this exact format:
+{
+  "thinking": "A structured <think>-style reasoning block that applies the <reasoning_rules> provided above.",
+  "evaluation_previous_goal": "Concise one-sentence analysis of your last action. Clearly state success, failure, or uncertain.",
+  "memory": "1-3 sentences of specific memory of this step and overall progress. You should put here everything that will help you track progress in future steps. Like counting pages visited, items found, etc.",
+  "next_goal": "State the next immediate goal and action to achieve it, in one clear sentence."
+  "action":[{"navigate": { "url": "url_value"}}, // ... more actions in sequence]
+}
+Action list should NEVER be empty.
+</output>
+
+
+ user 
+<agent_history>
+Agent initialized
+<step>
+Result
+Found initial url and automatically loaded it. Navigated to https://chatgpt.com
+<step>
+Successfully navigated to https://chatgpt.com. Verdict: Success
+Successfully navigated to the initial URL. The next step is to sign in.
+Click on the 'Sign in' button to proceed with the login process.
+Result
+Clicked element
+<step>
+Clicked the 'Sign in' button, but the page did not navigate to the login page. Verdict: Failure
+Attempted to sign in to chatgpt.com but the action did not lead to the login page. I need to find the correct sign in button.
+Re-examine the interactive elements and click on the 'Log in' button, which is usually the correct button to initiate the login process, or try 'Sign up for free' if 'Log in' does not work, to proceed with the login process as per the user request.
+Result
+Clicked element
+<step>
+Clicked the 'Sign up for free' button, but it was not the correct action to initiate the login process. Verdict: Failure
+I'm currently on step 2 of the user request, which is to sign in. I have tried 'Sign in' and 'Sign up for free' but neither worked. My next attempt is to click 'Log in'.
+Click on the 'Log in' button to initiate the login process.
+Result
+Clicked element
+<step>
+Clicked the 'Log in' button, which successfully opened the login dialog. Verdict: Success
+Successfully opened the login dialog. Now I need to input the email address provided in the user request.
+Input the email address 'rami.nguyen12@gmail.com' into the email address field within the login dialog, as specified in the user request.
+Result
+Input 'rami.nguyen12@gmail.com' into element 859.
+<step>
+Successfully input the email address 'rami.nguyen12@gmail.com' into the email address field. Verdict: Success
+Successfully input the email address. The next step is to input the password. I am currently on step 3 of the user request.
+Input the password 'ramicool@@' into the password field. I need to locate the password input field on the page.
+Result
+Clicked element
+<step>
+Clicked an element that was not the password field, thus failing to input the password. Verdict: Failure
+Successfully navigated to chatgpt.com, opened the login dialog, and input the email address. Now I need to input the password.
+Click the 'Continue' button to proceed to the password input field, then input the password 'ramicool@@' into the password field.
+Result
+Failed to click element <div index=855>. The element may not be interactable or visible. If the page......after navigation/interaction, the index [855] may be stale. Get fresh browser state before retrying.
+<step>
+Failed to click the correct element to proceed to the password input field. Verdict: Failure
+Successfully navigated to chatgpt.com, opened the login dialog, and input the email address 'rami.nguyen12@gmail.com'. Now I need to click 'Next' to input the password.
+Click the 'Next' button to proceed to the password input field, as specified in the user request.
+Result
+Clicked element
+<step>
+Failed to click the correct element to proceed to the password input field. Verdict: Failure
+Successfully navigated to chatgpt.com, opened the login dialog, and input the email address 'rami.nguyen12@gmail.com'. Now I need to click 'Next' to input the password.
+Click the 'Next' button to proceed to the password input field, as specified in the user request.
+Result
+1 validation error for AgentOutput
+action
+  Field required [type=missing, input_value={'thinking': "......ge."}, input_type=dict]
+    For further information visit https://errors.pydantic.dev/2.12/v/missing
+<step>
+Failed to click the correct element to proceed to the password input field. Verdict: Failure
+Successfully navigated to chatgpt.com, opened the login dialog, and input the email address 'rami.nguyen12@gmail.com'. I am now on the password input screen.
+Input the password 'ramicool@@' into the password field, which is element 955.
+Result
+Input 'ramicool@@' into element 955.
+<step>
+Successfully input the password 'ramicool@@' into the password field. Verdict: Success
+Successfully navigated to chatgpt.com, opened the login dialog, input the email address 'rami.nguyen12@gmail.com', and input the password 'ramicool@@'.
+Click the 'Next' button to complete the login process, then wait for 20 seconds for the user to log in with their security codes.
+Result
+Clicked element
+Waited for 20 seconds
+<step>
+Successfully logged in to ChatGPT. Verdict: Success
+Successfully navigated to chatgpt.com, opened the login dialog, input the email address 'rami.nguyen12@gmail.com', input the password 'ramicool@@', and waited for 20 seconds for the user to log in with their security codes. I am now ready to paste the first prompt.
+Paste the first prompt into the text area and submit it by pressing Enter.
+Result
+Input 'Let's write a 1000 word fully written college essay, plus at least 5 citations from peer-reviewed articles, that answers this question. To what extent do the attached economic data support the hypothesis “social service spending is inversely related to economic growth”? Formulate a verbal argument analyzing whether the data do or do not support the hypothesis. Attached data: Social Welfare Spending as % of GDP (OECD) GDP Annual Growth (World Bank) 2019 2016 2010 2005 2000 France 31.2 31.5 30.7 28.7 27.5 2.02 0.86 2.00 1.89 4.14 Belgium 28.9 29.0 28.3 25.3 23.5 2.44 1.19 2.71 2.32 3.72 Finland 28.7 30.8 27.4 23.9 22.6 1.35 2.57 3.17 2.78 5.75 Italy 28.2 28.9 27.6 24.1 22.6 0.43 1.24 1.53 0.76 3.88 Denmark 28.0 28.7 28.9 25.2 23.8 1.71 3.07 1.58 2.36 3.72 Austria 26.6 27.8 27.6 25.9 25.5 1.75 2.12 1.81 2.32 3.18 Sweden 26.1 27.1 26.3 27.4 26.8 2.55 2.35 5.75 2.79 4.63 Germany 25.1 25.3 25.9 26.3 25.4 0.99 2.29 4.15 0.89 2.88 Norway 25.0 25.1 21.9 20.7 20.4 1.12 1.16 0.79 2.69 3.32 Spain 23.7 24.6 25.8 20.4 19.5 1.96 2.92 0.09 3.55 3.91.' into element 2.
+Sent keys: Enter
+<step>
+Successfully pasted the first prompt into the text area and submitted it. Verdict: Success
+Successfully logged in to ChatGPT and submitted the first prompt. Now I need to wait for the response to be generated.
+Wait for 30 seconds for the responses to be generated, then extract all responses.
+Result
+Waited for 30 seconds
+<step>
+Successfully waited for 30 seconds for the responses to be generated. Verdict: Success
+Successfully logged in and submitted the first prompt. I am currently on step 9 of the user request, which is to extract all responses.
+Scroll down the page to ensure all content is visible, then extract all responses from the page to fulfill step 9 of the user request.
+Result
+Scrolled down 10.0 pages
+Query: Extract all the text from the chat conversation.
+Content in extracted_content_0.md and once in <read_state>.
+<step>
+Successfully waited for 30 seconds for the responses to be generated. Verdict: Success
+Successfully logged in and submitted the first prompt. I am currently on step 9 of the user request, which is to extract all responses.
+Scroll down the page to ensure all content is visible, then extract all responses from the page to fulfill step 9 of the user request.
+Result
+1 validation error for AgentOutput
+action
+  Field required [type=missing, input_value={'thinking': '......er.'}, input_type=dict]
+    For further information visit https://errors.pydantic.dev/2.12/v/missing
+<step>
+Successfully scrolled down the page to ensure all content is visible. Verdict: Success
+Successfully logged in to ChatGPT, submitted the first prompt, and waited for the response. I have also scrolled down the page to ensure all content is visible. I am now ready to extract the responses.
+Extract all responses from the page and save them to a file to fulfill step 9 of the user request.
+Result
+Query: Extract all the text from the chat conversation.
+Content in extracted_content_1.md and once in <read_state>.
+<step>
+Successfully extracted all responses from the page. Verdict: Success
+Successfully logged in, submitted the first prompt, and extracted the response. I am now at step 11 of the user request.
+Paste the first part of the rubric prompt into the text area and submit it to continue the conversation with ChatGPT.
+Result
+Input 'This is what my professor gave me as a rubric. Can you please grade this essay using this rubric? Critical thinking is a habit of mind characterized by the comprehensive exploration of issues, ideas, artifacts, and events before accepting or formulating an opinion or conclusion. Evaluators are encouraged to assign a zero to any work sample or collection of work that does not meet benchmark (cell one) level performance. Explanation of issues: Capstone (4): Issue/problem to be considered critically is stated clearly and described comprehensively, delivering all relevant information necessary for full understanding. Milestone (3): Issue/problem to be considered critically is stated, described, and clarified so that understanding is not seriously impeded by omissions. Milestone (2): Issue/problem to be considered critically is stated but description leaves some terms undefined, ambiguities unexplored, boundaries undetermined, and/or backgrounds unknown. Benchmark (1): Issue/problem to be considered critically is stated without clarification or description. Evidence (Selecting and using information to investigate a point of view or conclusion): Capstone (4): Information is taken from source(s) with enough.' into element 589.
+<step>
+Successfully pasted the first part of the rubric prompt into the text area. Verdict: Success
+Successfully logged in, submitted the first prompt, extracted the response, and pasted the first part of the rubric. I am now at step 12 of the user request.
+Paste the second part of the rubric prompt into the text area to continue the conversation with ChatGPT.
+Result
+Input 'interpretation/evaluation to develop a comprehensive analysis or synthesis. Viewpoints of experts are questioned thoroughly. Milestone (3): Information is taken from source(s) with enough interpretation/evaluation to develop a coherent analysis or synthesis. Viewpoints of experts are subject to questioning. Milestone (2): Information is taken from source(s) with some interpretation/evaluation, but not enough to develop a coherent analysis or synthesis. Viewpoints of experts are taken as mostly fact, with little questioning. Benchmark (1): Information is taken from source(s) without any interpretation/evaluation. Viewpoints of experts are taken as fact, without question. Influence of context and assumptions: Capstone (4): Thoroughly (systematically and methodically) analyzes own and others' assumptions and carefully evaluates the relevance of contexts when presenting a position. Milestone (3): Identifies own and others' assumptions and several relevant contexts when presenting a position. Milestone (2): Questions some assumptions. Identifies several relevant contexts when presenting a position. May be more aware of others' assumptions than one's own (or vice versa). Benchmark (1): Shows an emerging awareness of present assumptions (sometimes labels assertions as assumptions). Begins.' into element 589.
+<step>
+Successfully pasted the second part of the rubric prompt into the text area. Verdict: Success
+Successfully logged in, submitted the first prompt, extracted the response, and pasted the first two parts of the rubric. I am currently on step 13 of the user request.
+Paste the third part of the rubric prompt into the text area to continue the conversation with ChatGPT.
+Result
+Input 'to identify some contexts when presenting a position. Student's position (perspective, thesis/hypothesis): Capstone (4): Specific position (perspective, thesis/hypothesis) is imaginative, taking into account the complexities of an issue. Limits of position are acknowledged. Others' points of view are synthesized within position. Milestone (3): Specific position takes into account the complexities of an issue. Others' points of view are acknowledged within position. Milestone (2): Specific position acknowledges different sides of an issue. Benchmark (1): Specific position is stated, but is simplistic and obvious. Conclusions and related outcomes (implications and consequences): Capstone (4): Conclusions and related outcomes are logical and reflect student’s informed evaluation and ability to place evidence and perspectives discussed in priority order. Milestone (3): Conclusion is logically tied to a range of information, including opposing viewpoints; related outcomes are identified clearly. Milestone (2): Conclusion is logically tied to information (because information is chosen to fit the desired conclusion); some related outcomes are identified clearly. Benchmark (1): Conclusion is inconsistently tied to some of the information discussed; related outcomes are oversimplified..' into element 589.
+<step>
+Successfully pasted the third part of the rubric prompt into the text area. Verdict: Success
+Successfully logged in, submitted the first prompt, extracted the response, and pasted all three parts of the rubric. I am now ready to submit the rubric for grading.
+Submit the rubric prompt by pressing Enter to continue the conversation with ChatGPT and get the essay graded.
+Result
+Sent keys: Enter
+<step>
+Successfully submitted the rubric prompt by pressing Enter. Verdict: Success
+Successfully logged in, submitted the first prompt, extracted the response, and submitted the rubric for grading. I am now at step 15 of the user request.
+Wait for 60 seconds for the responses to be generated, then extract all responses to fulfill step 16 of the user request.
+Result
+Waited for 60 seconds
+</agent_history>
+
+<agent_state>
+<user_request>
+
+
+            Follow this instructions step by step at a time:
+
+            1) Go to https://chatgpt.com
+
+            2) Use "Sign in". 
+
+            3) Type Email: rami.nguyen12@gmail.com 
+            
+            4) Type password: ramicool@@
+            
+            5) Wait for 20 seconds for user log in with their security codes.
+
+            6) Paste the first prompt Let's write a 1000 word fully written college essay, plus at least 5 citations from peer-reviewed articles, that answers this question. To what extent do the attached economic data support the hypothesis “social service spending is inversely related to economic growth”? Formulate a verbal argument analyzing whether the data do or do not support the hypothesis. Attached data: Social Welfare Spending as % of GDP (OECD) GDP Annual Growth (World Bank) 2019 2016 2010 2005 2000 France 31.2 31.5 30.7 28.7 27.5 2.02 0.86 2.00 1.89 4.14 Belgium 28.9 29.0 28.3 25.3 23.5 2.44 1.19 2.71 2.32 3.72 Finland 28.7 30.8 27.4 23.9 22.6 1.35 2.57 3.17 2.78 5.75 Italy 28.2 28.9 27.6 24.1 22.6 0.43 1.24 1.53 0.76 3.88 Denmark 28.0 28.7 28.9 25.2 23.8 1.71 3.07 1.58 2.36 3.72 Austria 26.6 27.8 27.6 25.9 25.5 1.75 2.12 1.81 2.32 3.18 Sweden 26.1 27.1 26.3 27.4 26.8 2.55 2.35 5.75 2.79 4.63 Germany 25.1 25.3 25.9 26.3 25.4 0.99 2.29 4.15 0.89 2.88 Norway 25.0 25.1 21.9 20.7 20.4 1.12 1.16 0.79 2.69 3.32 Spain 23.7 24.6 25.8 20.4 19.5 1.96 2.92 0.09 3.55 3.91. Key "Enter" to submit the prompt. 
+            
+            7) Wait for 30 seconds for the responses to be generated. 
+
+            8) Wait for 30 seconds for the responses to be generated. 
+            
+            9) Extract all responses in 30 seconds.
+
+            10) Extract all responses in 30 seconds.
+
+            11) Paste this prompt This is what my professor gave me as a rubric. Can you please grade this essay using this rubric? Critical thinking is a habit of mind characterized by the comprehensive exploration of issues, ideas, artifacts, and events before accepting or formulating an opinion or conclusion. Evaluators are encouraged to assign a zero to any work sample or collection of work that does not meet benchmark (cell one) level performance. Explanation of issues: Capstone (4): Issue/problem to be considered critically is stated clearly and described comprehensively, delivering all relevant information necessary for full understanding. Milestone (3): Issue/problem to be considered critically is stated, described, and clarified so that understanding is not seriously impeded by omissions. Milestone (2): Issue/problem to be considered critically is stated but description leaves some terms undefined, ambiguities unexplored, boundaries undetermined, and/or backgrounds unknown. Benchmark (1): Issue/problem to be considered critically is stated without clarification or description. Evidence (Selecting and using information to investigate a point of view or conclusion): Capstone (4): Information is taken from source(s) with enough.
+            
+            12) Paste this prompt interpretation/evaluation to develop a comprehensive analysis or synthesis. Viewpoints of experts are questioned thoroughly. Milestone (3): Information is taken from source(s) with enough interpretation/evaluation to develop a coherent analysis or synthesis. Viewpoints of experts are subject to questioning. Milestone (2): Information is taken from source(s) with some interpretation/evaluation, but not enough to develop a coherent analysis or synthesis. Viewpoints of experts are taken as mostly fact, with little questioning. Benchmark (1): Information is taken from source(s) without any interpretation/evaluation. Viewpoints of experts are taken as fact, without question. Influence of context and assumptions: Capstone (4): Thoroughly (systematically and methodically) analyzes own and others' assumptions and carefully evaluates the relevance of contexts when presenting a position. Milestone (3): Identifies own and others' assumptions and several relevant contexts when presenting a position. Milestone (2): Questions some assumptions. Identifies several relevant contexts when presenting a position. May be more aware of others' assumptions than one's own (or vice versa). Benchmark (1): Shows an emerging awareness of present assumptions (sometimes labels assertions as assumptions). Begins.
+            
+            13) Paste this prompt to identify some contexts when presenting a position. Student's position (perspective, thesis/hypothesis): Capstone (4): Specific position (perspective, thesis/hypothesis) is imaginative, taking into account the complexities of an issue. Limits of position are acknowledged. Others' points of view are synthesized within position. Milestone (3): Specific position takes into account the complexities of an issue. Others' points of view are acknowledged within position. Milestone (2): Specific position acknowledges different sides of an issue. Benchmark (1): Specific position is stated, but is simplistic and obvious. Conclusions and related outcomes (implications and consequences): Capstone (4): Conclusions and related outcomes are logical and reflect student’s informed evaluation and ability to place evidence and perspectives discussed in priority order. Milestone (3): Conclusion is logically tied to a range of information, including opposing viewpoints; related outcomes are identified clearly. Milestone (2): Conclusion is logically tied to information (because information is chosen to fit the desired conclusion); some related outcomes are identified clearly. Benchmark (1): Conclusion is inconsistently tied to some of the information discussed; related outcomes are oversimplified..
+
+            14) Key "Enter" to submit the prompt. 
+            
+            15) Wait for 60 seconds for the responses to be generated. 
+            
+            16) Extract all responses in 60 seconds.
+
+            17) Paste this prompt 
+        
+        Yes, I would like to deliver a fully revised final version of the essay to hit a full 20/20. 
+        
+        Also, please explain what changes were made in the essay to reach a perfect 20/20 based on the AAC&U rubric.
+
+        . Key "Enter" to submit the prompt. 
+
+            18) Wait for 60 seconds for the responses to be generated. 
+            
+            19) Extract all responses in 60 seconds. 
+
+            20) End the session.
+
+            
+</user_request>
+<file_system>
+<file>
+extracted_content_0.md - 19 lines
+<content>
+<url>
+https://chatgpt.com/c/691dfa7f-bef4-8325-b71b-953d24e6a2dd
+</url>
+<query>
+Extract all the text from the chat conversation.
+</query>
+<result>
+... 11 more lines ...
+</result>
+</content>
+</file>
+<file>
+extracted_content_1.md - 22 lines
+<content>
+<url>
+https://chatgpt.com/c/691dfa7f-bef4-8325-b71b-953d24e6a2dd
+</url>
+<query>
+Extract all the text from the chat conversation.
+</query>
+<result>
+... 13 more lines ...
+Finally, the data span o
+</result>
+</content>
+</file>
+</file_system>
+<todo_contents>
+[empty todo.md, fill it when applicable]
+</todo_contents>
+<step_info>Step21 maximum:100
+Today:2025-11-19</step_info>
+<available_file_paths>/Users/ramizoey/Documents/PhD/ai-assessment/automation/essay_generation/agent_output
+Use with absolute paths</available_file_paths>
+</agent_state>
+<browser_state>
+<page_stats>48 links, 161 interactive, 0 iframes, 2 scroll containers, 2 shadow(open), 0 shadow(closed), 2 images, 980 total elements</page_stats>
+Current tab: B80F
+Available tabs:
+Tab B80F: https://chatgpt.com/c/691dfa7f-bef4-8325-b71b-953d24e6a2dd - Essay on social service spendi
+
+<page_info>0.0 pages above, 0.0 pages below, 1.0 total pages</page_info>
+
+Interactive elements:
+[Start of page]
+[147]<a />
+	Skip to content
+Chat history
+|SCROLL|<nav aria-label=Chat history /> (0.0 pages above, 1.7 pages below)
+	[189]<a aria-label=Home />
+	[192]<div />
+		[193]<button aria-expanded=false aria-label=Close sidebar data-state=closed />
+	[199]<a />
+		New chat
+		[208]<div />
+			[209]<kbd aria-label=Shift />
+				[210]<span />
+			[212]<kbd aria-label=Command />
+				[213]<span />
+			[215]<kbd />
+				[216]<span />
+	[218]<div />
+		[219]<div />
+			[220]<div />
+				[221]<svg />
+					[222]<path />
+			[223]<div />
+				[224]<div />
+					Search chats
+		[227]<div />
+			[228]<div />
+				[229]<kbd aria-label=Command />
+					[230]<span />
+				[232]<kbd />
+					[233]<span />
+	[235]<a />
+		Library
+	[246]<a />
+		Codex
+		[255]<svg />
+	[257]<a />
+		Atlas
+		[282]<svg />
+	[1498]<div aria-expanded=true aria-label=Collapse section />
+		[1271]<div />
+			[1269]<h2 />
+				GPTs
+	[1499]<a />
+		Explore
+	[1500]<a />
+		Write headlines and descriptions for trendy snacks
+		[1287]<button id=radix-_r_41_ aria-expanded=false data-state=closed />
+	[1501]<a />
+		Friend's Resume
+		[1300]<button id=radix-_r_44_ aria-expanded=false data-state=closed />
+	[1502]<a />
+		AI Newsletter Sources
+		[1313]<button id=radix-_r_47_ aria-expanded=false data-state=closed />
+	[1503]<a />
+		Thought Leadership Content
+		[1326]<button id=radix-_r_4a_ aria-expanded=false data-state=closed />
+	[1504]<a />
+		News Search
+		[1339]<button id=radix-_r_4d_ aria-expanded=false data-state=closed />
+	[1505]<a />
+		Trend analysis
+		[1352]<button id=radix-_r_4g_ aria-expanded=false data-state=closed />
+	[1506]<a />
+		Create Prompt for Images
+		[1365]<button id=radix-_r_4j_ aria-expanded=false data-state=closed />
+	[1507]<a />
+		Job Hunting
+		[1378]<button id=radix-_r_4m_ aria-expanded=false data-state=closed />
+	[1508]<a />
+		Read Paper
+		[1391]<button id=radix-_r_4p_ aria-expanded=false data-state=closed />
+	[1509]<a />
+		Resume - Professional Summary & Key Highlights
+		[1404]<button id=radix-_r_4s_ aria-expanded=false data-state=closed />
+	[1510]<a />
+		Write Paper
+		[1417]<button id=radix-_r_4v_ aria-expanded=false data-state=closed />
+	[1511]<a />
+		Email Marketing Chatbot
+		[1430]<button id=radix-_r_52_ aria-expanded=false data-state=closed />
+	[1512]<a />
+		Create a tailored resume
+		[1443]<button id=radix-_r_55_ aria-expanded=false data-state=closed />
+	[1513]<a />
+		Create LinkedIn Post (sharing Event's experience)
+		[1456]<button id=radix-_r_58_ aria-expanded=false data-state=closed />
+	[1514]<a />
+		Create post
+		[1469]<button id=radix-_r_5b_ aria-expanded=false data-state=closed />
+	[1515]<a />
+		Test Cover Letter and Personalized Email
+		[1482]<button id=radix-_r_5e_ aria-expanded=false data-state=closed />
+	[1516]<a />
+		Create article (Prompts)
+		[1495]<button id=radix-_r_5h_ aria-expanded=false data-state=closed />
+	[2024]<div aria-expanded=true aria-label=Collapse section />
+		[1940]<div />
+			[1938]<h2 />
+				Projects
+	[2025]<div />
+		[1944]<div />
+			[1942]<svg />
+				[1941]<path />
+		[1945]<div />
+			[1943]<div />
+				New project
+	[2026]<a />
+		[1951]<button data-state=closed />
+		Research
+		[1960]<button id=radix-_r_7d_ aria-expanded=false data-state=closed />
+	[2027]<a />
+		[1964]<button data-state=closed />
+		Rami
+		[1973]<button id=radix-_r_7h_ aria-expanded=false data-state=closed />
+	[2028]<a />
+		[1977]<button data-state=closed />
+		AI Fanstatic
+		[1986]<button id=radix-_r_7l_ aria-expanded=false data-state=closed />
+	[2029]<a />
+		Rami Support
+		[2000]<button id=radix-_r_7o_ aria-expanded=false data-state=closed />
+	[2030]<a />
+		Ai Core
+		[2014]<button id=radix-_r_7r_ aria-expanded=false data-state=closed />
+	[2031]<div type=button id=radix-_r_7u_ aria-expanded=false data-state=closed />
+		[2022]<div />
+			[2020]<svg />
+				[2017]<path />
+				[2018]<path />
+				[2019]<path />
+		[2023]<div />
+			[2021]<div />
+				See more
+	[1885]<div aria-expanded=true aria-label=Collapse section />
+		[1520]<div />
+			[1518]<h2 />
+				Chats
+	[1857]<a />
+		Environment variable issue
+		[1528]<button aria-label=Open conversation options id=radix-_r_5k_ aria-expanded=false data-state=closed />
+	[1858]<a />
+		Simplified learning explanation
+		[1540]<button aria-label=Open conversation options id=radix-_r_5m_ aria-expanded=false data-state=closed />
+	[1859]<a />
+		LinkedIn post embedding fix
+		[1552]<button aria-label=Open conversation options id=radix-_r_5o_ aria-expanded=false data-state=closed />
+	[1860]<a />
+		Research topics in education
+		[1564]<button aria-label=Open conversation options id=radix-_r_5q_ aria-expanded=false data-state=closed />
+	[1861]<a />
+		Research narrative summary
+		[1576]<button aria-label=Open conversation options id=radix-_r_5s_ aria-expanded=false data-state=closed />
+	[1862]<a />
+		Save temporary files Mac
+		[1588]<button aria-label=Open conversation options id=radix-_r_5u_ aria-expanded=false data-state=closed />
+	[1863]<a />
+		Cover letter creation
+		[1600]<button aria-label=Open conversation options id=radix-_r_60_ aria-expanded=false data-state=closed />
+	[1864]<a />
+		Portfolio website solution
+		[1612]<button aria-label=Open conversation options id=radix-_r_62_ aria-expanded=false data-state=closed />
+	[1865]<a />
+		Install code command
+		[1624]<button aria-label=Open conversation options id=radix-_r_64_ aria-expanded=false data-state=closed />
+	[1866]<a />
+		Answering questions simply
+		[1636]<button aria-label=Open conversation options id=radix-_r_66_ aria-expanded=false data-state=closed />
+	[1867]<a />
+		API key placement fix
+		[1648]<button aria-label=Open conversation options id=radix-_r_68_ aria-expanded=false data-state=closed />
+	[1868]<a />
+		Vibe coding party plan
+		[1660]<button aria-label=Open conversation options id=radix-_r_6a_ aria-expanded=false data-state=closed />
+	[1869]<a />
+		Organize course duration
+		[1672]<button aria-label=Open conversation options id=radix-_r_6c_ aria-expanded=false data-state=closed />
+	[1870]<a />
+		Fix code error
+		[1684]<button aria-label=Open conversation options id=radix-_r_6e_ aria-expanded=false data-state=closed />
+	[1871]<a />
+		AI and PhD advisors
+		[1696]<button aria-label=Open conversation options id=radix-_r_6g_ aria-expanded=false data-state=closed />
+	[1872]<a />
+		Dịch tiếng Việt
+		[1708]<button aria-label=Open conversation options id=radix-_r_6i_ aria-expanded=false data-state=closed />
+	[1873]<a />
+		Remove API key leak
+		[1720]<button aria-label=Open conversation options id=radix-_r_6k_ aria-expanded=false data-state=closed />
+	[837]<div aria-label=Open profile menu type=button id=radix-_R_eillkcea4qj5_ aria-expanded=false data-state=closed />
+		Rami Vy
+		Plus
+ChatGPT
+5.1
+[2354]<button aria-label=Share />
+	Share
+[859]<div />
+	[2355]<div type=button id=radix-_r_84_ aria-expanded=false data-state=closed />
+		[2350]<button aria-label=Open conversation options />
+|SCROLL|<div /> (10.4 pages above, 0.0 pages below)
+	You said:
+	*[2839]<article />
+		*[2833]<div />
+			the assumption that high spending automatically reduces growth
+			the assumption that spending is the cause rather than an outcome of economic performance
+			structural and institutional contexts (Nordic models, tax systems, labor markets)
+			the assumption that data points across countries are comparable
+			the assumption that total spending, rather than spending composition, is the relevant variable
+			It also demonstrates systematic evaluation of contextual factors such as industrial structure, demographic pressures, and automatic stabilizers. The analysis makes clear that these contexts shape how spending affects growth.
+			This fulfills the Capstone requirement for methodical analysis of assumptions and contextual relevance.
+			*[2957]<hr />
+			4. Student’s Position (Perspective, Thesis/Hypothesis)
+			Score: 4 (Capstone)
+			Justification:
+			The essay’s argument—that the data do
+			not
+			strongly support an inverse relationship—is nuanced and accounts for multiple complexities. It synthesizes various viewpoints (e.g., some evidence might appear to support the hypothesis, but not consistently). It also acknowledges the limits of its own conclusion (e.g., small dataset, lack of spending-type detail, potential reverse causality).
+			This indicates an imaginative, well-qualified position that integrates competing perspectives. This meets Capstone-level criteria.
+			*[2973]<hr />
+			5. Conclusions and Related Outcomes
+			Score: 4 (Capstone)
+			Justification:
+			The conclusion logically follows from the presented evidence, balancing descriptive observations, theoretical perspectives, and structural considerations. It recognizes implications such as:
+			the data’s inability to isolate causal effects
+			the context-dependence of spending-growth relationships
+			limitations in using aggregate spending as an explanatory variable
+			It prioritizes evidence and perspectives in a clear hierarchy and avoids oversimplified outcomes. This aligns with Capstone expectations.
+			*[3005]<hr />
+			Overall Evaluation
+			Total: 19 out of 20
+			This places the essay solidly within the
+			Capstone
+			performance range.
+			It demonstrates sophisticated critical thinking, nuanced evidence evaluation, and a well-integrated conclusion. The only non-Capstone element is the “Evidence” category, where deeper interrogation of expert viewpoints would be necessary for full marks.
+			*[3022]<hr />
+			If you’d like, I can also:
+			✅ revise the essay to
+			earn full Capstone scores in all categories
+			✅ rewrite portions to better match your professor’s expectations,
+			or
+			✅ produce a polished submission draft formatted to your style guide (APA, MLA, Chicago).
+			*[3066]<button aria-label=Copy data-state=closed pressed=false />
+			*[3067]<button aria-label=Good response data-state=closed pressed=false />
+			*[3068]<button aria-label=Bad response data-state=closed pressed=false />
+			*[3069]<button aria-label=Share data-state=closed pressed=false />
+			*[3070]<span data-state=closed />
+				*[3061]<button id=radix-_r_92_ data-state=closed aria-label=Switch model expanded=false />
+			*[3071]<button aria-label=More actions id=radix-_r_95_ data-state=closed expanded=false />
+[589]<div id=prompt-textarea />
+	[588]<p />
+[361]<div />
+	[362]<span data-state=closed />
+		[363]<button aria-label=Add files and more id=composer-plus-btn data-state=closed expanded=false />
+[369]<span data-state=closed />
+	[370]<button aria-label=Dictate button />
+*[3081]<span data-state=closed />
+ChatGPT can make mistakes. Check important info.
+[End of page]
+</browser_state>
+
+
+ RESPONSE
+{
+  "thinking": "I have successfully logged in, submitted the first prompt, extracted the response, submitted the rubric for grading, and waited for the response. I am now at step 16 of the user request, which is to extract all responses in 60 seconds. I will scroll down to ensure all content is visible before extracting the responses.",
+  "evaluation_previous_goal": "Successfully waited for 60 seconds for the responses to be generated. Verdict: Success",
+  "memory": "Successfully logged in, submitted the first prompt, extracted the response, submitted the rubric, and waited for the graded response. I am now ready to extract the graded response.",
+  "next_goal": "Scroll down the page to ensure all content is visible, then extract all responses from the page to fulfill step 16 of the user request.",
+  "action": [
+    {
+      "scroll": {
+        "down": true,
+        "pages": 10.0
+      }
+    },
+    {
+      "extract": {
+        "query": "Extract all the text from the chat conversation.",
+        "extract_links": false
+      }
+    }
+  ]
+}
