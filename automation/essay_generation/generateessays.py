@@ -1,6 +1,6 @@
 import os
 
-os.environ["BROWSER_USE_CONFIG_DIR"] = os.path.join(os.getcwd(), "browser_config")
+#os.environ["BROWSER_USE_CONFIG_DIR"] = os.path.join(os.getcwd(), "browser_config")
 
 from browser_use import Agent, ChatGoogle, ChatOpenAI, Browser
 from dotenv import load_dotenv
@@ -9,6 +9,8 @@ import json
 import asyncio
 from pydantic import BaseModel 
 from jsonresults import*
+import time 
+import shutil
 
 #Define a path
 
@@ -23,7 +25,7 @@ class AIrunner:
 
         self.email = email
         self.password = password
-        self.assignment_number = assignment_number
+        self.assignment_number = argument.essay
         self.aacu_rubric_data = aacu_rubric_data
 
         self.provider = None
@@ -34,12 +36,14 @@ class AIrunner:
     #Step 1: get model
     def getllms(self):
         
-        self.provider == "gemini"
-        self.model_name = "gemini-2.5-flash"
+        self.provider == "chatgpt"
+        self.model_name = "gpt-4.1-2025-04-14"
 
-        return ChatGoogle(model=self.model_name, api_key=os.getenv("GOOGLE_API_KEY"))
+        return ChatOpenAI(model=self.model_name, api_key=os.getenv("OPENAI_API_KEY"))
     
-    
+    from browser_use import Agent, ChatOpenAI
+
+
     #Step 2: open target website
 
     def target_website(self, website):
@@ -57,13 +61,16 @@ class AIrunner:
         assignment_prompt_path = os.path.join(base_direction, "assignmentprompt.json")
 
         with open(assignment_prompt_path, "r", encoding="utf-8") as f:
-            first_prompt = json.load(f)
+            first_prompt_data = json.load(f)
 
-        first_prompt = list(first_prompt.values())[1]
+        index = self.assignment_number - 1  
+        first_prompt = list(first_prompt_data.values())[index]
 
         self.first_prompt = first_prompt
 
         print("First Prompt:", first_prompt)
+
+        #sys.exit()
 
 
     def prepare_second_prompt(self):
@@ -113,6 +120,9 @@ class AIrunner:
         part1,  part2,  part3 =  parts
         
         return  part1,  part2,  part3
+    
+    
+
 
     #2. Define hyperparameters and paths
 
@@ -123,17 +133,13 @@ class AIrunner:
 
         followup_prompt = """
         
-        Yes, I would like to deliver a fully revised final version of the essay to hit a full 20/20. 
-        
-        Also, please explain what changes were made in the essay to reach a perfect 20/20 based on the AAC&U rubric.
+        Yes, I would like to deliver a fully revised final version of the essay to hit a full 20/20. Also, please explain what changes were made in the essay to reach a perfect 20/20 based on the AAC&U rubric.
 
         """
 
         followup_prompt_claude = """
         
-        Yes, I would like to deliver a fully revised final version of the 1000-word essay to hit a full 20/20. 
-        
-        Also, please explain what changes were made in the essay to reach a perfect 20/20 based on the AAC&U rubric.
+        Yes, I would like to deliver a fully revised final version of the 1000-word essay to hit a full 20/20. Also, please explain what changes were made in the essay to reach a perfect 20/20 based on the AAC&U rubric.
 
         """
 
@@ -141,51 +147,54 @@ class AIrunner:
             
             prompt = f"""
 
-            Follow this instructions step by step at a time:
+            1) Go to {self.url} 
 
-            1) Go to {self.url}
+            2) Use "Sign in".  
 
-            2) Use "Sign in". 
+            3) Type Email: {self.email}. Click Next.  
 
-            3) Type Email: {self.email} 
+            4) Type password: {self.password}. Click Next. Click Next. 
+
+            5) Wait for 20 seconds for user log in with their security codes. 
+
+            6) Paste the first prompt {self.first_prompt}. Key "Enter" to submit the prompt.  
+
+            7) Wait for 30 seconds for the responses to be generated.  
             
-            4) Type password: {self.password}
+            8) Wait for 10 seconds for the responses to be generated.  
+
+            9) Extract all responses in 30 seconds. 
+
+            10) Extract all responses in 10 seconds.  
+
+            11) Type this prompt, do not enter yet {part1}.  
+
+            12) Type this prompt, do not enter yet {part2}. 
+
+            13) Type this prompt, do not enter yet {part3}.  
+
+            14) Key "Enter" to submit the prompt.  
+
+            15) Wait for 30 seconds for the responses to be generated.  
+
+            16) Wait for 10 seconds for the responses to be generated.  
+
+            17) Extract all responses in 30 seconds. 
+
+            18) Extract all responses in 10 seconds. 
+
+            19) Paste this prompt {followup_prompt}. Key "Enter" to submit the prompt.  
+
+            20) Wait for 30 seconds for the responses to be generated.  
             
-            5) Wait for 20 seconds for user log in with their security codes.
+            21) Wait for 10 seconds for the responses to be generated. 
 
-            6) Paste the first prompt {self.first_prompt}. Key "Enter" to submit the prompt. 
-            
-            7) Wait for 30 seconds for the responses to be generated. 
+            22) Extract all responses in 30 seconds. 
 
-            8) Wait for 30 seconds for the responses to be generated. 
-            
-            9) Extract all responses in 30 seconds.
+            23) Extract all responses in 10 seconds.
 
-            10) Extract all responses in 30 seconds.
+            24) End the session. 
 
-            11) Paste this prompt {part1}.
-            
-            12) Paste this prompt {part2}.
-            
-            13) Paste this prompt {part3}.
-
-            14) Key "Enter" to submit the prompt. 
-            
-            15) Wait for 30 seconds for the responses to be generated. 
-
-            16) Wait for 30 seconds for the responses to be generated. 
-            
-            17) Extract all responses in 30 seconds.
-
-            18) Extract all responses in 30 seconds.
-
-            19) Paste this prompt {followup_prompt}. Key "Enter" to submit the prompt. 
-
-            20) Wait for 60 seconds for the responses to be generated. 
-            
-            21) Extract all responses in 60 seconds. 
-
-            22) End the session.
 
             """
 
@@ -318,6 +327,8 @@ class AIrunner:
       #Step 3: run agent
 
     def agent(self, prompt, interactive=None):
+
+        start_time = time.time()
         
         llm = self.getllms()
 
@@ -325,7 +336,7 @@ class AIrunner:
             headless=False,
             #executable_path='/Applications/Google Chrome.app/Contents/MacOS/Google Chrome',
             #user_data_dir='~/Library/Application Support/Google/Chrome'
-            #window_size={"width": 800, "height": 800},
+            window_size={"width": 1000, "height": 1000},
             )
         
          # Create a permanent output folder
@@ -352,7 +363,15 @@ class AIrunner:
         except Exception as e:
             print(f"[Warning] Failed to close session: {e}")
 
+        total_time = time.time() - start_time
+        total_minutes = total_time / 60
+
+
+        print(f"Total time taken: {total_minutes:.2f} minutes")
+
         save_result_as_json(result, filename="final_result.json", provider=self.provider, essay_number=self.argument.essay)
+
+        return result
 
 
 

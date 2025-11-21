@@ -1,5 +1,5 @@
 from generateessays import AIrunner
-from browser_use import Agent, ChatGoogle
+from browser_use import Agent, Browser
 from dotenv import load_dotenv
 import os, json
 import argparse
@@ -63,6 +63,7 @@ if __name__ == "__main__":
     
     bot.provider = argument.website
 
+
     bot.target_website(argument.website) #target website
 
     #3b: Define an essay
@@ -72,7 +73,6 @@ if __name__ == "__main__":
     essay_key = f"essay_{essay_number}_prompt"
 
 
-    
     first_prompt = bot.prepare_first_prompt(essay_number)
     
 
@@ -88,5 +88,8 @@ if __name__ == "__main__":
     #5: Run agent
     bot.agent(prompt)
 
+    #bot.save_all_markdown_files()
+
+    
 
     

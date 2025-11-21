@@ -44,19 +44,21 @@ def save_result_as_json(result, filename="final_result.json", provider=None, ess
 
                 break
             
-    for item in reversed(serializable):
-        
+    for item in reversed(serializable):  # Iterate in reverse order
         if isinstance(item, dict) and "long_term_memory" in item:
-            match = re.search(r"(https?://\S+)", item["long_term_memory"])
-            
-            if match:
+            # Modify regex to capture a link with a number
+            match = re.search(r"(https?://\S*\d\S*)", item["long_term_memory"])
 
+            if match:
                 link = match.group(1)
+                
+                # Path to save the extracted link
                 link_path = os.path.join(save_dir, "extracted_link.json")
 
+                # Save the extracted link in the desired format
                 with open(link_path, "w", encoding="utf-8") as f:
-                    json.dump({"link": link}, f, ensure_ascii=False, indent=2)
-                    
+                    json.dump({"extracted_link": link}, f, ensure_ascii=False, indent=2)
+
                 print(f"✅ Link extracted and saved to: {link_path}")
                 break
 
