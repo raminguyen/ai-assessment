@@ -110,32 +110,30 @@ class AIrunner:
 
         start = 0
 
-        indices = [n * i // 3 for i in range(1, 3)]
+        indices = [n * i // 4 for i in range(1, 4)]
 
         for end in indices + [n]:
             part = " ".join(words[start:end]).replace("\n", "").replace("\r", "")
             parts.append(part)
             start = end
 
-        part1,  part2,  part3 =  parts
+        part1,  part2,  part3, part4 =  parts
         
-        return  part1,  part2,  part3
+        return  part1,  part2,  part3, part4
     
     
-
-
     #2. Define hyperparameters and paths
 
     #Step 2: Send prompt  
     def send_prompt(self, website):
 
-        part1,  part2,  part3 = self.prepare_second_prompt()
+        part1,  part2,  part3, part4 = self.prepare_second_prompt()
 
+    
         followup_prompt = """
         
-        Yes, I would like to deliver a fully revised final version of the essay to hit a full 20/20. Also, please explain what changes were made in the essay to reach a perfect 20/20 based on the AAC&U rubric.
+        Yes, I would like to deliver a fully revised final version of the essay to hit a full 20/20. Also, please explain what changes were made in the essay to reach a perfect 20/20 based on the AAC&U rubric."""
 
-        """
 
         followup_prompt_claude = """
         
@@ -143,19 +141,19 @@ class AIrunner:
 
         """
 
-        if website == "chatgpt":
+        if website == "claude":
             
-            prompt = f"""
+            prompt = f""" Follow step by step
 
             1) Go to {self.url} 
 
-            2) Use "Sign in".  
+            2) Click Sign In.
 
-            3) Type Email: {self.email}. Click Next.  
+            3) Type Email: {self.email}.
 
-            4) Type password: {self.password}. Click Next. Click Next. 
+            4) Click Next.  
 
-            5) Wait for 20 seconds for user log in with their security codes. 
+            5) Wait for 10 seconds for user log in with their security codes. 
 
             6) Paste the first prompt {self.first_prompt}. Key "Enter" to submit the prompt.  
 
@@ -173,155 +171,96 @@ class AIrunner:
 
             13) Type this prompt, do not enter yet {part3}.  
 
-            14) Key "Enter" to submit the prompt.  
+            14) Type this prompt, do not enter yet {part4}.  
 
-            15) Wait for 30 seconds for the responses to be generated.  
+            15) Key "Enter" to submit the prompt.  
 
-            16) Wait for 10 seconds for the responses to be generated.  
+            16) Wait for 30 seconds for the responses to be generated.  
 
-            17) Extract all responses in 30 seconds. 
+            17) Wait for 10 seconds for the responses to be generated.  
 
-            18) Extract all responses in 10 seconds. 
+            19) Extract all responses in 30 seconds. 
 
-            19) Paste this prompt {followup_prompt}. Key "Enter" to submit the prompt.  
+            20) Extract all responses in 10 seconds. 
 
-            20) Wait for 30 seconds for the responses to be generated.  
+            21) Paste this prompt {repr(followup_prompt_claude)}. Key "Enter" to submit the prompt.  
+
+            22) Wait for 30 seconds for the responses to be generated.  
             
-            21) Wait for 10 seconds for the responses to be generated. 
+            23) Wait for 10 seconds for the responses to be generated. 
 
-            22) Extract all responses in 30 seconds. 
+            24) Extract all responses in 30 seconds. 
 
-            23) Extract all responses in 10 seconds.
+            25) Extract all responses in 10 seconds.
 
-            24) End the session. 
+            26) End the session. 
 
 
             """
 
+    
             return prompt
-        
-        if website == "claude":
+
+
+        if website == "chatgpt" or "copilot":
             
             prompt = f"""
 
-            Follow this instructions step by step:
+            1) Go to {self.url} 
 
-            1) Go to {self.url}
+            2) Use "Sign in".  
 
-            2) Click "Sign in". Use:
+            3) Type Email: {self.email}. Click Next.  
 
-                - Email: {self.email} 
-                - Password: {self.password}
+            4) Type password: {self.password}. Click Next. Click Next. 
+
+            5) Wait for 30 seconds for user log in with their security codes. 
+
+            6) Paste the first prompt {self.first_prompt}. Key "Enter" to submit the prompt.  
+
+            7) Wait for 30 seconds for the responses to be generated.  
             
-            3) Click Next.
+            8) Wait for 10 seconds for the responses to be generated.  
 
-            4) Wait for 20 seconds for user log in with their security codes.
+            9) Extract all responses in 30 seconds. 
 
-            5) Paste the first prompt {self.first_prompt}. Key "Enter" to submit the prompt. 
+            10) Extract all responses in 10 seconds.  
+
+            11) Type this prompt, do not enter yet {part1}.  
+
+            12) Type this prompt, do not enter yet {part2}. 
+
+            13) Type this prompt, do not enter yet {part3}.  
+
+            14) Type this prompt, do not enter yet {part4}.  
+
+            15) Key "Enter" to submit the prompt.  
+
+            16) Wait for 30 seconds for the responses to be generated.  
+
+            17) Wait for 10 seconds for the responses to be generated.  
+
+            19) Extract all responses in 30 seconds. 
+
+            20) Extract all responses in 10 seconds. 
+
+            21) Paste this prompt {followup_prompt}. Key "Enter" to submit the prompt.  
+
+            22) Wait for 30 seconds for the responses to be generated.  
             
-            6) Wait for 30 seconds for the responses to be generated. 
+            23) Wait for 10 seconds for the responses to be generated. 
 
-            7) Wait for 30 seconds for the responses to be generated.
-            
-            8) Extract all responses in 30 seconds.
+            24) Extract all responses in 30 seconds. 
 
-            9) Extract all responses in 30 seconds.
+            25) Extract all responses in 10 seconds.
 
-            10) Paste this prompt {part1}.
-            
-            11) Paste this prompt {part2}.
-            
-            12) Paste this prompt {part3}.
+            26) End the session. 
 
-            13) Key "Enter" to submit the prompt. 
-            
-            14) Wait for 30 seconds for the responses to be generated. 
-
-            15) Wait for 30 seconds for the responses to be generated.
-            
-            16) Extract all responses in 30 seconds.
-
-            17) Extract all responses in 30 seconds.
-
-            18) Paste this prompt {followup_prompt_claude}. Key "Enter" to submit the prompt.
-
-            19) Wait for 30 seconds for the responses to be generated. 
-
-            20) Wait for 30 seconds for the responses to be generated.
-            
-            21) Extract all responses in 30 seconds. 
-
-            22) Extract all responses in 30 seconds. 
-
-            23) End the session.
-
-            """
-
+        """
+        
             return prompt
         
- 
-        if website == "gemini" or website == "copilot":
-            
-            prompt = f"""
-
-            Follow this instructions step by step:
-
-            1) Go to {self.url}
-
-            2) Click "Sign in".:
-
-                - First, type Email: {self.email}. Key Enter.
-                - Then, type Password: {self.password}. Key Enter.
-            
-            3) Click Next.
-
-            4) Wait for 20 seconds for user log in with their security codes.
-
-            5) Paste the first prompt {self.first_prompt}. Key "Enter" to submit the prompt. 
-            
-            6) Wait for 30 seconds for the responses to be generated. 
-
-            7) Wait for 30 seconds for the responses to be generated. 
-            
-            8) Extract all responses in 30 seconds.
-
-            9) Extract all responses in 30 seconds.
-
-            10) Paste this prompt {part1}.
-
-            11) Wait for 5 seconds.
-            
-            12) Paste this prompt {part2}.
-
-            13) Wait for 5 seconds.
-
-            14) Paste this prompt {part3}.
-
-            15) Wait for 5 seconds.
-
-            16) Key "Enter" to submit the prompt. 
-            
-            17) Wait for 30 seconds for the responses to be generated. 
-
-            18) Wait for 30 seconds for the responses to be generated.
-            
-            19) Extract all responses in 30 seconds.
-
-            20) Extract all responses in 30 seconds.
-
-            21) Paste this prompt {followup_prompt}. Key "Enter" to submit the prompt. 
-
-            22) Wait for 30 seconds for the responses to be generated. 
-
-            23) Wait for 30 seconds for the responses to be generated. 
-            
-            24) Extract all responses in 60 seconds. 
-
-            25) End the session.
-
-            """
-
-            return prompt
+        
         
 
       #Step 3: run agent

@@ -78,12 +78,13 @@ if __name__ == "__main__":
 
 
     bot.prepare_second_prompt()
-
-    #import sys
-    #sys.exit()  
+  
 
     #4:Send prompt
     prompt = bot.send_prompt(website=argument.website)
+
+    #import sys
+    #sys.exit()
 
     #5: Run agent
     bot.agent(prompt)
