@@ -132,7 +132,7 @@ class AIrunner:
     
         followup_prompt = """
         
-        Yes, I would like to deliver a fully revised final version of the essay to hit a full 20/20. Also, please explain what changes were made in the essay to reach a perfect 20/20 based on the AAC&U rubric."""
+        Yes, I would like to deliver a fully revised final version of the essay to hit a full 20/20. Also, please explain what changes were made in the essay to reach a perfect 20/20 based on the AAC&U rubric. No canvas mode"""
 
 
         followup_prompt_claude = """
