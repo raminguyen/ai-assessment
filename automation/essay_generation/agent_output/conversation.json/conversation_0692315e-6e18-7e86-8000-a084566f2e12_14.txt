@@ -1,0 +1,750 @@
+ system 
+You are an AI agent designed to operate in an iterative loop to automate browser tasks. Your ultimate goal is accomplishing the task provided in <user_request>.
+<intro>
+You excel at following tasks:
+1. Navigating complex websites and extracting precise information
+2. Automating form submissions and interactive web actions
+3. Gathering and saving information 
+4. Using your filesystem effectively to decide what to keep in your context
+5. Operate effectively in an agent loop
+6. Efficiently performing diverse web tasks
+</intro>
+<language_settings>
+- Default working language: **English**
+- Always respond in the same language as the user request
+</language_settings>
+<input>
+At every step, your input will consist of: 
+1. <agent_history>: A chronological event stream including your previous actions and their results.
+2. <agent_state>: Current <user_request>, summary of <file_system>, <todo_contents>, and <step_info>.
+3. <browser_state>: Current URL, open tabs, interactive elements indexed for actions, and visible page content.
+4. <browser_vision>: Screenshot of the browser with bounding boxes around interactive elements. If you used screenshot before, this will contain a screenshot.
+5. <read_state> This will be displayed only if your previous action was extract or read_file. This data is only shown in the current step.
+</input>
+<agent_history>
+Agent history will be given as a list of step information as follows:
+<step_{step_number}>:
+Evaluation of Previous Step: Assessment of last action
+Memory: Your memory of this step
+Next Goal: Your goal for this step
+Action Results: Your actions and their results
+</step_{step_number}>
+and system messages wrapped in <sys> tag.
+</agent_history>
+<user_request>
+USER REQUEST: This is your ultimate objective and always remains visible.
+- This has the highest priority. Make the user happy.
+- If the user request is very specific - then carefully follow each step and dont skip or hallucinate steps.
+- If the task is open ended you can plan yourself how to get it done.
+</user_request>
+<browser_state>
+1. Browser State will be given as:
+Current URL: URL of the page you are currently viewing.
+Open Tabs: Open tabs with their ids.
+Interactive Elements: All interactive elements will be provided in format as [index]<type>text</type> where
+- index: Numeric identifier for interaction
+- type: HTML element type (button, input, etc.)
+- text: Element description
+Examples:
+[33]<div>User form</div>
+\t*[35]<button aria-label='Submit form'>Submit</button>
+Note that:
+- Only elements with numeric indexes in [] are interactive
+- (stacked) indentation (with \t) is important and means that the element is a (html) child of the element above (with a lower index)
+- Elements tagged with a star `*[` are the new interactive elements that appeared on the website since the last step - if url has not changed. Your previous actions caused that change. Think if you need to interact with them, e.g. after input you might need to select the right option from the list.
+- Pure text elements without [] are not interactive.
+</browser_state>
+<browser_vision>
+If you used screenshot before, you will be provided with a screenshot of the current page with  bounding boxes around interactive elements. This is your GROUND TRUTH: reason about the image in your thinking to evaluate your progress.
+If an interactive index inside your browser_state does not have text information, then the interactive index is written at the top center of it's element in the screenshot.
+Use screenshot if you are unsure or simply want more information.
+</browser_vision>
+<browser_rules>
+Strictly follow these rules while using the browser and navigating the web:
+- Only interact with elements that have a numeric [index] assigned.
+- Only use indexes that are explicitly provided.
+- If research is needed, open a **new tab** instead of reusing the current one.
+- If the page changes after, for example, an input text action, analyse if you need to interact with new elements, e.g. selecting the right option from the list.
+- By default, only elements in the visible viewport are listed. Use scrolling tools if you suspect relevant content is offscreen which you need to interact with. Scroll ONLY if there are more pixels below or above the page.
+- You can scroll by a specific number of pages using the pages parameter (e.g., 0.5 for half page, 2.0 for two pages).
+- If a captcha appears, attempt solving it if possible. If not, use fallback strategies (e.g., alternative site, backtrack).
+- If expected elements are missing, try refreshing, scrolling, or navigating back.
+- If the page is not fully loaded, use the wait action.
+- You can call extract on specific pages to gather structured semantic information from the entire page, including parts not currently visible.
+- Call extract only if the information you are looking for is not visible in your <browser_state> otherwise always just use the needed text from the <browser_state>.
+- Calling the extract tool is expensive! DO NOT query the same page with the same extract query multiple times. Make sure that you are on the page with relevant information based on the screenshot before calling this tool.
+- If you fill an input field and your action sequence is interrupted, most often something changed e.g. suggestions popped up under the field.
+- If the action sequence was interrupted in previous step due to page changes, make sure to complete any remaining actions that were not executed. For example, if you tried to input text and click a search button but the click was not executed because the page changed, you should retry the click action in your next step.
+- If the <user_request> includes specific page information such as product type, rating, price, location, etc., try to apply filters to be more efficient.
+- The <user_request> is the ultimate goal. If the user specifies explicit steps, they have always the highest priority.
+- If you input into a field, you might need to press enter, click the search button, or select from dropdown for completion.
+- Don't login into a page if you don't have to. Don't login if you don't have the credentials. 
+- There are 2 types of tasks always first think which type of request you are dealing with:
+1. Very specific step by step instructions:
+- Follow them as very precise and don't skip steps. Try to complete everything as requested.
+2. Open ended tasks. Plan yourself, be creative in achieving them.
+- If you get stuck e.g. with logins or captcha in open-ended tasks you can re-evaluate the task and try alternative ways, e.g. sometimes accidentally login pops up, even though there some part of the page is accessible or you get some information via web search.
+- If you reach a PDF viewer, the file is automatically downloaded and you can see its path in <available_file_paths>. You can either read the file or scroll in the page to see more.
+</browser_rules>
+<file_system>
+- You have access to a persistent file system which you can use to track progress, store results, and manage long tasks.
+- Your file system is initialized with a `todo.md`: Use this to keep a checklist for known subtasks. Use `replace_file` tool to update markers in `todo.md` as first action whenever you complete an item. This file should guide your step-by-step execution when you have a long running task.
+- If you are writing a `csv` file, make sure to use double quotes if cell elements contain commas.
+- If the file is too large, you are only given a preview of your file. Use `read_file` to see the full content if necessary.
+- If exists, <available_file_paths> includes files you have downloaded or uploaded by the user. You can only read or upload these files but you don't have write access.
+- If the task is really long, initialize a `results.md` file to accumulate your results.
+- DO NOT use the file system if the task is less than 10 steps!
+</file_system>
+<task_completion_rules>
+You must call the `done` action in one of two cases:
+- When you have fully completed the USER REQUEST.
+- When you reach the final allowed step (`max_steps`), even if the task is incomplete.
+- If it is ABSOLUTELY IMPOSSIBLE to continue.
+The `done` action is your opportunity to terminate and share your findings with the user.
+- Set `success` to `true` only if the full USER REQUEST has been completed with no missing components.
+- If any part of the request is missing, incomplete, or uncertain, set `success` to `false`.
+- You can use the `text` field of the `done` action to communicate your findings and `files_to_display` to send file attachments to the user, e.g. `["results.md"]`.
+- Put ALL the relevant information you found so far in the `text` field when you call `done` action.
+- Combine `text` and `files_to_display` to provide a coherent reply to the user and fulfill the USER REQUEST.
+- You are ONLY ALLOWED to call `done` as a single action. Don't call it together with other actions.
+- If the user asks for specified format, such as "return JSON with following structure", "return a list of format...", MAKE sure to use the right format in your answer.
+- If the user asks for a structured output, your `done` action's schema will be modified. Take this schema into account when solving the task!
+</task_completion_rules>
+<action_rules>
+- You are allowed to use a maximum of 10 actions per step.
+If you are allowed multiple actions, you can specify multiple actions in the list to be executed sequentially (one after another).
+- If the page changes after an action, the sequence is interrupted and you get the new state.
+</action_rules>
+<efficiency_guidelines>
+You can output multiple actions in one step. Try to be efficient where it makes sense. Do not predict actions which do not make sense for the current page.
+**Recommended Action Combinations:**
+- `input` + `click` → Fill form field and submit/search in one step
+- `input` + `input` → Fill multiple form fields
+- `click` + `click` → Navigate through multi-step flows (when the page does not navigate between clicks)
+- `scroll` with pages 10 + `extract` → Scroll to the bottom of the page to load more content before extracting structured data
+- File operations + browser actions
+Do not try multiple different paths in one step. Always have one clear goal per step.
+Its important that you see in the next step if your action was successful, so do not chain actions which change the browser state multiple times, e.g.
+- do not use click and then navigate, because you would not see if the click was successful or not.
+- or do not use switch and switch together, because you would not see the state in between.
+- do not use input and then scroll, because you would not see if the input was successful or not.
+</efficiency_guidelines>
+<reasoning_rules>
+You must reason explicitly and systematically at every step in your `thinking` block.
+Exhibit the following reasoning patterns to successfully achieve the <user_request>:
+- Reason about <agent_history> to track progress and context toward <user_request>.
+- Analyze the most recent "Next Goal" and "Action Result" in <agent_history> and clearly state what you previously tried to achieve.
+- Analyze all relevant items in <agent_history>, <browser_state>, <read_state>, <file_system>, <read_state> and the screenshot to understand your state.
+- Explicitly judge success/failure/uncertainty of the last action. Never assume an action succeeded just because it appears to be executed in your last step in <agent_history>. For example, you might have "Action 1/1: Input '2025-05-05' into element 3." in your history even though inputting text failed. Always verify using <browser_vision> (screenshot) as the primary ground truth. If a screenshot is unavailable, fall back to <browser_state>. If the expected change is missing, mark the last action as failed (or uncertain) and plan a recovery.
+- If todo.md is empty and the task is multi-step, generate a stepwise plan in todo.md using file tools.
+- Analyze `todo.md` to guide and track your progress.
+- If any todo.md items are finished, mark them as complete in the file.
+- Analyze whether you are stuck, e.g. when you repeat the same actions multiple times without any progress. Then consider alternative approaches e.g. scrolling for more context or send_keys to interact with keys directly or different pages.
+- Analyze the <read_state> where one-time information are displayed due to your previous action. Reason about whether you want to keep this information in memory and plan writing them into a file if applicable using the file tools.
+- If you see information relevant to <user_request>, plan saving the information into a file.
+- Before writing data into a file, analyze the <file_system> and check if the file already has some content to avoid overwriting.
+- Decide what concise, actionable context should be stored in memory to inform future reasoning.
+- When ready to finish, state you are preparing to call done and communicate completion/results to the user.
+- Before done, use read_file to verify file contents intended for user output.
+- Always reason about the <user_request>. Make sure to carefully analyze the specific steps and information required. E.g. specific filters, specific form fields, specific information to search. Make sure to always compare the current trajactory with the user request and think carefully if thats how the user requested it.
+</reasoning_rules>
+<examples>
+Here are examples of good output patterns. Use them as reference but never copy them directly.
+<todo_examples>
+  "write_file": {
+    "file_name": "todo.md",
+    "content": "# ArXiv CS.AI Recent Papers Collection Task\n\n## Goal: Collect metadata for 20 most recent papers\n\n## Tasks:\n- [ ] Navigate to https://arxiv.org/list/cs.AI/recent\n- [ ] Initialize papers.md file for storing paper data\n- [ ] Collect paper 1/20: The Automated LLM Speedrunning Benchmark\n- [x] Collect paper 2/20: AI Model Passport\n- [ ] Collect paper 3/20: Embodied AI Agents\n- [ ] Collect paper 4/20: Conceptual Topic Aggregation\n- [ ] Collect paper 5/20: Artificial Intelligent Disobedience\n- [ ] Continue collecting remaining papers from current page\n- [ ] Navigate through subsequent pages if needed\n- [ ] Continue until 20 papers are collected\n- [ ] Verify all 20 papers have complete metadata\n- [ ] Final review and completion"
+  }
+</todo_examples>
+<evaluation_examples>
+- Positive Examples:
+"evaluation_previous_goal": "Successfully navigated to the product page and found the target information. Verdict: Success"
+"evaluation_previous_goal": "Clicked the login button and user authentication form appeared. Verdict: Success"
+- Negative Examples:
+"evaluation_previous_goal": "Failed to input text into the search bar as I cannot see it in the image. Verdict: Failure"
+"evaluation_previous_goal": "Clicked the submit button with index 15 but the form was not submitted successfully. Verdict: Failure"
+</evaluation_examples>
+<memory_examples>
+"memory": "Visited 2 of 5 target websites. Collected pricing data from Amazon ($39.99) and eBay ($42.00). Still need to check Walmart, Target, and Best Buy for the laptop comparison."
+"memory": "Found many pending reports that need to be analyzed in the main page. Successfully processed the first 2 reports on quarterly sales data and moving on to inventory analysis and customer feedback reports."
+</memory_examples>
+<next_goal_examples>
+"next_goal": "Click on the 'Add to Cart' button to proceed with the purchase flow."
+"next_goal": "Extract details from the first item on the page."
+</next_goal_examples>
+</examples>
+<output>
+You must ALWAYS respond with a valid JSON in this exact format:
+{
+  "thinking": "A structured <think>-style reasoning block that applies the <reasoning_rules> provided above.",
+  "evaluation_previous_goal": "Concise one-sentence analysis of your last action. Clearly state success, failure, or uncertain.",
+  "memory": "1-3 sentences of specific memory of this step and overall progress. You should put here everything that will help you track progress in future steps. Like counting pages visited, items found, etc.",
+  "next_goal": "State the next immediate goal and action to achieve it, in one clear sentence."
+  "action":[{"navigate": { "url": "url_value"}}, // ... more actions in sequence]
+}
+Action list should NEVER be empty.
+</output>
+
+
+ user 
+<agent_history>
+Agent initialized
+<step>
+Result
+Found initial url and automatically loaded it. Navigated to https://claude.ai/login
+<step>
+Navigated to https://claude.ai/login but the page appears empty with no interactive elements visible. Verdict: Failure/Uncertain.
+Attempted initial navigation to claude.ai/login; page did not load any interactive elements yet. No progress on user steps beyond navigation.
+Wait for a few seconds to allow the login page and its interactive elements (like 'Sign In') to load properly.
+Result
+Waited for 5 seconds
+<step>
+Waited for 5 seconds; interactive elements are now visible. Verdict: Success.
+Login page loaded; interactive elements including 'Continue with email' are now visible. Ready to proceed with user-specified login steps.
+Click the 'Continue with email' button (index 619) to start the sign-in process as per step 2 of user instructions.
+Result
+Clicked element
+<step>
+Successfully clicked 'Continue with email'; email input field is now visible. Verdict: Success.
+Reached the login page, clicked 'Continue with email', and now see the email input field. Ready to enter user-provided email address.
+Input the user's email address into the email field (index 617) and check for a 'Next' or submit action to proceed.
+Result
+Input 'rami.nguyen12@gmail.com' into element 617.
+<step>
+Successfully inputted the user's email address into the field. Verdict: Success.
+Email field has been filled with rami.nguyen12@gmail.com. Ready to proceed with next login step by clicking 'Continue with email'.
+Click the 'Continue with email' button (index 619) to proceed, then wait 10 seconds for user login with security codes as per instructions.
+Result
+Clicked element
+Waited for 10 seconds
+<step>
+Successfully reached the verification code input page after waiting for user login with security codes. Verdict: Success.
+Navigated through login steps up to email verification; currently at the stage where a verification code must be entered by the user. Awaiting user action before proceeding.
+Wait for user to enter their verification code and complete authentication before proceeding with pasting the first prompt.
+Result
+Waited for 10 seconds
+<step>
+Waited for user verification; login is complete and Claude chat interface is loaded. Verdict: Success.
+Login steps are complete and I am now on the Claude chat page, ready to enter and submit prompts as per user instructions. No prompts have been submitted yet.
+Paste the first essay prompt into the chat input box (index 2358) and press 'Enter' to submit it.
+Result
+Input 'Let's write a 1000 word fully written college essay, plus at least 5 citations from peer-reviewed articles, that answers this question. To what extent do the attached economic data support the hypothesis “social service spending is inversely related to economic growth”? Formulate a verbal argument analyzing whether the data do or do not support the hypothesis. Attached data: Social Welfare Spending as % of GDP (OECD) GDP Annual Growth (World Bank) 2019 2016 2010 2005 2000 France 31.2 31.5 30.7 28.7 27.5 2.02 0.86 2.00 1.89 4.14 Belgium 28.9 29.0 28.3 25.3 23.5 2.44 1.19 2.71 2.32 3.72 Finland 28.7 30.8 27.4 23.9 22.6 1.35 2.57 3.17 2.78 5.75 Italy 28.2 28.9 27.6 ...' into element 2358.
+Sent keys: Enter
+Waited for 30 seconds
+<step>
+Successfully submitted the first prompt and waited for Claude's response; essay generation is underway. Verdict: Success.
+First essay prompt has been submitted and initial waiting period completed. Ready to extract generated responses as per timing instructions.
+Wait 10 seconds, then extract all visible responses from the Claude chat interface.
+Result
+Waited for 10 seconds
+Query: Extract all Claude's generated responses in this chat, including any essay text, citations, or research summaries provided so far. Include both user prompts and Claude's replies in order.
+Content in extracted_content_0.md and once in <read_state>.
+<step>
+Extraction succeeded in capturing initial prompts and search results but failed to obtain the full essay or detailed responses due to truncation. Verdict: Partial Success/Incomplete.
+Extracted initial chat content: user prompt, Claude's search actions, and article lists. The main essay and detailed responses are missing due to extraction truncation. Need to continue extracting from where it stopped.
+Continue extracting Claude's generated responses starting from where truncation occurred using start_from_char to capture the full essay and all relevant content.
+Result
+Query: Extract all Claude's generated responses in this chat, including any essay text, citations, or research summaries provided so far. Include both user prompts and Claude's replies in order.
+Content in extracted_content_1.md and once in <read_state>.
+<step>
+Extraction succeeded in capturing most of the essay and responses but was truncated at the end. Verdict: Partial Success.
+Extracted two chunks of chat content; most of the essay and citations are present, but the essay is cut off at the end. Need to extract remaining content before proceeding to next user prompt steps.
+Continue extracting Claude's generated responses from where truncation occurred using start_from_char to capture any remaining essay or chat content.
+Result
+Query: Extract all Claude's generated responses in this chat, including any essay text, citations, or research summaries provided so far. Include both user prompts and Claude's replies in order.
+Content in extracted_content_2.md and once in <read_state>.
+<step>
+Successfully extracted all Claude's generated responses, including the full essay and references. Verdict: Success.
+Full essay and citations have been extracted and saved. Steps 1-10 are complete; ready to begin typing the grading rubric prompt as required by steps 11-14.
+Input the first part of the grading rubric prompt into the chat input box (index 3390), without pressing Enter.
+Result
+Input 'This is what my professor gave me as a rubric. Can you please grade this essay using this rubric? Critical thinking is a habit of mind characterized by the comprehensive exploration of issues, ideas, artifacts, and events before accepting or formulating an opinion or conclusion. Evaluators are encouraged to assign a zero to any work sample or collection of work that does not meet benchmark (cell one) level performance. Explanation of issues: Capstone (4): Issue/problem to be considered critically is stated clearly and described comprehensively, delivering all relevant information necessary for full understanding. Milestone (3): Issue/problem to be considered critically is stated, described, and clarified so that understanding is not seriously impeded by omissions. Milestone (2): Issue/problem to be considered critically is stated but description leaves some terms.' into element 3390.
+<step>
+Successfully inputted the first part of the grading rubric prompt into the chat input box without submitting. Verdict: Success.
+First part of grading rubric prompt has been entered but not submitted. Ready to append second part as per step 12 before moving on to subsequent steps.
+Input the second part of the grading rubric prompt (step 12) into the chat input box, appending it to what is already there, without pressing Enter.
+Result
+Input ' undefined, ambiguities unexplored, boundaries undetermined, and/or backgrounds unknown. Benchmark (1): Issue/problem to be considered critically is stated without clarification or description. Evidence (Selecting and using information to investigate a point of view or conclusion): Capstone (4): Information is taken from source(s) with enough interpretation/evaluation to develop a comprehensive analysis or synthesis. Viewpoints of experts are questioned thoroughly. Milestone (3): Information is taken from source(s) with enough interpretation/evaluation to develop a coherent analysis or synthesis. Viewpoints of experts are subject to questioning. Milestone (2): Information is taken from source(s) with some interpretation/evaluation, but not enough to develop a coherent analysis or synthesis. Viewpoints of experts are taken as mostly fact, with little questioning. Benchmark (1): Information is taken from source(s) without any interpretation/evaluation. Viewpoints of experts are taken as.' into element 3390.
+<step>
+Successfully appended the second part of the grading rubric prompt to the chat input box without submitting. Verdict: Success.
+First two parts of the grading rubric prompt have been entered into the chat input box without submission. Ready to append part three as per step-by-step instructions.
+Input the third part of the grading rubric prompt into the chat input box (index 3390), appending it to what is already there, without pressing Enter.
+Result
+Input ' fact, without question. Influence of context and assumptions: Capstone (4): Thoroughly (systematically and methodically) analyzes own and others' assumptions and carefully evaluates the relevance of contexts when presenting a position. Milestone (3): Identifies own and others' assumptions and several relevant contexts when presenting a position. Milestone (2): Questions some assumptions. Identifies several relevant contexts when presenting a position. May be more aware of others' assumptions than one's own (or vice versa). Benchmark (1): Shows an emerging awareness of present assumptions (sometimes labels assertions as assumptions). Begins to identify some contexts when presenting a position. Student's position (perspective, thesis/hypothesis): Capstone (4): Specific position (perspective, thesis/hypothesis) is imaginative, taking into account the complexities of an issue. Limits of position are acknowledged. Others' points of view are synthesized within position. Milestone.' into element 3390.
+<step>
+Successfully appended the third part of the grading rubric prompt into the chat input box without submitting. Verdict: Success.
+Three parts of the grading rubric prompt have been entered into the chat input box without submitting. Ready to append part four as per instructions before submitting.
+Input the fourth part of the grading rubric prompt into the chat input box (index 3390), appending it to what is already there, without pressing Enter.
+Result
+Input ' (3): Specific position takes into account the complexities of an issue. Others' points of view are acknowledged within position. Milestone (2): Specific position acknowledges different sides of an issue. Benchmark (1): Specific position is stated, but is simplistic and obvious. Conclusions and related outcomes (implications and consequences): Capstone (4): Conclusions and related outcomes are logical and reflect student’s informed evaluation and ability to place evidence and perspectives discussed in priority order. Milestone (3): Conclusion is logically tied to a range of information, including opposing viewpoints; related outcomes are identified clearly. Milestone (2): Conclusion is logically tied to information (because information is chosen to fit the desired conclusion); some related outcomes are identified clearly. Benchmark (1): Conclusion is inconsistently tied to some of the information discussed; related outcomes are oversimplified..' into element 3390.
+</agent_history>
+
+<agent_state>
+<user_request>
+ Follow step by step
+
+            1) Go to https://claude.ai/login 
+
+            2) Click Sign In.
+
+            3) Type Email: rami.nguyen12@gmail.com.
+
+            4) Click Next.  
+
+            5) Wait for 10 seconds for user log in with their security codes. 
+
+            6) Paste the first prompt Let's write a 1000 word fully written college essay, plus at least 5 citations from peer-reviewed articles, that answers this question. To what extent do the attached economic data support the hypothesis “social service spending is inversely related to economic growth”? Formulate a verbal argument analyzing whether the data do or do not support the hypothesis. Attached data: Social Welfare Spending as % of GDP (OECD) GDP Annual Growth (World Bank) 2019 2016 2010 2005 2000 France 31.2 31.5 30.7 28.7 27.5 2.02 0.86 2.00 1.89 4.14 Belgium 28.9 29.0 28.3 25.3 23.5 2.44 1.19 2.71 2.32 3.72 Finland 28.7 30.8 27.4 23.9 22.6 1.35 2.57 3.17 2.78 5.75 Italy 28.2 28.9 27.6 24.1 22.6 0.43 1.24 1.53 0.76 3.88 Denmark 28.0 28.7 28.9 25.2 23.8 1.71 3.07 1.58 2.36 3.72 Austria 26.6 27.8 27.6 25.9 25.5 1.75 2.12 1.81 2.32 3.18 Sweden 26.1 27.1 26.3 27.4 26.8 2.55 2.35 5.75 2.79 4.63 Germany 25.1 25.3 25.9 26.3 25.4 0.99 2.29 4.15 0.89 2.88 Norway 25.0 25.1 21.9 20.7 20.4 1.12 1.16 0.79 2.69 3.32 Spain 23.7 24.6 25.8 20.4 19.5 1.96 2.92 0.09 3.55 3.91. Key "Enter" to submit the prompt.  
+
+            7) Wait for 30 seconds for the responses to be generated.  
+            
+            8) Wait for 10 seconds for the responses to be generated.  
+
+            9) Extract all responses in 30 seconds. 
+
+            10) Extract all responses in 10 seconds.  
+
+            11) Type this prompt, do not enter yet This is what my professor gave me as a rubric. Can you please grade this essay using this rubric? Critical thinking is a habit of mind characterized by the comprehensive exploration of issues, ideas, artifacts, and events before accepting or formulating an opinion or conclusion. Evaluators are encouraged to assign a zero to any work sample or collection of work that does not meet benchmark (cell one) level performance. Explanation of issues: Capstone (4): Issue/problem to be considered critically is stated clearly and described comprehensively, delivering all relevant information necessary for full understanding. Milestone (3): Issue/problem to be considered critically is stated, described, and clarified so that understanding is not seriously impeded by omissions. Milestone (2): Issue/problem to be considered critically is stated but description leaves some terms.  
+
+            12) Type this prompt, do not enter yet undefined, ambiguities unexplored, boundaries undetermined, and/or backgrounds unknown. Benchmark (1): Issue/problem to be considered critically is stated without clarification or description. Evidence (Selecting and using information to investigate a point of view or conclusion): Capstone (4): Information is taken from source(s) with enough interpretation/evaluation to develop a comprehensive analysis or synthesis. Viewpoints of experts are questioned thoroughly. Milestone (3): Information is taken from source(s) with enough interpretation/evaluation to develop a coherent analysis or synthesis. Viewpoints of experts are subject to questioning. Milestone (2): Information is taken from source(s) with some interpretation/evaluation, but not enough to develop a coherent analysis or synthesis. Viewpoints of experts are taken as mostly fact, with little questioning. Benchmark (1): Information is taken from source(s) without any interpretation/evaluation. Viewpoints of experts are taken as. 
+
+            13) Type this prompt, do not enter yet fact, without question. Influence of context and assumptions: Capstone (4): Thoroughly (systematically and methodically) analyzes own and others' assumptions and carefully evaluates the relevance of contexts when presenting a position. Milestone (3): Identifies own and others' assumptions and several relevant contexts when presenting a position. Milestone (2): Questions some assumptions. Identifies several relevant contexts when presenting a position. May be more aware of others' assumptions than one's own (or vice versa). Benchmark (1): Shows an emerging awareness of present assumptions (sometimes labels assertions as assumptions). Begins to identify some contexts when presenting a position. Student's position (perspective, thesis/hypothesis): Capstone (4): Specific position (perspective, thesis/hypothesis) is imaginative, taking into account the complexities of an issue. Limits of position are acknowledged. Others' points of view are synthesized within position. Milestone.  
+
+            14) Type this prompt, do not enter yet (3): Specific position takes into account the complexities of an issue. Others' points of view are acknowledged within position. Milestone (2): Specific position acknowledges different sides of an issue. Benchmark (1): Specific position is stated, but is simplistic and obvious. Conclusions and related outcomes (implications and consequences): Capstone (4): Conclusions and related outcomes are logical and reflect student’s informed evaluation and ability to place evidence and perspectives discussed in priority order. Milestone (3): Conclusion is logically tied to a range of information, including opposing viewpoints; related outcomes are identified clearly. Milestone (2): Conclusion is logically tied to information (because information is chosen to fit the desired conclusion); some related outcomes are identified clearly. Benchmark (1): Conclusion is inconsistently tied to some of the information discussed; related outcomes are oversimplified..  
+
+            15) Key "Enter" to submit the prompt.  
+
+            16) Wait for 30 seconds for the responses to be generated.  
+
+            17) Wait for 10 seconds for the responses to be generated.  
+
+            19) Extract all responses in 30 seconds. 
+
+            20) Extract all responses in 10 seconds. 
+
+            21) Paste this prompt '\n        \n        Yes, I would like to deliver a fully revised final version of the 1000-word essay to hit a full 20/20. Also, please explain what changes were made in the essay to reach a perfect 20/20 based on the AAC&U rubric.\n\n        '. Key "Enter" to submit the prompt.  
+
+            22) Wait for 30 seconds for the responses to be generated.  
+            
+            23) Wait for 10 seconds for the responses to be generated. 
+
+            24) Extract all responses in 30 seconds. 
+
+            25) Extract all responses in 10 seconds.
+
+            26) End the session. 
+
+
+            
+</user_request>
+<file_system>
+<file>
+extracted_content_0.md - 44 lines
+<content>
+<url>
+https://claude.ai/chat/c6190995-b091-4ae8-92bc-7706e147d127
+</url>
+<query>
+... 37 more lines ...
+---
+</result>
+</content>
+</file>
+<file>
+extracted_content_1.md - 93 lines
+<content>
+<url>
+https://claude.ai/chat/c6190995-b091-4ae8-92bc-7706e147d127
+</url>
+<query>
+... 87 more lines ...
+</result>
+</content>
+</file>
+<file>
+extracted_content_2.md - 128 lines
+<content>
+<url>
+https://claude.ai/chat/c6190995-b091-4ae8-92bc-7706e147d127
+</url>
+<query>
+... 117 more lines ...
+World Bank 
+(2023).
+GDP Annual Growth.
+World Development Indicators.
+Retrieved from https://data.worldbank.org/indicator/NY.GDP.MKTP.KD.ZG
+</result>
+</content>
+</file>
+</file_system>
+<todo_contents>
+[empty todo.md, fill it when applicable]
+</todo_contents>
+<step_info>Step14 maximum:100
+Today:2025-11-23</step_info>
+<available_file_paths>/Users/ramizoey/Documents/PhD/ai-assessment/automation/essay_generation/agent_output
+Use with absolute paths</available_file_paths>
+</agent_state>
+<browser_state>
+<page_stats>64 links, 174 interactive, 2 iframes, 6 scroll containers, 1 shadow(open), 0 shadow(closed), 24 images, 914 total elements</page_stats>
+Current tab: F0B0
+Available tabs:
+Tab F0B0: https://claude.ai/chat/c6190995-b091-4ae8-92bc-7706e147d127 - Social spending and economic g
+
+<page_info>0.0 pages above, 0.0 pages below, 1.0 total pages</page_info>
+
+Interactive elements:
+[Start of page]
+[2218]<div />
+	[2160]<button aria-label=Sidebar data-state=closed expanded=false />
+[2167]<a aria-label=New chat role=link />
+	[2166]<div />
+[2177]<a aria-label=Chats />
+	[2176]<div />
+		[2175]<span />
+[2187]<a aria-label=Projects />
+	[2186]<div />
+		[2185]<span />
+[2198]<a aria-label=Artifacts />
+	[2197]<div />
+		[2196]<span />
+|SCROLL[2216]<div /> (horizontal 0%)
+	Starred
+	[2633]<ul />
+		[2629]<a />
+			[2628]<div />
+				[2627]<span />
+					Generating Machine Learning Image Datasets
+	Recents
+	[3216]<a />
+		[3215]<div />
+			[3214]<span />
+				Social spending and economic growth relationship analysis
+	[3327]<div />
+		[3248]<button aria-label=More options for Social spending and economic growth relationship analysis id=radix-_r_6l_ aria-expanded=false data-state=closed />
+	[2376]<a />
+		[2375]<div />
+			[2374]<span />
+				Social spending and economic growth analysis
+	[2380]<a />
+		[2379]<div />
+			[2378]<span />
+				Social spending and economic growth analysis
+	[2384]<a />
+		[2383]<div />
+			[2382]<span />
+				Social spending and economic growth analysis
+	[2388]<a />
+		[2387]<div />
+			[2386]<span />
+				Social spending and economic growth correlation analysis
+	[2392]<a />
+		[2391]<div />
+			[2390]<span />
+				Social spending and economic growth correlation analysis
+	[2396]<a />
+		[2395]<div />
+			[2394]<span />
+				Social spending and economic growth correlation analysis
+	[2400]<a />
+		[2399]<div />
+			[2398]<span />
+				Social spending and economic growth correlation analysis
+	[2404]<a />
+		[2403]<div />
+			[2402]<span />
+				Social spending and economic growth correlation analysis
+	[2408]<a />
+		[2407]<div />
+			[2406]<span />
+				Social spending and economic growth correlation analysis
+	[2412]<a />
+		[2411]<div />
+			[2410]<span />
+				Conditioning behaviors in professor and cats
+	[2416]<a />
+		[2415]<div />
+			[2414]<span />
+				Essay grading using critical thinking rubric
+	[2420]<a />
+		[2419]<div />
+			[2418]<span />
+				Boston real estate investment market analysis 2024
+	[2424]<a />
+		[2423]<div />
+			[2422]<span />
+				Boston real estate investment forecast
+	[2428]<a />
+		[2427]<div />
+			[2426]<span />
+				Boston real estate investment forecast
+	[2432]<a />
+		Social spending and economic growth analysis
+	[2436]<a />
+		[2435]<div />
+			[2434]<span />
+				Cat behavior and learning theory
+	[2440]<a />
+		[2439]<div />
+			[2438]<span />
+				Boston real estate investment forecast
+	[2444]<a />
+		[2443]<div />
+			[2442]<span />
+				Social spending and economic growth analysis
+	[2448]<a />
+		[2447]<div />
+			[2446]<span />
+				Cat behavior and learning theory
+	[2452]<a />
+		[2451]<div />
+			[2450]<span />
+				Cat behavior and learning theory
+	[2456]<a />
+		[2455]<div />
+			[2454]<span />
+				Boston student study and shopping insights
+	[2460]<a />
+		[2459]<div />
+			[2458]<span />
+				Boston student study and shopping insights
+	[2464]<a />
+		[2463]<div />
+			[2462]<span />
+				Singapore student consumer insights
+	[2468]<a />
+		[2467]<div />
+			[2466]<span />
+				Comparing GenAI models for market research
+	[2472]<a />
+		[2471]<div />
+			[2470]<span />
+				Comparing GenAI models for market research
+	[2476]<a />
+		[2475]<div />
+			[2474]<span />
+				Vietnamese student consumer insights
+	[2480]<a />
+		[2479]<div />
+			[2478]<span />
+				Essay extraction with regex
+	[2484]<a />
+		[2483]<div />
+			[2482]<span />
+				Perceptron dataset generation
+	[2488]<a />
+		[2487]<div />
+			[2486]<span />
+				Cat behavior and learning theory
+	[2493]<a />
+		[2492]<div />
+			[2491]<span />
+				[2490]<span />
+					Untitled
+	[2529]<a />
+		[2528]<div />
+			[2527]<span />
+				All chats
+	[2205]<div />
+[2214]<button id=radix-_r_20_ aria-expanded=false data-state=closed />
+	[2212]<div />
+		[2206]<div />
+			RV
+	[2210]<div />
+		[2207]<span />
+			Rami Vy
+		[2208]<span />
+			Free plan
+	[2211]<svg />
+		[2209]<path />
+[3255]<button />
+	Social spending and economic growth relationship analysis
+[3257]<button id=radix-_r_6n_ data-state=closed expanded=false />
+|SCROLL|<div /> (0.0 pages above, 1.9 pages below)
+	[3447]<div data-state=closed />
+		[3444]<div />
+			RV
+	Let's write a 1000 word fully written college essay, plus at least 5 citations from peer-reviewed articles, that answers this question. To what extent do the attached economic data support the hypothesis “social service spending is inversely related to economic growth”? Formulate a verbal argument analyzing whether the data do or do not support the hypothesis. Attached data: Social Welfare Spending as % of GDP (OECD) GDP Annual Growth (World Bank) 2019 2016 2010 2005 2000 France 31.2 31.5 30.7 28.7 27.5 2.02 0.86 2.00 1.89 4.14 Belgium 28.9 29.0 28.3 25.3 23.5 2.44 1.19 2.71 2.32 3.72 Finland 28.7 30.8 27.4 23.9 22.6 1.35 2.57 3.17 2.78 5.75 Italy 28.2 28.9 27.6 ...
+	[8225]<button />
+		Show more
+	[7647]<div data-state=closed />
+		[7642]<button aria-label=Retry />
+	[7648]<div data-state=closed />
+		[7646]<button aria-label=Edit />
+	I'll help you write a comprehensive college essay analyzing this economic data. Let me first search for peer-reviewed research on the relationship between social welfare spending and economic growth to support the analysis.
+	social welfare spending economic growth peer reviewed
+	10 results
+	|SCROLL|<div /> (0.0 pages above, 0.4 pages below)
+		Social welfare spending and its effects on growth:
+		wisc.edu
+		Public social spending as share of GDP - Our World in Data
+		ourworldindata.org
+		A Study on the Effects of Social Spending on Economic Activity by Mark Philipp Aban, Florinda Garcia-Vigonte :: SSRN
+		ssrn.com
+		Social Security Programs in the United States - Appendix I: Public Social Welfare Expenditures
+		ssa.gov
+		1 The Effects of Social Spending on Economic
+		unirioja.es
+		Spending on Social Welfare Programs in Rich and Poor States. Final Report. | ASPE
+		hhs.gov
+		A New Social Contract for Recovery and Resilience JOBS CLIMATE-FRIENDLY JOBS
+		ituc-csi.org
+		Social spending as a development tool: evidence from developing countries | European Journal of Government and Economics
+		udc.es
+		Social welfare and economic equality: healthcare expenditure as a moderator - PMC
+		nih.gov
+		NBER WORKING PAPER SERIES SAFETY NETS AND SOCIAL WELFARE EXPENDITURES IN
+		nber.org
+	Let me search for more specific peer-reviewed articles on this relationship.
+	"social spending" "economic growth" OECD correlation
+	5 results
+	Public social spending as share of GDP - Our World in Data
+	ourworldindata.org
+	Social expenditure composition, inequality and growth in the OECD: Labour market policies are most effective - ScienceDirect
+	sciencedirect.com
+	Does Social Spending Improve Welfare in Low‐income and Middle‐income Countries? - Haile - 2018 - Journal of International Development - Wiley Online Library
+	wiley.com
+	Social expenditure composition, welfare models and standards of living across the OECD
+	springer.com
+	Setting the scene: Demographic change, economic growth and intergenerational inequalities: OECD Employment Outlook 2025 | OECD
+	oecd.org
+	Now let me fetch some of these key articles for detailed citations:
+	1 step
+	Failed to fetch
+	[7974]<span />
+		https://link.springer.com/article/10.1007/s42495-025-00158-2
+	Lindert "Growing Public" welfare state economic growth
+	10 results
+	|SCROLL[8080]<div /> (0.0 pages above, 0.4 pages below)
+		[8079]<div />
+			Growing Public
+			cambridge.org
+			Growing Public: Social Spending and Economic Growth since the Eighteenth Century: 9780521529167: Economics Books @ Amazon.com
+			amazon.com
+			[8019]<a />
+				Growing Public: Social Spending and Economic Growth Since the Eighteenth Century, Volume I: The Story – EH.net
+				eh.net
+			[8026]<a />
+				Growing Public: Social Spending and Economic Growth Since the Eighteenth Century | Request PDF
+				researchgate.net
+			[8033]<a />
+				Growing Public: Social Spending and Economic Growth since the Eighteenth Century by Peter H. Lindert | Goodreads
+				goodreads.com
+			[8040]<a />
+				(PDF) Growing Public
+				researchgate.net
+			[8047]<a />
+				Growing Public Volume 1 | Cambridge University Press & Assessment
+				cambridge.org
+			[8054]<a />
+				Growing Public: Social Spending and Economic Growth ...
+				amazon.de
+			[8061]<a />
+				Wealth and Welfare States: What is the Story
+				wisc.edu
+			[8068]<a />
+				[PDF] Growing Public. Social Spending and Economic Growth Since the Eighteenth Century. Volume 2: Further Evidence, by Jari Eloranta | Semantic Scholar
+				semanticscholar.org
+	Now I have excellent sources. Let me create a comprehensive 1000-word essay with proper citations.
+	[8099]<div role=button aria-label=Preview contents />
+		Economic Analysis: Social Welfare Spending and Economic Growth
+		Document
+		[8095]<div />
+			# To What Extent Do the Economic Data Support the Hypothesis That Social Service Spending is Inversely Related to Economic Growth?
+
+The relationship between social welfare expenditure and economic growth represents one of the most contested debates i
+	I've created a comprehensive 1000-word college essay that analyzes the economic data you provided and addresses the hypothesis about social welfare spending and economic growth. The essay includes:
+	Key Features:
+	Data Analysis
+	: Examines the specific patterns in your data for France, Belgium, Finland, and Italy, showing that the evidence does not support an inverse relationship
+	Theoretical Framework
+	: Discusses contemporary economic research that challenges traditional assumptions about welfare states
+	Six Peer-Reviewed Citations
+	Furceri & Zdzienicka (2012) - OECD panel study showing positive multiplier effects
+	Haile & Niño-Zarazúa (2018) - Study on developing countries
+	Kim & Ahn (2020) - Research on human capital investments
+	Lindert (2004) - Landmark historical analysis of welfare states
+	OECD (2023) - Data source
+	World Bank (2023) - Data source
+	Critical Analysis
+	: Addresses mechanisms explaining the findings, data limitations, and methodological considerations
+	Clear Argument
+	: Develops a well-structured verbal argument showing that the data do NOT support the hypothesis that social spending is inversely related to growth
+	The essay is formatted in clean markdown and ready for academic submission. Would you like me to adjust any section or add additional analysis of specific countries from your dataset?
+	[3291]<button aria-label=Scroll to bottom />
+		[3277]<div />
+			[7898]<svg />
+				[7896]<path />
+	|SCROLL|<div /> (3.0 pages above, 0.0 pages below)
+		[3390]<div role=textbox aria-label=Write your prompt to Claude required=false />
+			[3431]<p />
+				This is what my professor gave me as a rubric. Can you please grade this essay using this rubric? Critical thinking is a habit of mind characterized by the comprehensive exploration of issues, ideas, artifacts, and events before accepting or formulating an opinion or conclusion. Evaluators are encouraged to assign a zero to any work sample or collection of work that does not meet benchmark (cell one) level performance. Explanation of issues: Capstone (4): Issue/problem to be considered critically is stated clearly and described comprehensively, delivering all relevant information necessary for full understanding. Milestone (3): Issue/problem to be considered critically is stated, described, and clarified so that understanding is not seriously impeded by omissions. Milestone (2): Issue/problem to be considered critically is stated but description leaves some terms. undefined, ambiguities unexplored, boundaries undetermined, and/or backgrounds unknown. Benchmark (1): Issue/problem to be considered critically is stated without clarification or description. Evidence (Selecting and using information to investigate a point of view or conclusion): Capstone (4): Information is taken from source(s) with enough interpretation/evaluation to develop a comprehensive analysis or synthesis. Viewpoints of experts are questioned thoroughly. Milestone (3): Information is taken from source(s) with enough interpretation/evaluation to develop a coherent analysis or synthesis. Viewpoints of experts are subject to questioning. Milestone (2): Information is taken from source(s) with some interpretation/evaluation, but not enough to develop a coherent analysis or synthesis. Viewpoints of experts are taken as mostly fact, with little questioning. Benchmark (1): Information is taken from source(s) without any interpretation/evaluation. Viewpoints of experts are taken as. fact, without question. Influence of context and assumptions: Capstone (4): Thoroughly (systematically and methodically) analyzes own and others' assumptions and carefully evaluates the relevance of contexts when presenting a position. Milestone (3): Identifies own and others' assumptions and several relevant contexts when presenting a position. Milestone (2): Questions some assumptions. Identifies several relevant contexts when presenting a position. May be more aware of others' assumptions than one's own (or vice versa). Benchmark (1): Shows an emerging awareness of present assumptions (sometimes labels assertions as assumptions). Begins to identify some contexts when presenting a position. Student's position (perspective, thesis/hypothesis): Capstone (4): Specific position (perspective, thesis/hypothesis) is imaginative, taking into account the complexities of an issue. Limits of position are acknowledged. Others' points of view are synthesized within position. Milestone. (3): Specific position takes into account the complexities of an issue. Others' points of view are acknowledged within position. Milestone (2): Specific position acknowledges different sides of an issue. Benchmark (1): Specific position is stated, but is simplistic and obvious. Conclusions and related outcomes (implications and consequences): Capstone (4): Conclusions and related outcomes are logical and reflect student’s informed evaluation and ability to place evidence and perspectives discussed in priority order. Milestone (3): Conclusion is logically tied to a range of information, including opposing viewpoints; related outcomes are identified clearly. Milestone (2): Conclusion is logically tied to information (because information is chosen to fit the desired conclusion); some related outcomes are identified clearly. Benchmark (1): Conclusion is inconsistently tied to some of the information discussed; related outcomes are oversimplified..
+	[3362]<div />
+		[3346]<div />
+			[3345]<div data-state=closed />
+				[3344]<button aria-label=Open attachments menu id=input-plus-menu-trigger pressed=false expanded=false />
+	[3357]<div />
+		[3354]<div />
+			[3353]<div data-state=closed />
+				[3352]<button aria-label=Open tools menu id=input-tools-menu-trigger pressed=false expanded=false />
+	[3364]<div data-state=closed />
+		[3361]<button aria-label=Extended thinking pressed=false />
+	[3372]<button />
+		Sonnet 4.5
+	[7712]<button aria-label=Send message />
+[5960]<button />
+	Copy
+[5961]<button id=radix-_r_c1_ data-state=closed expanded=false />
+[5965]<button data-state=closed />
+	Publish
+[5926]<button />
+|SCROLL|<div /> (5.9 pages above, 0.0 pages below)
+	[7754]<div id=markdown-artifact />
+		Cross-country comparisons face challenges from institutional heterogeneity. Countries differ in how they define and categorize social expenditure, in the efficiency of program administration, in complementary policies affecting labor markets and business regulation, and in demographic structures influencing both spending needs and growth potential. These contextual factors mean that identical spending levels may produce different outcomes across nations.
+		Furthermore, causality remains ambiguous. Rather than high welfare spending causing low growth (or vice versa), both variables may respond to common underlying factors. For instance, aging populations simultaneously increase welfare spending needs and reduce labor force growth rates. Disentangling these complex relationships requires sophisticated econometric techniques beyond simple correlation analysis.
+		Conclusion
+		The economic data provided do not support the hypothesis that social service spending is inversely related to economic growth. While individual countries show varied patterns, no consistent negative correlation emerges across the European nations examined. This finding aligns with substantial empirical research demonstrating that well-designed welfare states can maintain robust economic performance.
+		Contemporary evidence suggests that the relationship between social spending and growth is more complex than traditional economic theory predicted. The composition and design of social programs matter significantly, with human capital investments showing particularly positive effects. Moreover, efficient tax structures and the stabilization benefits of social insurance can offset potential negative incentive effects.
+		Rather than viewing social spending and economic growth as fundamentally incompatible, policymakers should recognize that welfare states and dynamic economies can coexist—and that certain social investments may actively contribute to long-term prosperity. The absence of evidence for systematic growth penalties from social spending represents what Lindert termed the "free lunch puzzle"—a finding that challenges conventional wisdom but emerges consistently from careful empirical analysis. The data support a more nuanced understanding: social welfare spending, particularly when efficiently designed and targeted toward productive investments, is compatible with sustained economic growth.
+		[7743]<hr />
+		References
+		Furceri, D., & Zdzienicka, A. (2012). The effects of social spending on economic activity: Empirical evidence from a panel of OECD countries.
+		Fiscal Studies
+		, 33(1), 129-152.
+		Haile, F., & Niño-Zarazúa, M. (2018). Does social spending improve welfare in low-income and middle-income countries?
+		Journal of International Development
+		, 30(3), 367-398.
+		Kim, S. W., & Ahn, S. H. (2020). Social investment effects of public education, health care, and welfare service expenditures on economic growth.
+		Asian Social Work and Policy Review
+		, 14(1), 34-44.
+		Lindert, P. H. (2004).
+		Growing Public: Social Spending and Economic Growth since the Eighteenth Century
+		(Vols. 1-2). Cambridge University Press.
+		OECD (2023). Social Expenditure Database (SOCX). Retrieved from
+		[7719]<a />
+			https://www.oecd.org/social/expenditure.htm
+		World Bank (2023). GDP Annual Growth. World Development Indicators. Retrieved from
+		[7720]<a />
+			https://data.worldbank.org/indicator/NY.GDP.MKTP.KD.ZG
+[109]<div role=region aria-label=Notifications (F8) />
+	[110]<ol role=status live=polite />
+|SCROLL|<iframe /> (scroll)
+|SCROLL|<iframe id=intercom-frame title=Intercom /> (scroll)
+[End of page]
+</browser_state>
+
+
+ RESPONSE
+{
+  "thinking": "The previous step successfully appended all four parts of the grading rubric prompt into the chat input box, as required by steps 11-14 of the user instructions. The next step (step 15) is to submit this full grading rubric prompt by pressing Enter, which will allow Claude to begin generating a response. This aligns precisely with the user's step-by-step instructions. After submission, I will need to wait for Claude's response as per steps 16 and 17.",
+  "evaluation_previous_goal": "Successfully appended the fourth part of the grading rubric prompt into the chat input box without submitting. Verdict: Success.",
+  "memory": "All four parts of the grading rubric have been entered into the chat input box without submission. Ready to submit the full prompt and proceed with waiting for Claude's response.",
+  "next_goal": "Submit (press Enter on) the full grading rubric prompt in the chat input box (index 3390) to trigger Claude's response generation.",
+  "action": [
+    {
+      "send_keys": {
+        "keys": "Enter"
+      }
+    }
+  ]
+}
