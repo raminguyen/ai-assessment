@@ -94,56 +94,91 @@ class EssayGrader:
         part9  = " ".join(words[cuts[7]:cuts[8]])
         part10 = " ".join(words[cuts[8]:])
 
-        prompt = f""" Follow step by step
+        if self.model_grade == "chatgpt":
+            prompt = f""" Follow step by step
+                1) Go to {self.url}
+                2) Type the prompt: good morning.
+                3) Key "Enter" to submit the prompt.
+                4) Extract all responses
+                5) End the session."""
+            self.agent_prompt = prompt
 
-        1) Go to {self.url} 
+            return prompt
+        
 
-            2) Click Sign In.
+        elif self.model_grade == "claude":
+        
+            prompt = f""" Follow step by step
 
-            3) Type Email: {self.email}.
+            1) Go to {self.url} 
 
-            4) Type Password: {self.password}.
+                2) Click Sign In.
 
-            5) Click Next.
+                3) Type Email: {self.email}.
 
-            6) Wait for 10 seconds for user log in with their security codes. 
+                4) Type Password: {self.password}.
 
-            7) Type this prompt, do not enter yet {part1}.  
+                5) Click Next.
 
-            8) Type this prompt, do not enter yet {part2}. 
+                6) Wait for 10 seconds for user log in with their security codes. 
 
-            9) Type this prompt, do not enter yet {part3}.  
+                7) Type this prompt, do not enter yet {part1}.  
 
-            10) Type this prompt, do not enter yet {part4}.  
+                8) Type this prompt, do not enter yet {part2}. 
 
-            11) Type this prompt, do not enter yet {part5}.  
+                9) Type this prompt, do not enter yet {part3}.  
 
-            12) Type this prompt, do not enter yet {part6}.
+                10) Type this prompt, do not enter yet {part4}.  
 
-            13) Type this prompt, do not enter yet {part7}.
+                11) Type this prompt, do not enter yet {part5}.  
 
-            14) Type this prompt, do not enter yet {part8}.
+                12) Type this prompt, do not enter yet {part6}.
 
-            15) Type this prompt, do not enter yet {part9}.
+                13) Type this prompt, do not enter yet {part7}.
 
-            16) Type this prompt, do not enter yet {part10}.
+                14) Type this prompt, do not enter yet {part8}.
 
-            17) Key "Enter" to submit the prompt.
+                15) Type this prompt, do not enter yet {part9}.
 
-            18) Wait for 30 seconds for the responses to be generated.  
+                16) Type this prompt, do not enter yet {part10}.
 
-            19) Wait for 10 seconds for the responses to be generated.
+                17) Key "Enter" to submit the prompt.
 
-            20) Extract all responses in 30 seconds.
+                18) Wait for 30 seconds for the responses to be generated.  
 
-            21) Extract all responses in 10 seconds.
+                19) Wait for 10 seconds for the responses to be generated.
 
-            22) End the session.
+                20) Extract all responses in 30 seconds.
 
-    """
-        self.agent_prompt = prompt
+                21) Extract all responses in 10 seconds.
+
+                22) End the session.
+
+        """
+            self.agent_prompt = prompt
+        
+            return prompt
     
-        return prompt
+    def save_result(self, result):
+
+        serializable = [
+            r.model_dump(exclude_none=True) if hasattr(r, "model_dump") else str(r)
+            for r in result
+        ]
+
+        assignment_id = self.assignment
+        save_dir = os.path.join("grade", f"tuned_essay{assignment_id}")
+
+        # new readable file name
+        file_name = f"{self.model_grade}_grade_{self.essay}.json"
+        save_path = os.path.join(save_dir, file_name)
+
+        os.makedirs(save_dir, exist_ok=True)
+
+        with open(save_path, "w") as f:
+            json.dump({"result": serializable}, f, indent=4)
+
+        print(f"Saved final result to: {save_path}")
 
     def agent(self):
 
@@ -176,6 +211,8 @@ class EssayGrader:
                 loop.run_until_complete(close_fn())
         except Exception as e:
             print(f"[Warning] Failed to close session: {e}")
+
+        self.save_result(result)
 
         end_time = time.time()
         total_time = end_time - start_time

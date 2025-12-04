@@ -5,7 +5,7 @@ from docx import Document   # pip install python-docx
 # base folder
 base_dir = os.path.dirname(os.path.abspath(__file__))
 
-folder = os.path.join(base_dir, "tuned_essay1")
+folder = os.path.join(base_dir, "tuned_essay3")
 
 # list all docx files in that folder
 files = [f for f in os.listdir(folder) if f.endswith(".docx")]
