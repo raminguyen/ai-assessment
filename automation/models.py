@@ -4,13 +4,16 @@ from google import genai
 import os
 import json
 from anthropic import Anthropic
+from xai_sdk import Client
+from xai_sdk.chat import user, system
+
 
 load_dotenv()  
 
 chatgpt_api_key=os.getenv("OPENAI_API_KEY")
 google_api_key=os.getenv("GOOGLE_API_KEY")
 claude_api_key = os.getenv("ANTHROPIC_API_KEY")
-
+grok_api_key = os.getenv("GROK_API_KEY")
 
 def chatgpt(model: str, prompt: str):
 
@@ -49,6 +52,17 @@ def claude(model: str, prompt: str):
 
     return message.content[0].text
 
-def copilot(model: str, prompt: str):
-    pass
+def grok(model: str, prompt: str):
+    client=Client(
+        api_key=grok_api_key,
+        timeout=3600
+    )
+
+    chat = client.chat.create(model=model)
+
+    chat.append(user(prompt))
+
+    response = chat.sample()
+
+    return response.content
 
