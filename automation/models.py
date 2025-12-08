@@ -5,16 +5,16 @@ import os
 import json
 from anthropic import Anthropic
 from xai_sdk import Client
-from xai_sdk.chat import user, system
+from xai_sdk.chat import user
 
-
-load_dotenv()  
+load_dotenv('../.env')
 
 chatgpt_api_key=os.getenv("OPENAI_API_KEY")
 google_api_key=os.getenv("GOOGLE_API_KEY")
 claude_api_key = os.getenv("ANTHROPIC_API_KEY")
 grok_api_key = os.getenv("GROK_API_KEY")
 
+#chatgpt
 def chatgpt(model: str, prompt: str):
 
     client = OpenAI(api_key=chatgpt_api_key)
@@ -26,7 +26,7 @@ def chatgpt(model: str, prompt: str):
     
     return response.output_text
 
-
+#gemini
 def gemini(model: str, prompt: str):
     client = genai.Client(api_key=google_api_key)
 
@@ -40,6 +40,8 @@ def gemini(model: str, prompt: str):
 
     return response.text
 
+#claude
+
 def claude(model: str, prompt: str):
     client = Anthropic(api_key=claude_api_key)
 
@@ -51,6 +53,8 @@ def claude(model: str, prompt: str):
     )
 
     return message.content[0].text
+
+#grok
 
 def grok(model: str, prompt: str):
     client=Client(

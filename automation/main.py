@@ -1,6 +1,10 @@
 from utils import*
 import sys
 
+# Define paramater 
+
+assignment = "assignment_1"
+
 all_models = [
     ("chatgpt", "gpt-4.1"),
     ("gemini", "gemini-3-pro-preview"),
@@ -8,17 +12,23 @@ all_models = [
     ("grok", "grok-4-1-fast-reasoning")
 ]
 
-""" 
+prompt_1_write, prompt_2_grade, base_direction, rubric = load_prompts(assignment)
 
-Pass argument
+run_no_rubric = True
+run_with_rubric = True
 
-"""
+#
+#
+# 1. Pass argument
+#
+#
 
 writing_models = all_models
 
+# 2. Filter models: if argument is provided, use only this model.
 if len(sys.argv) > 1: 
-    which_model = sys.argv[1]
 
+    which_model = sys.argv[1]
 
     filter_models = []
 
@@ -28,10 +38,10 @@ if len(sys.argv) > 1:
 
     writing_models = filter_models
     
-run_no_rubric = True
-run_with_rubric = True
 
+# 3. Filter experiments: rubric, norubric, both
 if len(sys.argv) > 2:
+
     experiment_type = sys.argv[2]
 
     if experiment_type =="rubric":
@@ -39,21 +49,17 @@ if len(sys.argv) > 2:
     elif experiment_type =="norubric":
         run_with_rubric = False
 
-
-assignment = "assignment_1"
+# 4. Get assignment from argument
 
 if len(sys.argv) > 3:
     
     arg=sys.argv[3]
-
     if sys.argv[3].startswith("assignment"):
         assignment = sys.argv[3]
     elif arg.isdigit():
         assignment = f"assignment_{arg}"
 
-prompt_1_write, prompt_2_grade, base_direction, rubric = load_prompts(assignment)
-
-
+# 5. Write essay, then other models grade it.
 for model_name, model_value in writing_models:
 
     other_models = []
@@ -63,8 +69,8 @@ for model_name, model_value in writing_models:
             other_models.append(value)
 
     if run_no_rubric:
-        print(f"\n{model_name} (without rubric)")
-        print(f"Prompt preview: {prompt_1_write[:100]}...")
+        print(model_name, "without rubric")
+        print('Prompt preview', prompt_1_write)
         run_pipeline(
             write_model=model_value,
             prompt_1=prompt_1_write,
@@ -75,7 +81,8 @@ for model_name, model_value in writing_models:
         )
 
     if run_with_rubric:
-        print(f"\n{model_name} (with rubric)")
+        print(model_name, "with rubric")
+        print('Prompt preview', prompt_1_write)
 
         run_pipeline(
             write_model=model_value,

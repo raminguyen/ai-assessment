@@ -4,34 +4,20 @@ import os
 import strip_markdown
 import sys
 
-
 def load_prompts(assignment="assignment_1"):
 
     prompt_key = f"{assignment}_prompt"
     
     
     base_direction = os.path.dirname(os.path.abspath(__file__))
-    file_path = os.path.join(base_direction, "prompt.json")
+    file_path = os.path.join(base_direction, "..", "prompts", "prompt.json")
 
     with open(file_path, "r") as f:
         data = json.load(f)
 
     prompt_1_write = data[prompt_key]
-
-    
-
-    prompt_1_write = data[prompt_key]
-
-
-    #print(prompt_1_write)
-
     prompt_2_grade = data["grade_prompt"]
-
-    #print(prompt_2_grade)
-
     rubric = data.get('critical_thinking', '') 
-    #print(rubric)
-
    
     return prompt_1_write, prompt_2_grade, base_direction, rubric
 
@@ -48,8 +34,6 @@ def json_to_docs(json_name, docx_name):
         print("error here: Rami: no json file.")
 
     clean_text = strip_markdown.strip_markdown(text)
-
-    print(clean_text)
 
     doc = Document()
 
