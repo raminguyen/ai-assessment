@@ -8,7 +8,6 @@ def load_prompts(assignment="assignment_1"):
 
     prompt_key = f"{assignment}_prompt"
     
-    
     base_direction = os.path.dirname(os.path.abspath(__file__))
     file_path = os.path.join(base_direction, "..", "prompts", "prompt.json")
 
@@ -17,7 +16,7 @@ def load_prompts(assignment="assignment_1"):
 
     prompt_1_write = data[prompt_key]
     prompt_2_grade = data["grade_prompt"]
-    rubric = data.get('critical_thinking', '') 
+    rubric = data["critical_thinking"]
    
     return prompt_1_write, prompt_2_grade, base_direction, rubric
 

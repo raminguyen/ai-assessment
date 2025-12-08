@@ -94,7 +94,6 @@ class generate_essay(essay):
             json.dump({"essay": self.response_text}, f)
 
         #1d: SAVE DOCS
-
         docs_direction = os.path.join(base_direction, "outputs", self.pipeline_folder, self.assignment, essay_folder, "docs")        
         os.makedirs(docs_direction, exist_ok=True)
         docx_path = os.path.join(docs_direction, file_name.replace(".json", ".docx"))
