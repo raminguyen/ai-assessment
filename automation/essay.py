@@ -7,30 +7,35 @@ import sys
 
 prompt_1_write, prompt_2_grade, base_direction, rubric = load_prompts()
 
-
 class essay:
     def __init__(self):
         self.prompt_1_write = prompt_1_write
         self.prompt_2_grade = prompt_2_grade
         self.rubric = rubric
-
     """
     
     WRITE ESSAY
     
     """
 
-    def generate_essay(self, model, prompt_1=prompt_1_write, rubric=None):
+class generate_essay(essay):
+
+    def __init__(self):
+        super().__init__()
+
+
+    def write(self, model, prompt_1=None, rubric=None, assignment="assignment_1"):
 
         start = time.time()
 
         self.model = model
+        self.assignment = assignment
 
-        print("Generating essay using model:", self.model)
+        print("Writing model is:", self.model)
 
         if rubric is not None:
-            prompt = prompt_1 + " " + rubric
-            print(prompt)
+            prompt = rubric + " " + prompt_1
+            print(f"combined prompt {prompt}")
             self.used_rubric = True
             
         else:
@@ -64,10 +69,14 @@ class essay:
         else:
             print("model is not found")
 
+        if self.used_rubric:
+            essay_folder = "tuned_essays" #with rubric
+        else:
+            essay_folder = "essays" #without rubric
         
         #2. SAVE JSON
 
-        output_direction = os.path.join(base_direction, "outputs", self.pipeline_folder)
+        output_direction = os.path.join(base_direction, "outputs", self.pipeline_folder, self.assignment, essay_folder)
 
         os.makedirs(output_direction, exist_ok=True)
 
@@ -79,7 +88,7 @@ class essay:
 
         #3: SAVE DOCS
 
-        docs_direction = os.path.join(base_direction, "outputs", self.pipeline_folder, "docs")        
+        docs_direction = os.path.join(base_direction, "outputs", self.pipeline_folder, self.assignment, essay_folder, "docs")        
 
         os.makedirs(docs_direction, exist_ok=True)
 
@@ -89,13 +98,11 @@ class essay:
 
         end = time.time()
 
-        print(f"generate essay time {(end - start)/60} mins")
-
-        print("--------------------------------------------")
-
-        print("Done.")
+        print(f"writing done and time  ({(end - start)/60:.1f} min)")
 
         return self.response_text
+    
+
     
 
     """
@@ -104,18 +111,25 @@ class essay:
     
     """
     
-    def grade_essay(self, model, prompt_2=prompt_2_grade):
+class grade_essay(essay):
+
+    def __init__(self):
+        super().__init__()
+
+    def grade(self, model, essay_text, used_rubric, pipeline_folder, assignment="assignment_1"):
+
+        self.response_text = essay_text
+        self.used_rubric = used_rubric
+        self.pipeline_folder = pipeline_folder
+        self.assignment = assignment
 
         start= time.time()
 
-    
         self.model = model
         
-        print("Grading essay using model", model)
+        print("Grading model", model)
 
-        grade_prompt = prompt_2 + ' ' + self.response_text 
-
-        print(grade_prompt)
+        grade_prompt = prompt_2_grade + ' ' + essay_text
 
         if model.startswith("gpt"):
             graded = chatgpt(self.model, grade_prompt)
@@ -123,15 +137,15 @@ class essay:
 
         elif model.startswith("gemini"):
             graded = gemini(model, grade_prompt)
-            file_name = "gemini_grade_tuned_essay.json" if self.used_rubric else "gemini_grade_essay"
+            file_name = "gemini_grade_tuned_essay.json" if self.used_rubric else "gemini_grade_essay.json"
 
         elif model.startswith("claude"):
             graded = claude(model, grade_prompt)
-            file_name = "claude_grade_tuned_essay.json" if self.used_rubric else "claude_grade_essay"
+            file_name = "claude_grade_tuned_essay.json" if self.used_rubric else "claude_grade_essay.json"
 
         elif model.startswith("grok"):
             graded = grok(model, grade_prompt)
-            file_name = "groke_grade_tuned_essay.json" if self.used_rubric else "grok_grade_essay"
+            file_name = "groke_grade_tuned_essay.json" if self.used_rubric else "grok_grade_essay.json"
         
         else:
             print("grade model is not found")
@@ -142,10 +156,14 @@ class essay:
         
         """    
 
+        if self.used_rubric:
+            essay_folder = "tuned_essays" #with rubric
+        else:
+            essay_folder = "essays" #without rubric
         
         #1: CREATE NEW FOLDER
 
-        output_direction = os.path.join(base_direction, "outputs", self.pipeline_folder)
+        output_direction = os.path.join(base_direction, "outputs", self.pipeline_folder, self.assignment, essay_folder)
         
         os.makedirs(output_direction, exist_ok=True)
 
@@ -159,7 +177,7 @@ class essay:
 
         #3: SAVE DOCS
 
-        docs_direction = os.path.join(base_direction, "outputs", self.pipeline_folder, "docs")        
+        docs_direction = os.path.join(base_direction, "outputs", self.pipeline_folder, self.assignment, essay_folder, "docs")        
 
         os.makedirs(docs_direction, exist_ok=True)
 
@@ -169,11 +187,7 @@ class essay:
         
         end = time.time()
 
-        print(f"grade essay time: {(end - start)/60} minutes")
-
-        print("Done grading essay, rami cool")
-
-        print("--------------------------------------------")
+        print(f"grade done and essay time: ({(end - start)/60:.1f} min)")
 
         return graded
 

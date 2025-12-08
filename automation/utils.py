@@ -2,27 +2,41 @@ import json
 from docx import Document
 import os
 import strip_markdown
+import sys
 
 
+def load_prompts(assignment="assignment_1"):
 
-def load_prompts():
+    prompt_key = f"{assignment}_prompt"
+    
+    
     base_direction = os.path.dirname(os.path.abspath(__file__))
-    file_path = os.path.join(base_direction, "assignmentprompt.json")
-    rubric_path = os.path.join(base_direction, "rubric.txt")
+    file_path = os.path.join(base_direction, "prompt.json")
 
     with open(file_path, "r") as f:
         data = json.load(f)
 
-    prompt_1_write = data["test_prompt"]
+    prompt_1_write = data[prompt_key]
 
-    prompt_2_grade = "starting grading using basic rubric. give me only 1 score and 5 words description"
+    
 
-    with open(rubric_path, "r") as f:
-        rubric = f.read()
+    prompt_1_write = data[prompt_key]
 
+
+    #print(prompt_1_write)
+
+    prompt_2_grade = data["grade_prompt"]
+
+    #print(prompt_2_grade)
+
+    rubric = data.get('critical_thinking', '') 
+    #print(rubric)
+
+   
     return prompt_1_write, prompt_2_grade, base_direction, rubric
 
 def json_to_docs(json_name, docx_name):
+
     with open(json_name, "r") as f:
         data = json.load(f)
 
@@ -44,45 +58,48 @@ def json_to_docs(json_name, docx_name):
     doc.save(docx_name)
 
 
-def run_pipeline(write_model, prompt_1, grade_model=None, description=str, rubric=None):
+def run_pipeline(write_model, prompt_1, grade_model=None, description=str, rubric=None, assignment="assignment_1"):
 
     
-    from essay import essay
+    from essay import generate_essay, grade_essay
     
-    pipeline = essay()
+    writer = generate_essay()
+    grader = grade_essay()
 
-    pipeline.generate_essay(
+    writer.write(
         model=write_model,
         prompt_1=prompt_1,
-        rubric=rubric
+        rubric=rubric,
+        assignment=assignment
     )
 
 
     if isinstance(grade_model, (list, tuple)):
+
         for each_model in grade_model:
-            pipeline.grade_essay(each_model)
+            grader.grade(
+                model = each_model,
+                essay_text=writer.response_text,
+                used_rubric = writer.used_rubric,
+                pipeline_folder=writer.pipeline_folder)
+    
 
     elif grade_model is None:
         print("No grading needed")
-        
+
     else:
-        pipeline.grade_essay(grade_model)    
+        # Grade with single model
+        grader = grade_essay()
+
+        grader.grade(
+            model=grade_model,
+            essay_text=writer.response_text,
+            used_rubric=writer.used_rubric,
+            pipeline_folder=writer.pipeline_folder,
+            assignment=assignment
+        )  
     
     print(f"{description}: grading completed")
 
-
-"""
-from essay import essay
-
-pipeline = essay()
-
-pipeline.generate_essay(model=chatgpt, prompt_1=prompt_1_write, rubric = None)
-
-
-pipeline.generate_essay(model=chatgpt, prompt_1=prompt_1_write, rubric = rubric)
-
-sys.exit()
-
-"""
 
 
