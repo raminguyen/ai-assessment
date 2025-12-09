@@ -1,4 +1,4 @@
-from utils import*
+from utils import load_prompts, json_to_docs
 from models import*
 import json
 import os
@@ -7,19 +7,20 @@ import time
 #load prompt
 prompt_1_write, prompt_2_grade, base_direction, rubric = load_prompts()
 
-class essay:
-    def __init__(self):
-        self.prompt_1_write = prompt_1_write
-        self.prompt_2_grade = prompt_2_grade
-        self.rubric = rubric
-        
 #
 #
 # 1. Write an essay
 #
 #
 
-class generate_essay(essay):
+class Essay:
+    def __init__(self):
+        self.prompt_1_write = prompt_1_write
+        self.prompt_2_grade = prompt_2_grade
+        self.rubric = rubric
+        
+
+class Writer(Essay): 
 
     def __init__(self):
         super().__init__()
@@ -74,7 +75,7 @@ class generate_essay(essay):
             print("model is not found")
 
         if self.used_rubric:
-            file_name = f"{model_name}_write_tuned_essay"
+            file_name = f"{model_name}_write_tuned_essay.json"
 
         else:
             file_name = f"{model_name}_write_essay.json"
@@ -113,7 +114,7 @@ class generate_essay(essay):
 #
 
 
-class grade_essay(essay):
+class Grader(Essay):
     
     ''' auto grade essays '''
 
@@ -160,7 +161,7 @@ class grade_essay(essay):
             file_name = f"{model_name}_graded_tuned_essay"
 
         else:
-            file_name = f"{model_name}_grade_essay.json"
+            file_name = f"{model_name}_Grader.json"
 
         #2b. SAVE OUTPUTS 
 
@@ -199,13 +200,3 @@ class grade_essay(essay):
         print('Writing done and time', (end - start)/60, 'mins')
 
         return graded
-
-
-
-    
-        
-              
-    
-
-
-        

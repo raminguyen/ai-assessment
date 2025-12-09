@@ -1,9 +1,7 @@
-from utils import*
+from utils import load_prompts, run_pipeline
 import sys
 
 # Define paramater 
-
-assignment = "assignment_1"
 
 all_models = [
     ("chatgpt", "gpt-4.1"),
@@ -11,11 +9,6 @@ all_models = [
     ("claude", "claude-sonnet-4-5"),
     ("grok", "grok-4-1-fast-reasoning")
 ]
-
-prompt_1_write, prompt_2_grade, base_direction, rubric = load_prompts(assignment)
-
-run_no_rubric = True
-run_with_rubric = True
 
 #
 #
@@ -45,9 +38,9 @@ if len(sys.argv) > 2:
     experiment_type = sys.argv[2]
 
     if experiment_type =="rubric":
-        run_no_rubric = False
+        used_rubric = True
     elif experiment_type =="norubric":
-        run_with_rubric = False
+        used_rubric = False
 
 # 4. Get assignment from argument
 
@@ -59,6 +52,8 @@ if len(sys.argv) > 3:
     elif arg.isdigit():
         assignment = f"assignment_{arg}"
 
+prompt_1_write, prompt_2_grade, base_direction, rubric = load_prompts(assignment)
+
 # 5. Write essay, then other models grade it.
 for model_name, model_value in writing_models:
 
@@ -67,8 +62,20 @@ for model_name, model_value in writing_models:
     for name, value in all_models:
         if name != model_name: 
             other_models.append(value)
+    
+    if used_rubric:
+        print(model_name, "with rubric")
+        print('Prompt preview', prompt_1_write)
 
-    if run_no_rubric:
+        run_pipeline(
+            write_model=model_value,
+            prompt_1=prompt_1_write, 
+            grade_model=other_models,
+            description=model_name+ " tuned essays with rubrics",
+            rubric=rubric,
+        )
+
+    else:
         print(model_name, "without rubric")
         print('Prompt preview', prompt_1_write)
         run_pipeline(
@@ -80,15 +87,5 @@ for model_name, model_value in writing_models:
             assignment=assignment
         )
 
-    if run_with_rubric:
-        print(model_name, "with rubric")
-        print('Prompt preview', prompt_1_write)
-
-        run_pipeline(
-            write_model=model_value,
-            prompt_1=prompt_1_write, 
-            grade_model=other_models,
-            description=model_name+ " tuned essays with rubrics",
-            rubric=rubric,
-        )
+    
 

@@ -44,10 +44,10 @@ def json_to_docs(json_name, docx_name):
 def run_pipeline(write_model, prompt_1, grade_model=None, description=str, rubric=None, assignment="assignment_1"):
 
     
-    from essay import generate_essay, grade_essay
+    from essay import Writer, Grader
     
-    writer = generate_essay()
-    grader = grade_essay()
+    writer = Writer()
+    grader = Grader()
 
     writer.write(
         model=write_model,
@@ -72,7 +72,7 @@ def run_pipeline(write_model, prompt_1, grade_model=None, description=str, rubri
 
     else:
         # Grade with single model
-        grader = grade_essay()
+        grader = Grader()
 
         grader.grade(
             model=grade_model,
