@@ -3,6 +3,8 @@ import os
 import json
 import sys
 from dotenv import load_dotenv
+import strip_markdown
+from docx import Document
 
 load_dotenv()
 
@@ -85,6 +87,7 @@ class Model:
 class ModelGemini3ProPreview(Model):
 
   def __init__(self):
+
     super().__init__("gemini-3-pro-preview")
 
     self.client = genai.Client(api_key=API_KEY)
@@ -118,7 +121,39 @@ class ModelGemini3ProPreview(Model):
   def tune(self, essay, rubric):
       combined_prompt = essay.grade_prompt + rubric.text + essay.essay_text
       print(combined_prompt)
-      import sys
-      sys.exit()
-      return self.geminiapi(essay.combined_prompt)
+      
+      return self.geminiapi(combined_prompt)
+    
+
+class Util:
+
+  @staticmethod
+
+  def texttojson(text, file_name):
+
+    data = {"result": text}
+
+    with open (file_name, 'w') as f:
+      json.dump (data, f, indent=2)
+
+    return file_name
+
+
+  @staticmethod
+
+  def jsontodoc(json):
+
+    with open(json, "r",) as f:
+      data = json.load(f)
+
+    text = data["result"]
+
+    clean_text = strip_markdown.strip_markdown(text)
+    
+    doc = Document()
+
+    doc.add_paragraph(clean_text)
+
+    doc.save(docx_name="output.docx")
+
     
