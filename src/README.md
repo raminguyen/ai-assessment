@@ -21,7 +21,7 @@ python main.py [writer] [workflow] [rubric] [assignment]
    - Options: `critical_thinking`, `oral_communication`
 
 4. **assignment**: Assignment number
-   - Any number: `1`, `2`, `3`, etc.
+   - Any number: `1`, `2`, `3`
 
 ## Examples
 
