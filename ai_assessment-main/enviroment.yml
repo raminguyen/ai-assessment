@@ -1,0 +1,15 @@
+name: ai-assessment
+channels:
+  - conda-forge
+  - defaults
+dependencies:
+  - python>=3.11
+  - pip
+  - pip:
+    - openai
+    - google-generativeai
+    - anthropic
+    - xai-sdk
+    - python-dotenv
+    - python-docx
+    - strip-markdown
