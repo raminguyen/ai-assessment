@@ -1,4 +1,4 @@
-```markdown
+
 # Running the AI Assessment System
 
 ## Command Format
