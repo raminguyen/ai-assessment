@@ -1,8 +1,3 @@
-
-# Running the AI Assessment System
-
-## Command Format
-
 ```bash
 python main.py [writer] [workflow] [rubric] [assignment]
 ```
