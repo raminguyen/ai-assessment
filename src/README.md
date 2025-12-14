@@ -46,4 +46,3 @@ python main.py claude both critical_thinking 1
 - Results saved to: `output/assignment_[N]/[writer]/[rubric]/[workflow]/`
 - JSON files and Word docs created automatically
 ```
-
