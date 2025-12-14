@@ -11,14 +11,11 @@ from ai_assessment import (
 )
 
 def main():
-
     """Main entry point"""
-
-    #1. Parse arguments
     parser = argparse.ArgumentParser()
     parser.add_argument("writer", choices=["gemini", "chatgpt", "claude", "grok"])
     parser.add_argument('workflow', type=str, choices=["norubric", "withrubric", "both"])
-    parser.add_argument('--rubric', type=str, default="critical_thinking")
+    parser.add_argument('rubric', type=str)  
     parser.add_argument('assignment', type=int)
     args = parser.parse_args()
 
@@ -51,11 +48,11 @@ def main():
     # Decide which workflos to run
     workflows = []
     
-    if args.rubric == "both":
+    if args.workflow == "both":
 
         workflows = ["norubric", "withrubric"]
     else:
-        workflows = [args.rubric]
+        workflows = [args.workflow]
 
     #
     # Without Rubric
@@ -91,11 +88,12 @@ def main():
             Util.texttojson(tuned, essay_file, essay, rubric, writer_model=writer_model)
         
             essay.essay_text = Util.load_essay(essay_file)
+
             grade_files = Util.grade_all(essay, rubric, graders, writer_model, essay_file, args.assignment)
             
             Util.batch_jsontodoc([essay_file] + grade_files)
 
-        print("Rami is done.")
+    print("Rami is done.")
 
 
 if __name__ == "__main__":
