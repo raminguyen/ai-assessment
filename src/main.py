@@ -17,7 +17,8 @@ def main():
     #1. Parse arguments
     parser = argparse.ArgumentParser()
     parser.add_argument("writer", choices=["gemini", "chatgpt", "claude", "grok"])
-    parser.add_argument('rubric', type=str, choices=["norubric", "withrubric", "both"])
+    parser.add_argument('workflow', type=str, choices=["norubric", "withrubric", "both"])
+    parser.add_argument('--rubric', type=str, default="critical_thinking")
     parser.add_argument('assignment', type=int)
     args = parser.parse_args()
 
@@ -39,14 +40,19 @@ def main():
             graders[name] = model
 
     # Set up essay and rubric
-    essay = Essay(f"Essay_{args.assignment}")
-    rubric = Rubric("critical_thinking")
+    essay = Essay('Essay_' + str(args.assignment))
+    
+    rubric = Rubric(args.rubric)
+
     essay.load_prompt(args.assignment)
-    base_folder = f"assignment_{args.assignment}/{args.writer}"
+
+    base_folder = 'assignment_' + str(args.assignment) + '/' + args.writer + '/' + args.rubric
 
     # Decide which workflos to run
     workflows = []
+    
     if args.rubric == "both":
+
         workflows = ["norubric", "withrubric"]
     else:
         workflows = [args.rubric]
@@ -59,10 +65,12 @@ def main():
 
         if workflow == "norubric":
 
-            Util.OUTPUT_FOLDER = f"{base_folder}/norubric"
+            Util.OUTPUT_FOLDER = base_folder + '/norubric' 
             
             generated = writer_model.generate(essay)
-            essay_file = f"{args.writer}_generate_essay{args.assignment}.json"
+
+            essay_file = args.writer + '_generate_essay' + str(args.assignment) + '.json'
+
             Util.texttojson(generated, essay_file, essay, writer_model=writer_model)
             
             essay.essay_text = Util.load_essay(essay_file)
@@ -74,12 +82,14 @@ def main():
         # With Rubric
         #
         else:
-            Util.OUTPUT_FOLDER = f"{base_folder}/withrubric"
+            Util.OUTPUT_FOLDER = base_folder + '/withrubric'
             
             tuned = writer_model.tune(essay, rubric)
-            essay_file = f"{args.writer}_tuned_essay{args.assignment}.json"
+
+            essay_file = args.writer + '_tuned_essay' + str(args.assignment) + '.json'
+
             Util.texttojson(tuned, essay_file, essay, rubric, writer_model=writer_model)
-            
+        
             essay.essay_text = Util.load_essay(essay_file)
             grade_files = Util.grade_all(essay, rubric, graders, writer_model, essay_file, args.assignment)
             
