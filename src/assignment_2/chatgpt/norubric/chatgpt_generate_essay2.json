@@ -1,9 +1,0 @@
-{
-  "essay_name": "Essay_2",
-  "writer_model": "gpt-5.2-2025-12-11",
-  "loaded_from": null,
-  "grader_model": null,
-  "rubric": null,
-  "result": "No; these data show no consistent inverse spending-growth relationship overall.\n\n**Citations (peer\u2011reviewed, relevant literature):**  \n- Barro, R. J. (1991). *Economic Growth in a Cross Section of Countries*. **Quarterly Journal of Economics**, 106(2), 407\u2013443.  \n- Easterly, W., & Rebelo, S. (1993). *Fiscal Policy and Economic Growth: An Empirical Investigation*. **Journal of Monetary Economics**, 32(3), 417\u2013458.  \n- Lindert, P. H. (2004). *Social Spending and Economic Growth since the Eighteenth Century*. **Cambridge University Press** (scholarly monograph; not a journal article).  \n- Perotti, R. (1996). *Growth, Income Distribution, and Democracy: What the Data Say*. **Journal of Economic Growth**, 1(2), 149\u2013187.  \n- Sala\u2011i\u2011Martin, X. (1997). *I Just Ran Two Million Regressions*. **American Economic Review**, 87(2), 178\u2013183.  \n\nIf you want, I can (1) compute the correlation(s) from your table (by year and pooled), (2) write a real college essay (not 10 words), and (3) tailor citations to specifically \u201csocial welfare spending\u201d rather than broad fiscal policy.",
-  "timestamp": "2025-12-14 15:49:55"
-}

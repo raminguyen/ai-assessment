@@ -46,7 +46,7 @@ def main():
 
     essay.load_prompt(args.assignment)
 
-    base_folder = 'assignment_' + str(args.assignment) + '/' + args.writer + '/' + args.rubric
+    base_folder = 'output/' + 'assignment_' + str(args.assignment) + '/' + args.writer + '/' + args.rubric
 
     # Decide which workflos to run
     workflows = []
