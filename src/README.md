@@ -1,8 +1,3 @@
-```markdown
-# Running the AI Assessment System
-
-## Command Format
-
 ```bash
 python main.py [writer] [workflow] [rubric] [assignment]
 ```
@@ -21,7 +16,7 @@ python main.py [writer] [workflow] [rubric] [assignment]
    - Options: `critical_thinking`, `oral_communication`
 
 4. **assignment**: Assignment number
-   - Any number: `1`, `2`, `3`, etc.
+   - Any number: `1`, `2`, `3`
 
 ## Examples
 
@@ -46,4 +41,3 @@ python main.py claude both critical_thinking 1
 - Results saved to: `output/assignment_[N]/[writer]/[rubric]/[workflow]/`
 - JSON files and Word docs created automatically
 ```
-
