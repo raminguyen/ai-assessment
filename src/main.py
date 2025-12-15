@@ -45,7 +45,7 @@ def main():
 
     base_folder = 'output/' + 'assignment_' + str(args.assignment) + '/' + args.writer + '/' + args.rubric
 
-    # Decide which workflos to run
+    # Decide which workflows to run
     workflows = []
     
     if args.workflow == "both":
