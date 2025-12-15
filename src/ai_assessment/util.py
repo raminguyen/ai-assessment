@@ -13,6 +13,7 @@ class Util:
     
     @staticmethod
     def texttojson(text, file_name, essay, rubric=None, writer_model=None, grader_model=None, source_file=None, grade_time=None):
+        
         Util._ensure_folder()
         
         # Get time
@@ -22,7 +23,7 @@ class Util:
             "essay_name": essay.name,
             "writer_model": writer_model.name if writer_model else None,
             "grader_model": grader_model.name if grader_model else None,
-            "time_minutes": round(time_val / 60, 2) if time_val else None,
+            "time_taken": round(time_val / 60, 2) if time_val else None,
             "loaded_from": source_file,
             "rubric": rubric.text if rubric else None,
             "result": text,
@@ -35,6 +36,7 @@ class Util:
             json.dump(data, f, indent=2)
         
         print("Saved at", file_path)
+
         return file_path
         
     @staticmethod
@@ -80,12 +82,16 @@ class Util:
     
     @staticmethod
     def grade_all(essay, rubric, graders, writer_model, essay_file, assignment):
+       
         """Grade essay with all grader models"""
         grade_files = []
 
         for name in graders:
+            # Run grading for this grader
             graded, grade_time = graders[name].grade(essay, rubric)
-            grade_file = f"{name}_grade_essay{assignment}.json"
+
+            # Create output file for this grader
+            grade_file = name + "_grade_essay" + str(assignment) + ".json"
 
             Util.texttojson(graded, grade_file, essay, rubric, 
                         writer_model=writer_model, 

@@ -84,6 +84,7 @@ def main():
             tuned = writer_model.tune(essay, rubric)
 
             essay_file = args.writer + '_tuned_essay' + str(args.assignment) + '.json'
+            print(essay_file)
 
             Util.texttojson(tuned, essay_file, essay, rubric, writer_model=writer_model)
         
