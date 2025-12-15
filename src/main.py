@@ -1,7 +1,7 @@
 import argparse
 from datetime import datetime
 from ai_assessment import Rubric, ModelChatGPT, ModelClaude, ModelGemini3ProPreview, ModelGrok, Util
-
+import os 
 def main():
 
     all_models = {
@@ -25,35 +25,32 @@ def main():
     
     score = subparsers.add_parser('score')
     score.add_argument('grader', choices=['chatgpt', 'gemini', 'claude', 'grok'], help="The model doing the grading")
-    score.add_argument('writer', choices=['chatgpt', 'gemini', 'claude', 'grok'], help="The model that wrote the essay")
-
-    score.add_argument('essay_type', choices=['generate', 'tune'], help='Which essay to score')
     score.add_argument('rubric', type=str)
+    score.add_argument('filename', help='Individual file to read')
     score.add_argument('assignment', type=int)
     
     args = parser.parse_args()
 
     def generate_cmd(args):
-
         model = all_models[args.model]
 
-        if Util.check_data_exists(args.assignment, 'generate', model.name):
+        if Util.check_data_exists(args.assignment, 'generate', args.model, rubric=None):
             print('Already exists, skipping: ' + args.model + ' generate assignment ' + str(args.assignment))
             return
 
-        #1.Set up model and essay
         model = all_models[args.model]
         essay = Util.create_essay(args.assignment)
 
-        #2.Generate and save
         data = model.generate(essay)
-        Util.save_data(data, args.assignment)
+        
+        Util.save_individual_file(data, args.assignment, 'generate', args.model, rubric=None)
+
 
     def tune_cmd(args):
 
         model = all_models[args.model]
 
-        if Util.check_data_exists(args.assignment, 'tune', model.name, rubric=args.rubric):
+        if Util.check_data_exists(args.assignment, 'tune', args.model, rubric=args.rubric):
             print('Already exists, skipping: ' + args.model + ' tune assignment ' + str(args.assignment))
             return
 
@@ -65,34 +62,34 @@ def main():
         #2. Tune and save
         data = model.tune(essay, rubric)
         data['rubric'] = args.rubric
-        Util.save_data(data, args.assignment)
+        
+        Util.save_individual_file(data, args.assignment, 'tune', args.model, rubric=args.rubric)
+
 
     def score_cmd(args):
-
         grader_model = all_models[args.grader]
-        writer_target = args.writer
 
-        if Util.check_data_exists(args.assignment, 'score', grader_model.name, essay_type=args.essay_type, writer=args.writer, rubric=args.rubric):
-            print('Already exists, skipping: ' + args.grader + ' grading ' + args.writer + ' (' + args.essay_type + ') assignment ' + str(args.assignment))
+        essay_type = args.filename.split('_')[2]
+        writer = args.filename.split('_')[3].replace('.json', '')
+        
+        # Load essay first to get writer_name
+        essay_text, writer_name, essay_type = Util.load_essay_from_data(args.filename, rubric=args.rubric)
+
+        if Util.check_data_exists(args.assignment, 'score', args.grader, essay_type=essay_type, writer=writer_name, rubric=args.rubric):
+            print('Already exists, skipping: ' + args.grader + ' scoring ' + essay_type + ' assignment ' + str(args.assignment))
             return
         
-        #1: Set up model, and load essay
-        essay_text, writer_name = Util.load_essay_from_data(args.assignment, args.essay_type, writer=writer_target)
-        
-        #2. Load essay and rubric
         essay = Util.create_essay(args.assignment)
         rubric = Rubric(args.rubric)
         essay.essay_text = essay_text
 
-        #3. Grade and Save
-        data = grader_model.score(essay, rubric, writer=writer_name, essay_type=args.essay_type)
-
-        data['writer'] = writer_name 
+        data = grader_model.score(essay, rubric, writer=writer_name, essay_type=essay_type)
         data['rubric'] = args.rubric
         data['scored_essay_text'] = essay_text
+        data['essay_type'] = essay_type
 
-        Util.save_data(data, args.assignment)
-
+        Util.save_individual_file(data, args.assignment, 'score', args.grader, essay_type=essay_type, rubric=args.rubric, writer=writer_name)
+    
     #
     # Route to command
     #

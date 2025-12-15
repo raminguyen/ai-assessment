@@ -70,100 +70,47 @@ class Util:
 
 
     @staticmethod
-    def load_essay_from_data(assignment, essay_type, writer=None):
-
-        """ Get essay text from data.json """
-
-        filepath = os.path.join('..', 'data', 'data.json')
+    def load_essay_from_data(filename, rubric=None):
+        """Load essay from individual file"""
         
-        # 1. map user input
-        name_map = {
-            "chatgpt": "gpt", 
-            "claude": "claude",
-            "gemini": "gemini",
-            "grok": "grok"
-        }
-
-        search_term = name_map.get(writer, writer)
-
-        # 2. Load data.json
-        filepath = os.path.join('..', 'data', 'data.json')
+        # Only generate files are in data/ folder
+        # Tune and score files are in rubric subfolder
+        if 'generate' in filename:
+            folder = os.path.join('..', 'data')
+        elif rubric:
+            folder = os.path.join('..', 'data', rubric)
+        else:
+            folder = os.path.join('..', 'data')
+        
+        filepath = os.path.join(folder, filename)
+        
+        print('Looking for: ' + filepath)  
+        
         with open(filepath, 'r') as f:
-            all_data = json.load(f)
-
-        # 3. Find matching essay
-        operations = all_data['assignment_' + str(assignment)] 
+            data = json.load(f)
         
-        for op in operations:
-            # Check if command matches (e.g., 'generate', or 'tune')
-            if op.get("command") != essay_type:
-                continue
-
-            # Check if writer matches 
-            if writer and search_term not in op.get("model", ""):
-                continue
-                
-            return op["result"], op.get("model")
-            
-
-    @staticmethod
+        # Extract essay type from filename
+        essay_type = filename.split('_')[2]
+        
+        return data.get("result"), data.get("model"), essay_type
+                    
     def check_data_exists(assignment, command, model_name, essay_type=None, writer=None, rubric=None):
-
-        """ check if data already exists in data.json"""
-
-        name_map = {
-            "chatgpt": "gpt", 
-            "claude": "claude",
-            "gemini": "gemini",
-            "grok": "grok"
-        }
+        """Check if individual file exists"""
         
-        search_writer = name_map.get(writer, writer)
-
-        filepath = os.path.join('..', 'data', 'data.json')
+        if command == 'score' and essay_type and writer:
+            filename = "assignment_" + str(assignment) + "_" + command + "_" + model_name + "_" + essay_type + "_" + writer + ".json"
+        else:
+            filename = "assignment_" + str(assignment) + "_" + command + "_" + model_name + ".json"
         
-        if not os.path.exists(filepath):
-            return False
-            
-        with open(filepath, 'r') as f:
-            all_data = json.load(f)
-            
-        #check assignment if exists
-        assignment_key = 'assignment_' + str(assignment)
-
-        if assignment_key not in all_data:
-            return False
-
-        #find assignment    
-        operations = all_data[assignment_key]
+        if rubric:
+            folder = os.path.join('..', 'data', rubric)
+        else:
+            folder = os.path.join('..', 'data')
         
-        for op in operations:
+        filepath = os.path.join(folder, filename)
 
-            #command does not match
-            if op.get('command') != command:
-                continue
-            
-            #model does not match
-            current_model = op.get('grader') if op.get('grader') else op.get('model')
-
-    
-            if current_model != model_name:
-                continue
+        return os.path.exists(filepath)
                 
-            if rubric and op.get('rubric') != rubric:
-                continue
-
-            #essay type does not match
-            if essay_type and op.get('essay_type') != essay_type:
-                continue
-
-            if writer and search_writer not in op.get('writer', ''):
-                continue
-            
-            return True
-            
-        return False
-    
     @staticmethod
 
     def save_to_file(filename, data):
@@ -193,8 +140,39 @@ class Util:
         all_data[assignment_key].append(data)
         
         f = open(filepath, 'w')
-        
+
         json.dump(all_data, f, indent=2)
         f.close()
         
         print('Saved to: ' + filepath)
+
+    @staticmethod
+    def save_individual_file(data, assignment, command, model_name, essay_type=None, rubric=None, writer=None):
+        """Save individual JSON file for each command in rubric folder"""
+        
+        folder = os.path.join('..', 'data', rubric) if rubric else os.path.join('..', 'data')
+        os.makedirs(folder, exist_ok=True)
+        
+        # Map full names to short names
+        name_map = {
+            "gpt-5.2-2025-12-11": "chatgpt",
+            "grok-4-1-fast-reasoning": "grok",
+            "gemini-3-pro-preview": "gemini",
+            "claude-sonnet-4-5-20250929": "claude"
+        }
+        
+        # Use short name if available
+        short_model = name_map.get(model_name, model_name)
+        short_writer = name_map.get(writer, writer) if writer else None
+        
+        if command == 'score' and essay_type and short_writer:
+            filename = "assignment_" + str(assignment) + "_" + command + "_" + short_model + "_" + essay_type + "_" + short_writer + ".json"
+        else:
+            filename = "assignment_" + str(assignment) + "_" + command + "_" + short_model + ".json"
+        
+        filepath = os.path.join(folder, filename)
+        
+        with open(filepath, 'w') as f:
+            json.dump(data, f, indent=2)
+        
+        print('Saved: ' + filepath)
