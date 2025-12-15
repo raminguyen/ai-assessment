@@ -1,33 +1,41 @@
 #!/bin/bash
 
 WRITER=$1
-GRADERS=$2
-RUBRIC=$3
-ASSIGNMENT=$4
+RUBRIC=$2
+ASSIGNMENT=$3
 
-echo "Running pipeline: Writer=$WRITER, Graders=$GRADERS, Rubric=$RUBRIC, Assignment=$ASSIGNMENT"
+# All models
+ALL_MODELS=("chatgpt" "grok" "gemini" "claude")
 
-# Generate
-echo "Step 1: Generating essay"
-python main.py generate $WRITER $ASSIGNMENT
+# Filter graders (exclude writer)
+GRADERS=()
 
-# Tune
-echo "Step 2: Tuning essay"
-python main.py tune $WRITER $RUBRIC $ASSIGNMENT
-
-# Score with each grader
-STEP=3
-
-for GRADER in $GRADERS; do
-    
-    echo "Step ${STEP}a: $GRADER grading generated essay"
-    python main.py score $GRADER $RUBRIC ${WRITER}_essay.json $ASSIGNMENT
-    
-    echo "Step ${STEP}b: $GRADER grading tuned essay"
-    python main.py score $GRADER $RUBRIC ${WRITER}_essay_tuned.json $ASSIGNMENT
-    
-    STEP=$((STEP + 1))
-
+for model in "${ALL_MODELS[@]}"; do
+    if [ "$model" != "$WRITER" ]; then
+        GRADERS+=("$model")
+    fi
 done
 
-echo "Done! Check assignment_${ASSIGNMENT}.json"
+cd src
+source ~/miniconda3/etc/profile.d/conda.sh
+conda activate assessment
+echo "Conda activated"
+
+echo "Step 1: Writer ($WRITER) is working."
+
+python main.py generate $WRITER $ASSIGNMENT
+python main.py tune $WRITER $RUBRIC $ASSIGNMENT
+
+echo "Step 2: Graders (${GRADERS[@]}) scoring."
+
+for GRADER in "${GRADERS[@]}"; do
+    python main.py score $GRADER $WRITER generate $RUBRIC $ASSIGNMENT
+    python main.py score $GRADER $WRITER tune $RUBRIC $ASSIGNMENT
+done
+
+echo "Step 3: Export to CSV"
+
+cd ../ tools 
+python table.py
+
+echo "Done!"

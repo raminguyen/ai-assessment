@@ -3,8 +3,10 @@ import json
 from datetime import datetime
 import strip_markdown
 from docx import Document
+from ai_assessment import Essay
 
 class Util:
+
     OUTPUT_FOLDER = "results"
     
     @staticmethod
@@ -38,36 +40,8 @@ class Util:
         print("Saved at", file_path)
 
         return file_path
-        
-    @staticmethod
-    def jsontodoc(json_file, output_name=None):
-        json_path = os.path.join(Util.OUTPUT_FOLDER, json_file)
-        
-        with open(json_path, "r") as f:
-            data = json.load(f)
-        
-        text = data["result"]
-        
-        if output_name is None:
-            output_name = json_file.replace(".json", ".docx")
-        
-        clean_text = strip_markdown.strip_markdown(text)
-        
-        doc = Document()
-        doc.add_paragraph(clean_text)
-        
-        docs_folder = os.path.join(Util.OUTPUT_FOLDER, "docs")
-        os.makedirs(docs_folder, exist_ok=True)
-        output_path = os.path.join(docs_folder, output_name)
-        
-        doc.save(output_path)
-        print("Saved at", output_path)
-        return output_path
     
-    @staticmethod
-    def batch_jsontodoc(json_files):
-        for json_file in json_files:
-            Util.jsontodoc(json_file)
+    
     
     @staticmethod
     def load_essay(filename):
@@ -79,46 +53,148 @@ class Util:
         
         return data["result"]
     
+        
     
     @staticmethod
-    def grade_all(essay, rubric, graders, writer_model, essay_file, assignment):
-       
-        """Grade essay with all grader models"""
-        grade_files = []
-
-        for name in graders:
-            # Run grading for this grader
-            graded, grade_time = graders[name].grade(essay, rubric)
-
-            # Create output file for this grader
-            grade_file = name + "_grade_essay" + str(assignment) + ".json"
-
-            Util.texttojson(graded, grade_file, essay, rubric, 
-                        writer_model=writer_model, 
-                        grader_model=graders[name], 
-                        source_file=essay_file,
-                        grade_time=grade_time)
-            grade_files.append(grade_file)
-        
-        return grade_files
+    def create_essay(assignment):
+        """Create and load essay"""
+        essay = Essay('Essay_' + str(assignment))
+        essay.load_prompt(assignment)
+        return essay
     
     @staticmethod
-    def combine_all_json(output_folder):
-        """Combine all JSON files into one"""
-        combined_data = {"operations": []}
+    def save_data(data, assignment):
+        """Add assignment and save to file"""
+        data['assignment'] = assignment
+        Util.save_to_file('data.json', data)
+
+
+    @staticmethod
+    def load_essay_from_data(assignment, essay_type, writer=None):
+
+        """ Get essay text from data.json """
+
+        filepath = os.path.join('..', 'data', 'data.json')
         
-        # Get all JSON files
-        for file in os.listdir(output_folder):
-            if file.endswith('.json') and file != 'combined.json':
-                file_path = os.path.join(output_folder, file)
+        # 1. map user input
+        name_map = {
+            "chatgpt": "gpt", 
+            "claude": "claude",
+            "gemini": "gemini",
+            "grok": "grok"
+        }
+
+        search_term = name_map.get(writer, writer)
+
+        # 2. Load data.json
+        filepath = os.path.join('..', 'data', 'data.json')
+        with open(filepath, 'r') as f:
+            all_data = json.load(f)
+
+        # 3. Find matching essay
+        operations = all_data['assignment_' + str(assignment)] 
+        
+        for op in operations:
+            # Check if command matches (e.g., 'generate', or 'tune')
+            if op.get("command") != essay_type:
+                continue
+
+            # Check if writer matches 
+            if writer and search_term not in op.get("model", ""):
+                continue
                 
-                with open(file_path, 'r') as f:
-                    data = json.load(f)
-                    combined_data["operations"].append(data)
+            return op["result"], op.get("model")
+            
+
+    @staticmethod
+    def check_data_exists(assignment, command, model_name, essay_type=None, writer=None, rubric=None):
+
+        """ check if data already exists in data.json"""
+
+        name_map = {
+            "chatgpt": "gpt", 
+            "claude": "claude",
+            "gemini": "gemini",
+            "grok": "grok"
+        }
         
-        # Save combined file
-        combined_file = os.path.join(output_folder, 'combined.json')
-        with open(combined_file, 'w') as f:
-            json.dump(combined_data, f, indent=2)
+        search_writer = name_map.get(writer, writer)
+
+        filepath = os.path.join('..', 'data', 'data.json')
         
-        print('Combined: ' + combined_file)
+        if not os.path.exists(filepath):
+            return False
+            
+        with open(filepath, 'r') as f:
+            all_data = json.load(f)
+            
+        #check assignment if exists
+        assignment_key = 'assignment_' + str(assignment)
+
+        if assignment_key not in all_data:
+            return False
+
+        #find assignment    
+        operations = all_data[assignment_key]
+        
+        for op in operations:
+
+            #command does not match
+            if op.get('command') != command:
+                continue
+            
+            #model does not match
+            current_model = op.get('grader') if op.get('grader') else op.get('model')
+
+    
+            if current_model != model_name:
+                continue
+                
+            if rubric and op.get('rubric') != rubric:
+                continue
+
+            #essay type does not match
+            if essay_type and op.get('essay_type') != essay_type:
+                continue
+
+            if writer and search_writer not in op.get('writer', ''):
+                continue
+            
+            return True
+            
+        return False
+    
+    @staticmethod
+
+    def save_to_file(filename, data):
+
+        """Append data to JSON file organized by assignment"""
+        
+        # Save to data folder
+        filepath = os.path.join('..', 'data', filename)
+        
+        all_data = {}
+        
+        if os.path.exists(filepath):
+            f = open(filepath, 'r')
+            content = f.read()
+            f.close()
+            
+            if content:
+                all_data = json.loads(content)
+        
+        # Get assignment key
+        assignment_key = 'assignment_' + str(data.get('assignment', 1))
+
+        if assignment_key not in all_data:
+            all_data[assignment_key] = []
+                    
+        # Append to assignment
+        all_data[assignment_key].append(data)
+        
+        f = open(filepath, 'w')
+        
+        json.dump(all_data, f, indent=2)
+        f.close()
+        
+        print('Saved to: ' + filepath)

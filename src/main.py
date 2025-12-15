@@ -1,128 +1,15 @@
 import argparse
-import json
-import os
 from datetime import datetime
-from ai_assessment import (
-    Essay,
-    Rubric,
-    ModelChatGPT,
-    ModelClaude,
-    ModelGemini3ProPreview,
-    ModelGrok
-)
-
-
-def save_to_file(filename, data):
-    """Append data to JSON file"""
-    all_data = {"operations": []}
-    
-    if os.path.exists(filename):
-        with open(filename, 'r') as f:
-            all_data = json.load(f)
-    
-    all_data["operations"].append(data)
-    
-    with open(filename, 'w') as f:
-        json.dump(all_data, f, indent=2)
-    
-    print('Saved to: ' + filename)
-
+from ai_assessment import Rubric, ModelChatGPT, ModelClaude, ModelGemini3ProPreview, ModelGrok, Util
 
 def main():
-    
+
     all_models = {
         "gemini": ModelGemini3ProPreview(),
         "chatgpt": ModelChatGPT(),
         "claude": ModelClaude(),
         "grok": ModelGrok()
     }
-
-    def generate_cmd(args):
-        model = all_models[args.model]
-        essay = Essay('Essay_' + str(args.assignment))
-        essay.load_prompt(args.assignment)
-        
-        result = model.generate(essay)
-        
-        data = {
-            "model": args.model,
-            "command": "generate",
-            "result": result,
-            "time_minutes": round(essay.time / 60, 2)
-        }
-        
-        # Save individual file
-        individual_file = args.model + '_essay.json'
-        with open(individual_file, 'w') as f:
-            json.dump(data, f, indent=2)
-        print('Saved to: ' + individual_file)
-        
-        # Save to assignment file
-        assignment_file = 'assignment_' + str(args.assignment) + '.json'
-        save_to_file(assignment_file, data)
-
-    def tune_cmd(args):
-        model = all_models[args.model]
-        essay = Essay('Essay_' + str(args.assignment))
-        rubric = Rubric(args.rubric)
-        essay.load_prompt(args.assignment)
-        
-        result = model.tune(essay, rubric)
-        
-        data = {
-            "model": args.model,
-            "command": "tune",
-            "rubric": args.rubric,
-            "result": result,
-            "time_minutes": round(essay.time / 60, 2)
-        }
-        
-        # Save individual file
-        individual_file = args.model + '_essay_tuned.json'
-        with open(individual_file, 'w') as f:
-            json.dump(data, f, indent=2)
-        print('Saved to: ' + individual_file)
-        
-        # Save to assignment file
-        assignment_file = 'assignment_' + str(args.assignment) + '.json'
-        save_to_file(assignment_file, data)
-
-    def score_cmd(args):
-        model = all_models[args.model]
-        
-        with open(args.essay_file, 'r') as f:
-            essay_data = json.load(f)
-        
-        if "operations" in essay_data:
-            essay_text = essay_data["operations"][-1]["result"]
-        else:
-            essay_text = essay_data["result"]
-        
-        essay = Essay('Essay_' + str(args.assignment))
-        rubric = Rubric(args.rubric)
-        essay.load_prompt(args.assignment)
-        essay.essay_text = essay_text
-        
-        result, elapsed = model.grade(essay, rubric)
-        
-        data = {
-            "model": args.model,
-            "command": "score",
-            "rubric": args.rubric,
-            "source": args.essay_file,
-            "result": result,
-            "time_minutes": round(elapsed / 60, 2)
-        }
-        
-        # Save individual file
-        individual_file = args.model + '_grade.json'
-        with open(individual_file, 'w') as f:
-            json.dump(data, f, indent=2)
-        print('Saved to: ' + individual_file)
-        
-        # Save to assignment file
-        assignment_file = 'assignment_' + str(args.assignment) + '.json'
-        save_to_file(assignment_file, data)
 
     parser = argparse.ArgumentParser()
     subparsers = parser.add_subparsers(dest='command')
@@ -137,19 +24,87 @@ def main():
     tune.add_argument('assignment', type=int)
     
     score = subparsers.add_parser('score')
-    score.add_argument('model', choices=['chatgpt', 'gemini', 'claude', 'grok'])
+    score.add_argument('grader', choices=['chatgpt', 'gemini', 'claude', 'grok'], help="The model doing the grading")
+    score.add_argument('writer', choices=['chatgpt', 'gemini', 'claude', 'grok'], help="The model that wrote the essay")
+
+    score.add_argument('essay_type', choices=['generate', 'tune'], help='Which essay to score')
     score.add_argument('rubric', type=str)
-    score.add_argument('essay_file', type=str)
     score.add_argument('assignment', type=int)
     
     args = parser.parse_args()
-    
+
+    def generate_cmd(args):
+
+        model = all_models[args.model]
+
+        if Util.check_data_exists(args.assignment, 'generate', model.name):
+            print('Already exists, skipping: ' + args.model + ' generate assignment ' + str(args.assignment))
+            return
+
+        #1.Set up model and essay
+        model = all_models[args.model]
+        essay = Util.create_essay(args.assignment)
+
+        #2.Generate and save
+        data = model.generate(essay)
+        Util.save_data(data, args.assignment)
+
+    def tune_cmd(args):
+
+        model = all_models[args.model]
+
+        if Util.check_data_exists(args.assignment, 'tune', model.name, rubric=args.rubric):
+            print('Already exists, skipping: ' + args.model + ' tune assignment ' + str(args.assignment))
+            return
+
+        #1. Set up model, essay, and rubric
+        model = all_models[args.model]
+        essay = Util.create_essay(args.assignment)
+        rubric = Rubric(args.rubric)
+        
+        #2. Tune and save
+        data = model.tune(essay, rubric)
+        data['rubric'] = args.rubric
+        Util.save_data(data, args.assignment)
+
+    def score_cmd(args):
+
+        grader_model = all_models[args.grader]
+        writer_target = args.writer
+
+        if Util.check_data_exists(args.assignment, 'score', grader_model.name, essay_type=args.essay_type, writer=args.writer, rubric=args.rubric):
+            print('Already exists, skipping: ' + args.grader + ' grading ' + args.writer + ' (' + args.essay_type + ') assignment ' + str(args.assignment))
+            return
+        
+        #1: Set up model, and load essay
+        essay_text, writer_name = Util.load_essay_from_data(args.assignment, args.essay_type, writer=writer_target)
+        
+        #2. Load essay and rubric
+        essay = Util.create_essay(args.assignment)
+        rubric = Rubric(args.rubric)
+        essay.essay_text = essay_text
+
+        #3. Grade and Save
+        data = grader_model.score(essay, rubric, writer=writer_name, essay_type=args.essay_type)
+
+        data['writer'] = writer_name 
+        data['rubric'] = args.rubric
+        data['scored_essay_text'] = essay_text
+
+        Util.save_data(data, args.assignment)
+
+    #
+    # Route to command
+    #
+
     if args.command == 'generate':
         generate_cmd(args)
     elif args.command == 'tune':
         tune_cmd(args)
     elif args.command == 'score':
         score_cmd(args)
+    elif args.command == 'exporttodocs':
+        Util.export_all_to_docs()
 
 
 if __name__ == "__main__":

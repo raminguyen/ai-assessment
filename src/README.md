@@ -1,43 +1,46 @@
-```bash
-python main.py [writer] [workflow] [rubric] [assignment]
-```
+# AI Essay Assessment Tool
 
-## Arguments
+## How It Works
 
-1. **writer**: Which AI writes the essay
-   - Options: `chatgpt`, `gemini`, `claude`, `grok`
+1. **Generate** - A model writes an essay
+2. **Tune** - The same model improves the essay based on a rubric
+3. **Score** - Other models grade both essays
 
-2. **workflow**: Which workflow to run
-   - `norubric` - Generate without rubric, grade with rubric
-   - `withrubric` - Generate with rubric, grade with rubric
-   - `both` - Run both workflows
+All results are saved to `data.json` organized by assignment.
 
-3. **rubric**: Which rubric to use for grading
-   - Options: `critical_thinking`, `oral_communication`
-
-4. **assignment**: Assignment number
-   - Any number: `1`, `2`, `3`
-
-## Examples
+## Installation
 
 ```bash
-# ChatGPT writes, both workflows, oral_communication rubric, assignment 1
-python main.py chatgpt both oral_communication 1
-
-# Gemini writes, only norubric workflow, critical_thinking rubric, assignment 2
-python main.py gemini norubric critical_thinking 2
-
-# Grok writes, only withrubric workflow, oral_communication rubric, assignment 3
-python main.py grok withrubric oral_communication 3
-
-# Claude writes, both workflows, critical_thinking rubric, assignment 1
-python main.py claude both critical_thinking 1
+pip install -r requirements.txt
 ```
 
-## What Happens
+## Commands
 
-- Writer generates essay
-- All other models grade the essay
-- Results saved to: `output/assignment_[N]/[writer]/[rubric]/[workflow]/`
-- JSON files and Word docs created automatically
+Generate essay:
+```bash
+python main.py generate chatgpt 1
 ```
+
+Tune essay:
+```bash
+python main.py tune chatgpt critical_thinking 1
+```
+
+Score essay:
+```bash
+python main.py score grok chatgpt generate critical_thinking 1
+```
+
+All commands are flexible. Change writer, grader, rubric, and assignment.
+
+## Full Pipeline
+
+```bash
+bash ./run_pipeline.sh chatgpt critical_thinking 1
+```
+
+**Note:** chatgpt is writer, the rest (grok, gemini, claude) are graders.
+
+## Results
+
+Results saved to `../data/data.json`

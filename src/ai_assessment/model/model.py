@@ -1,6 +1,5 @@
 import time
-import time
-
+from datetime import datetime
 
 class Model:
     def __init__(self, model_name):
@@ -8,6 +7,7 @@ class Model:
         self.client = None
     
     def generate(self, essay):
+
         print("Generating an essay")
         start = time.time()
         result = self.api_call(essay.write_prompt)
@@ -17,10 +17,20 @@ class Model:
         essay.time = time.time() - start
         print(f"Done in {essay.time/60:.2f} mins")
         time.sleep(5)
-
-        return result
+        
+        # Create a JSON data
+        data = {
+            "command": "generate",
+            "model": self.name,
+            "essay_name": essay.name,
+            "result": result,
+            "time_minutes": round(essay.time / 60, 2),
+            "timestamp": datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        }
+        return data
     
     def tune(self, essay, rubric):
+
         print("Tuning with rubric")
         start = time.time()
         result = self.api_call(rubric.text + essay.write_prompt)
@@ -29,11 +39,20 @@ class Model:
         essay.status = 2
         essay.time = time.time() - start
         print(f"Done in {essay.time/60:.2f} mins")
-        time.sleep(5)
 
-        return result
+        time.sleep(5)
+        
+        data = {
+            "command": "tune",
+            "model": self.name,
+            "essay_name": essay.name,
+            "result": result,
+            "time_minutes": round(essay.time / 60, 2),
+            "timestamp": datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        }
+        return data
     
-    def grade(self, essay, rubric):
+    def score(self, essay, rubric, writer=None, essay_type=None):
 
         print("Grading essay")
         start = time.time()
@@ -45,4 +64,15 @@ class Model:
         print(f"Done in {elapsed/60:.2f} mins")
         time.sleep(5)
         
-        return result, elapsed
+        # Create and return data
+        data = {
+            "command": "score",
+            "grader": self.name,
+            "writer": writer,
+            "essay_type": essay_type,
+            "essay_name": essay.name,
+            "result": result,
+            "time_minutes": round(elapsed / 60, 2),
+            "timestamp": datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    }
+        return data
