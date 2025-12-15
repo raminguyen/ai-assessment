@@ -1,54 +1,49 @@
 import json
 import os
+import glob
 from docx import Document
 
-@staticmethod
 def main():
-    """Convert all results in data.json to Word documents"""
+    """Convert individual result files to Word documents"""
 
-    # Load data
-    data_path = os.path.join('..', 'data', 'data.json')
-
-    with open(data_path, 'r') as f:
-        all_data = json.load(f)
+    data_path = os.path.join('..', 'data')
     
-    # Create docs folder
-    docs_folder = os.path.join('..', 'data','docs')
-    os.makedirs(docs_folder, exist_ok=True)
-    
-    # Loop through all assignments
-    for assignment_key, operations in all_data.items():
-        for op in operations:
-         
-            command = op.get('command', 'unknown')
+    # Get all .json files from rubric folders
+    for rubric in os.listdir(data_path):
+        rubric_path = os.path.join(data_path, rubric)
+        if not os.path.isdir(rubric_path):
+            continue
+        
+        # Get all .json files (generate, tune, score)
+        json_files = glob.glob(os.path.join(rubric_path, '*.json'))
+        
+        # Also get generate files from data/ and put in rubric docs
+        json_files += glob.glob(os.path.join(data_path, '*generate*.json'))
+        
+        docs_folder = os.path.join(rubric_path, 'docs')
+        os.makedirs(docs_folder, exist_ok=True)
+        
+        for filepath in json_files:
+            with open(filepath, 'r') as f:
+                data = json.load(f)
+            
+            # Skip score files
+            command = data.get('command', 'unknown')
             if command == 'score':
                 continue
             
-            # Get result text
-            result = op.get('result', '')
+            result = data.get('result', '')
             if not result:
                 continue
             
-            # Build filename
-            model = op.get('model', 'unknown')
-            
-            if command == 'generate':
-                filename = assignment_key + '_' + model + '_generate.docx'
-            elif command == 'tune':
-                filename = assignment_key + '_' + model + '_tuned.docx'
-            else:
-                filename = assignment_key + '_' + model + '_' + command + '.docx'
-            
-            # Create document
+            filename = os.path.basename(filepath).replace('.json', '.docx')
             doc = Document()
             doc.add_paragraph(result)
-            
-            # Save
             doc_path = os.path.join(docs_folder, filename)
             doc.save(doc_path)
             print('Saved: ' + filename)
     
-    print('All documents saved to: ' + docs_folder)
+    print('All documents saved!')
 
 if __name__ == "__main__":
     main()

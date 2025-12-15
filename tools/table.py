@@ -1,47 +1,77 @@
 import json
 import pandas as pd
 import os
-
-# Load data
-data_path = os.path.join('..','data', 'data.json')
-
-with open(data_path, 'r') as f:
-    data = json.load(f)
+import glob
 
 rows = []
 
-for assignment_key, operations in data.items():
-    for op in operations:
-        # Get essay text - prioritize scored_essay_text, fall back to result
-        essay_text = op.get('scored_essay_text') or op.get('result', '')
+data_path = os.path.join('..', 'data')
+
+# Get all .json files from data/ folder (generate files)
+json_files = glob.glob(os.path.join(data_path, '*.json'))
+
+for filepath in json_files:
+    with open(filepath, 'r') as f:
+        data = json.load(f)
+    
+    essay_text = data.get('scored_essay_text') or data.get('result', '')
+    if essay_text and len(essay_text) > 500:
+        essay_text = essay_text[:500] + "..."
+    
+    filename = os.path.basename(filepath)
+    assignment = filename.split('_')[1]
+    
+    row = {
+        'Assignment': 'assignment_' + assignment,
+        'Command': data.get('command'),
+        'Model/Grader': data.get('model') or data.get('grader'),
+        'Writer': data.get('writer'),
+        'Essay Type': data.get('essay_type'),
+        'Rubric': '',
+        'Time (mins)': data.get('time_minutes'),
+        'Timestamp': data.get('timestamp'),
+        'Result': data.get('result', ''),
+        'Essay Text': essay_text
+    }
+    rows.append(row)
+
+# Get all rubric folders
+for rubric in os.listdir(data_path):
+    rubric_path = os.path.join(data_path, rubric)
+    if not os.path.isdir(rubric_path):
+        continue
+    
+    # Get all .json files in rubric folder
+    json_files = glob.glob(os.path.join(rubric_path, '*.json'))
+    
+    for filepath in json_files:
+        with open(filepath, 'r') as f:
+            data = json.load(f)
+        
+        essay_text = data.get('scored_essay_text') or data.get('result', '')
         if essay_text and len(essay_text) > 500:
             essay_text = essay_text[:500] + "..."
         
+        filename = os.path.basename(filepath)
+        assignment = filename.split('_')[1]
+        
         row = {
-            'Assignment': assignment_key,
-            'Command': op.get('command'),
-            'Model/Grader': op.get('model') or op.get('grader'),
-            'Writer': op.get('writer'),
-            'Essay Name': op.get('essay_name'),
-            'Essay Type': op.get('essay_type'),
-            'Rubric': op.get('rubric', ''),
-            'Time (mins)': op.get('time_minutes'),
-            'Timestamp': op.get('timestamp'),
-            'Result': op.get('result', ''),
+            'Assignment': 'assignment_' + assignment,
+            'Command': data.get('command'),
+            'Model/Grader': data.get('model') or data.get('grader'),
+            'Writer': data.get('writer'),
+            'Essay Type': data.get('essay_type'),
+            'Rubric': rubric,
+            'Time (mins)': data.get('time_minutes'),
+            'Timestamp': data.get('timestamp'),
+            'Result': data.get('result', ''),
             'Essay Text': essay_text
         }
         rows.append(row)
 
-# Create DataFrame
 df = pd.DataFrame(rows)
 
-# Display
-print(df.to_string(index=False))
 
-csv_path = os.path.join('..','data', 'data.csv')
-
-
-# Save to CSV
+csv_path = os.path.join('..', 'data', 'alldata.csv')
 df.to_csv(csv_path, index=False)
-
-print('\nSaved to data.csv')
+print('\nSaved to alldata.csv')

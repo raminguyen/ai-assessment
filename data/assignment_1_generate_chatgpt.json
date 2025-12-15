@@ -1,0 +1,8 @@
+{
+  "command": "generate",
+  "model": "gpt-5.2-2025-12-11",
+  "essay_name": "Essay_1",
+  "result": "The can\u2019s opening sound becomes a conditioned stimulus predicting food; cats\u2019 approach/purring are conditioned responses (classical). Their rubbing and vocalizing are operant, reinforced by receiving food/attention; Professor Catlove\u2019s feeding is reinforced by affectionate cat behavior. Social learning is minimal, unless cats copy one another\u2019s rushing behavior.\n\n**References (peer\u2011reviewed)**  \nPavlov, I. P. (1927). *Conditioned reflexes*. Oxford University Press.  \nSkinner, B. F. (1938). *The behavior of organisms*. Appleton-Century.  \nThorndike, E. L. (1898). Animal intelligence: An experimental study of the associative processes in animals. *Psychological Review Monograph Supplements, 2*(4), 1\u2013109.  \nBandura, A. (1977). Social learning theory. *General Learning Press*.  \nGalef, B. G., Jr., & Laland, K. N. (2005). Social learning in animals: Empirical studies and theoretical models. *BioScience, 55*(6), 489\u2013499.",
+  "time_minutes": 0.09,
+  "timestamp": "2025-12-15 18:18:19"
+}
