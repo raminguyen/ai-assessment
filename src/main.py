@@ -23,18 +23,20 @@ def main():
     all_models = {
         "gemini": ModelGemini3ProPreview(),
         "chatgpt": ModelChatGPT(),
-        #"claude": ModelClaude(), #end for now, as server is overloaded.
+        "claude": ModelClaude(),
         "grok": ModelGrok()
     }
 
 
     #3. Pick the writer model
     writer_model = all_models[args.writer]
+    print("writer model is", args.writer)
 
     graders = {}
     for name, model in all_models.items():
         if name != args.writer:
             graders[name] = model
+            print("grader models are", name)
 
     # Set up essay and rubric
     essay = Essay('Essay_' + str(args.assignment))
