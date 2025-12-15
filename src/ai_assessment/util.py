@@ -101,3 +101,24 @@ class Util:
             grade_files.append(grade_file)
         
         return grade_files
+    
+    @staticmethod
+    def combine_all_json(output_folder):
+        """Combine all JSON files into one"""
+        combined_data = {"operations": []}
+        
+        # Get all JSON files
+        for file in os.listdir(output_folder):
+            if file.endswith('.json') and file != 'combined.json':
+                file_path = os.path.join(output_folder, file)
+                
+                with open(file_path, 'r') as f:
+                    data = json.load(f)
+                    combined_data["operations"].append(data)
+        
+        # Save combined file
+        combined_file = os.path.join(output_folder, 'combined.json')
+        with open(combined_file, 'w') as f:
+            json.dump(combined_data, f, indent=2)
+        
+        print('Combined: ' + combined_file)
