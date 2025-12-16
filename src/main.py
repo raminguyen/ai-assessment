@@ -1,7 +1,7 @@
 import argparse
 from datetime import datetime
+from ai_assessment import Run
 import os 
-from ai_assessment import Runner
 
 def main():
 
@@ -23,14 +23,12 @@ def main():
     score.add_argument('rubric', type=str)
     score.add_argument('filename', help='Individual file to read')
     score.add_argument('assignment', type=int)
-    
+
 
     args = parser.parse_args()
-    Runner = Runner()
+    Runner = Run()
 
-    Runner.generate(args)
-    Runner.tune(args)
-    Runner.score(args) 
+    Runner.run(args)
 
 if __name__ == "__main__":
     main()
