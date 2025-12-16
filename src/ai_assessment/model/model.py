@@ -3,7 +3,6 @@ from datetime import datetime
 from ai_assessment import Rubric, ModelChatGPT, ModelClaude, ModelGemini3ProPreview, ModelGrok, Util
 import argparse
 
-
 class Model:
     def __init__(self, model_name):
         self.name = model_name

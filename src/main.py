@@ -24,7 +24,7 @@ def main():
     score.add_argument('filename', help='Individual file to read')
     score.add_argument('assignment', type=int)
     
-    
+
     args = parser.parse_args()
     Runner = Runner()
 

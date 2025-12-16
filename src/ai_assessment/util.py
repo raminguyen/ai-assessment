@@ -101,6 +101,20 @@ class Util:
         
         print('Saved to: ' + filepath)
 
+    def build_filename(assignment, command, short_model, essay_type=None, short_writer=None):
+        
+        """Build filename based on command"""
+        base = "a" + str(assignment)
+        essay_abbr = "gen" if essay_type == "generate" else "tune"
+        
+        filename_map = {
+            'generate': base + "_gen_" + short_model + ".json",
+            'tune': base + "_tune_" + short_model + ".json",
+            'score': base + "_" + essay_abbr + "_" + short_writer + "_score_" + short_model + ".json" if essay_type and short_writer else None,
+        }
+        
+        return filename_map.get(command, base + "_" + short_model + ".json")
+
     @staticmethod
     def save_individual_file(data, assignment, command, model_name, essay_type=None, rubric=None, writer=None):
         """Save individual JSON file for each command in rubric folder"""
@@ -123,21 +137,9 @@ class Util:
         short_model = name_map.get(model_name, model_name)
 
         short_writer = name_map.get(writer, writer) if writer else None
-        
-        # Build filename
-        if command == 'generate':
-            filename = "a" + str(assignment) + "_gen_" + short_model + ".json"
-        elif command == 'tune':
-            filename = "a" + str(assignment) + "_tune_" + short_model + ".json"
-        
-        elif command == 'score' and essay_type and short_writer:
-            essay_abbr = "gen" if essay_type == "generate" else "tune"
 
-            filename = "a" + str(assignment) + "_" + essay_abbr + "_" + short_writer + "_score_" + short_model  + ".json"
-        
-        else:
-            filename = "a" + str(assignment) + "_" + short_model + ".json"
-        
+        filename = Util.build_filename(assignment, command, short_model, essay_type, short_writer)
+
         filepath = os.path.join(folder, filename)
         
         with open(filepath, 'w') as f:
@@ -160,8 +162,10 @@ class Util:
         
         if 'gen' in filename:
             essay_type = 'generate'
+
         elif 'tune' in filename:
             essay_type = 'tune'
+            
         else:
             essay_type = 'generate'
         
@@ -181,27 +185,8 @@ class Util:
         short_model = name_map.get(model_name, model_name)
         short_writer = name_map.get(writer, writer) if writer else None
         
-        if command == 'generate':
-            filename = "a" + str(assignment) + "_gen_" + short_model + ".json"
-            folder = os.path.join('..', 'data', rubric)
-            filepath = os.path.join(folder, filename)
-            return os.path.exists(filepath)
-            
-        elif command == 'tune':
-            filename = "a" + str(assignment) + "_tune_" + short_model + ".json"
-            folder = os.path.join('..', 'data', rubric)
-            filepath = os.path.join(folder, filename)
-            return os.path.exists(filepath)
+        filename = Util.build_filename(assignment, command, short_model, essay_type, short_writer)
+        folder = os.path.join('..', 'data', rubric)
 
-        elif command == 'score' and essay_type and short_writer:
-            essay_abbr = "gen" if essay_type == "generate" else "tune"
-            filename = "a" + str(assignment) + "_" + essay_abbr + "_" + short_writer + "_score_" + short_model  + ".json"
-            folder = os.path.join('..', 'data', rubric)
-            filepath = os.path.join(folder, filename)
-            return os.path.exists(filepath)
-        
-        else:
-            filename = "a" + str(assignment) + "_" + short_model + ".json"
-            folder = os.path.join('..', 'data', rubric)
-            filepath = os.path.join(folder, filename)
-            return os.path.exists(filepath)
+        filepath = os.path.join(folder, filename)
+        return os.path.exists(filepath)
