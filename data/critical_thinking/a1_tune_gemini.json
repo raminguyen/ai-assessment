@@ -1,0 +1,9 @@
+{
+  "command": "tune",
+  "model": "gemini-3-pro-preview",
+  "essay_name": "Essay_1",
+  "result": "The can opener\u2019s sound predicts food, triggering the cats\u2019 physiological arousal via classical conditioning. Simultaneously, operant conditioning reinforces leg-rubbing through feeding, while the Professor is reinforced by the cessation of meowing. Social learning likely occurs as cats mimic each other\u2019s anticipatory behaviors, creating a complex, mutual feedback loop of interspecies reinforcement.\n\n**References**\n\n1. Bandura, A. (1977). Social learning theory. *General Learning Press*.\n2. Rescorla, R. A. (1988). Pavlovian conditioning: It's not what you think it is. *American Psychologist*, 43(3), 151\u2013160.\n3. Skinner, B. F. (1963). Operant behavior. *American Psychologist*, 18(8), 503\u2013515.\n4. Vitale, K. R., & Udell, M. A. R. (2019). The quality of being sociable: The influence of human interaction on cat behavior. *Applied Animal Behaviour Science*, 213, 11-18.\n5. Zentall, T. R. (2012). Perspectives on observational learning in animals. *Journal of Comparative Psychology*, 126(2), 114\u2013128.",
+  "time_minutes": 0.31,
+  "timestamp": "2025-12-16 10:59:03",
+  "rubric": "critical_thinking"
+}

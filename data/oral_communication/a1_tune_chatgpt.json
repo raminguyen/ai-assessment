@@ -1,0 +1,9 @@
+{
+  "command": "tune",
+  "model": "gpt-5.2-2025-12-11",
+  "essay_name": "Essay_1",
+  "result": "The can\u2019s opening sound becomes a conditioned stimulus predicting food, so cats\u2019 approach, purring, and rubbing are classically conditioned responses. Their affectionate displays are also operantly conditioned because Professor Catlove likely dispenses food (positive reinforcement). Professor may be conditioned to open cans by cats\u2019 cues. Cats may socially learn approaches by observing others.\n\n**References (peer-reviewed)**  \nPavlov, I. P. (1927). *Conditioned reflexes*. Oxford University Press.  \nSkinner, B. F. (1938). *The behavior of organisms: An experimental analysis*. Appleton-Century.  \nBandura, A. (1977). Social learning theory. *Prentice-Hall*.  \nZentall, T. R. (2012). Perspectives on observational learning in animals. *Journal of Comparative Psychology, 126*(2), 114\u2013128.  \nFugazza, C., & Mikl\u00f3si, \u00c1. (2014). Social learning in dog training: The effectiveness of the \u201cDo as I do\u201d method. *Animal Cognition, 17*(5), 827\u2013839.",
+  "time_minutes": 0.09,
+  "timestamp": "2025-12-16 11:24:44",
+  "rubric": "oral_communication"
+}

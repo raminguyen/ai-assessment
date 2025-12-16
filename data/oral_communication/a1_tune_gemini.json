@@ -1,0 +1,9 @@
+{
+  "command": "tune",
+  "model": "gemini-3-pro-preview",
+  "essay_name": "Essay_1",
+  "result": "**The Essay**\n\nClassical conditioning occurs when the can\u2019s sound elicits the cats\u2019 approach. Simultaneously, operant conditioning positively reinforces the cats\u2019 vocalizations through food rewards. Conversely, the professor experiences negative reinforcement; feeding the cats eliminates their persistent begging. Social learning is likely absent, as these behaviors are primarily instinctual or individually reinforced.\n\n**References**\n\nBandura, A. (1965). Influence of models' reinforcement contingencies on the acquisition of imitative responses. *Journal of Personality and Social Psychology*, 1(6), 589.\n\nGromov, V. S. (2020). Classical conditioning and operant conditioning: A review of theoretical issues. *Biology Bulletin*, 47, 915-926.\n\nRescorla, R. A. (1988). Pavlovian conditioning: It's not what you think it is. *American Psychologist*, 43(3), 151.\n\nSkinner, B. F. (1963). Operant behavior. *American Psychologist*, 18(8), 503.\n\nThorndike, E. L. (1898). Animal intelligence: An experimental study of the associative processes in animals. *The Psychological Review: Monograph Supplements*, 2(4), i.",
+  "time_minutes": 0.38,
+  "timestamp": "2025-12-16 11:28:19",
+  "rubric": "oral_communication"
+}

@@ -1,0 +1,9 @@
+{
+  "command": "tune",
+  "model": "claude-sonnet-4-5-20250929",
+  "essay_name": "Essay_1",
+  "result": "# Conditioning in Professor Catlove's Kitchen\n\nProfessor Catlove's morning routine demonstrates multiple learning principles. The cats exhibit classical conditioning: the sound of the can opener (conditioned stimulus) predicts food (unconditioned stimulus), triggering salivation and excitement (conditioned response). Their purring and leg-rubbing represent operant conditioning\u2014behaviors previously reinforced by receiving food. If multiple cats are present, social learning occurs as they observe each other's successful food-soliciting behaviors. Professor Catlove also displays operant conditioning; the cats' affectionate responses positively reinforce his feeding behavior, making him more likely to open cans promptly in future mornings.\n\n## References\n\nDomjan, M. (2005). Pavlovian conditioning: A functional perspective. *Annual Review of Psychology*, 56, 179-206.\n\nPearce, J. M., & Bouton, M. E. (2001). Theories of associative learning in animals. *Annual Review of Psychology*, 52, 111-139.\n\nRescorla, R. A. (1988). Pavlovian conditioning: It's not what you think it is. *American Psychologist*, 43(3), 151-160.\n\nSkinner, B. F. (1963). Operant behavior. *American Psychologist*, 18(8), 503-515.\n\nZentall, T. R. (2012). Perspectives on observational learning in animals. *Journal of Comparative Psychology*, 126(2), 114-128.",
+  "time_minutes": 0.15,
+  "timestamp": "2025-12-16 11:34:25",
+  "rubric": "oral_communication"
+}

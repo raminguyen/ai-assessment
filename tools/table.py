@@ -22,7 +22,7 @@ for filepath in json_files:
     assignment = filename.split('_')[1]
     
     row = {
-        'Assignment': 'assignment_' + assignment,
+        'Assignment': data.get('essay_name'),
         'Command': data.get('command'),
         'Model/Grader': data.get('model') or data.get('grader'),
         'Writer': data.get('writer'),

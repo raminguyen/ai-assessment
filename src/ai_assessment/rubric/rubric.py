@@ -10,3 +10,4 @@ class Rubric:
             data = json.load(f)
         
         self.text = data[rubric_type]
+        self.type = rubric_type

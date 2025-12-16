@@ -1,0 +1,9 @@
+{
+  "command": "tune",
+  "model": "claude-sonnet-4-5-20250929",
+  "essay_name": "Essay_1",
+  "result": "# Learned Behaviors in the Cat Food Ritual\n\nProfessor Catlove's morning routine demonstrates multiple learning processes. The cats exhibit classical conditioning: the can-opening sound (conditioned stimulus) predicts food (unconditioned stimulus), triggering salivation and excitement (conditioned response). Their affectionate behaviors\u2014purring and rubbing\u2014represent operant conditioning, as these actions previously earned faster feeding (positive reinforcement). Professor Catlove shows operant conditioning too; cat affection negatively reinforces his feeding behavior by reducing guilt. Social learning occurs if newer cats imitate veteran cats' rushing behavior, observing that this strategy succeeds.\n\n## References\n\nDomjan, M. (2005). Pavlovian conditioning: A functional perspective. *Annual Review of Psychology, 56*, 179-206.\n\nBouton, M. E. (2007). Learning and behavior: A contemporary synthesis. *Psychological Review, 114*(4), 1101-1126.\n\nSkinner, B. F. (1963). Operant behavior. *American Psychologist, 18*(8), 503-515.\n\nBandura, A. (1977). Social learning theory. *Psychological Review, 84*(2), 191-215.\n\nRescorla, R. A. (1988). Pavlovian conditioning: It's not what you think it is. *American Psychologist, 43*(3), 151-160.",
+  "time_minutes": 0.15,
+  "timestamp": "2025-12-16 11:05:57",
+  "rubric": "critical_thinking"
+}

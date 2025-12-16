@@ -1,0 +1,8 @@
+{
+  "command": "generate",
+  "model": "gemini-3-pro-preview",
+  "essay_name": "Essay_2",
+  "result": "**Essay**\n\nThe data indicate rising spending correlates with declining economic growth.\n\n**References**\n\nAfonso, A., & Furceri, D. (2010). Government size, composition, volatility and economic growth. *European Journal of Political Economy*, 26(4), 517-532.\n\nBarro, R. J. (1991). Economic growth in a cross section of countries. *The Quarterly Journal of Economics*, 106(2), 407-443.\n\nBergh, A., & Henrekson, M. (2011). Government size and growth: A survey and interpretation of the evidence. *Journal of Economic Surveys*, 25(5), 872-897.\n\nF\u00f6lster, S., & Henrekson, M. (2001). Growth effects of government expenditure and taxation in rich countries. *European Economic Review*, 45(8), 1501-1520.\n\nGrier, K. B., & Tullock, G. (1989). An empirical analysis of cross-national economic growth, 1951\u20131980. *Journal of Monetary Economics*, 24(2), 259-276.",
+  "time_minutes": 0.34,
+  "timestamp": "2025-12-16 11:12:57"
+}

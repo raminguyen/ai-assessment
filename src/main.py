@@ -17,33 +17,38 @@ def main():
     gen = subparsers.add_parser('generate')
     gen.add_argument('model', choices=['chatgpt', 'gemini', 'claude', 'grok'])
     gen.add_argument('assignment', type=int)
-    
+    gen.add_argument('--folder', type=str, required=True, help='Folder name for rubric')
+
     tune = subparsers.add_parser('tune')
     tune.add_argument('model', choices=['chatgpt', 'gemini', 'claude', 'grok'])
-    tune.add_argument('rubric', type=str)
     tune.add_argument('assignment', type=int)
+    tune.add_argument('rubric', type=str)
     
     score = subparsers.add_parser('score')
-    score.add_argument('grader', choices=['chatgpt', 'gemini', 'claude', 'grok'], help="The model doing the grading")
+    score.add_argument('grader', choices=['chatgpt', 'gemini', 'claude', 'grok'])
     score.add_argument('rubric', type=str)
     score.add_argument('filename', help='Individual file to read')
     score.add_argument('assignment', type=int)
     
+    
     args = parser.parse_args()
 
     def generate_cmd(args):
-        model = all_models[args.model]
 
-        if Util.check_data_exists(args.assignment, 'generate', args.model, rubric=None):
+        model = all_models[args.model]
+        rubric = args.folder
+
+        if Util.check_data_exists(args.assignment, 'generate', args.model, rubric=rubric):
             print('Already exists, skipping: ' + args.model + ' generate assignment ' + str(args.assignment))
             return
 
         model = all_models[args.model]
+
         essay = Util.create_essay(args.assignment)
 
         data = model.generate(essay)
         
-        Util.save_individual_file(data, args.assignment, 'generate', args.model, rubric=None)
+        Util.save_individual_file(data, args.assignment, 'generate', args.model, rubric=rubric)
 
 
     def tune_cmd(args):
@@ -67,10 +72,10 @@ def main():
 
 
     def score_cmd(args):
+
         grader_model = all_models[args.grader]
 
-        essay_type = args.filename.split('_')[2]
-        writer = args.filename.split('_')[3].replace('.json', '')
+        essay_type = 'generate' if 'gen' in args.filename else 'tune'
         
         # Load essay first to get writer_name
         essay_text, writer_name, essay_type = Util.load_essay_from_data(args.filename, rubric=args.rubric)
@@ -100,8 +105,6 @@ def main():
         tune_cmd(args)
     elif args.command == 'score':
         score_cmd(args)
-    elif args.command == 'exporttodocs':
-        Util.export_all_to_docs()
 
 
 if __name__ == "__main__":

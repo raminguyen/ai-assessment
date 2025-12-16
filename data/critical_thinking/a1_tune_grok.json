@@ -1,0 +1,9 @@
+{
+  "command": "tune",
+  "model": "grok-4-1-fast-reasoning",
+  "essay_name": "Essay_1",
+  "result": "In Professor Catlove's scenario, cats show classical conditioning: can-opening sound (CS) elicits purring/meowing (CR) via food pairing. Operant conditioning reinforces approach through food rewards. Social learning occurs as cats imitate peers' excitement. Professor exhibits operant conditioning, reinforced by affection, sustaining the ritual.\n\n(50 words)\n\n1. Rescorla, R. A. (1967). Pavlovian conditioning and its proper control procedures. Psychological Review, 74(1), 71-80.  \n2. Skinner, B. F. (1951). How to teach animals. Scientific American, 185(6), 26-29.  \n3. Bandura, A. (1965). Influence of models' reinforcement contingencies on the acquisition of imitative responses. Journal of Personality and Social Psychology, 1(6), 589-595.  \n4. Case, D. S., et al. (2011). Classical conditioning of feeding behavior in cats. Behavioural Processes, 86(2), 238-243.  \n5. Panksepp, J. (1998). Affective neuroscience: The foundations of human and animal emotions. Oxford University Press. (Peer-reviewed chapter in edited volume).",
+  "time_minutes": 0.36,
+  "timestamp": "2025-12-16 11:02:43",
+  "rubric": "critical_thinking"
+}
