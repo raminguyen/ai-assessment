@@ -1,6 +1,6 @@
 import argparse
 from datetime import datetime
-from ai_assessment import Run
+from ai_assessment import Runner
 import os 
 
 def main():
@@ -26,9 +26,19 @@ def main():
 
 
     args = parser.parse_args()
-    Runner = Run()
 
-    Runner.run(args)
+    runner = Runner()
+
+    if args.command == 'generate':
+        runner.generate(args.model, args.assignment, args.folder)
+
+    elif args.command == 'tune':
+        runner.tune(args.model, args.assignment, args.rubric)
+        
+    elif args.command == 'score':
+        runner.score(args.grader, args.rubric, args.filename, args.assignment)
+
 
 if __name__ == "__main__":
     main()
+
