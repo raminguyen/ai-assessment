@@ -1,8 +1,0 @@
-{
-  "command": "generate",
-  "model": "gpt-5.2-2025-12-11",
-  "essay_name": "Essay_1",
-  "result": "The can\u2019s opening sound becomes a conditioned stimulus predicting food, eliciting cats\u2019 approach and vocalizing (classical). Their rubbing/meowing is strengthened when Catlove feeds them (operant). Catlove may feed faster to stop meowing (negative reinforcement). Cats can also learn to approach by observing others\u2019 rushing to the kitchen (social learning).\n\n**References (peer\u2011reviewed):**  \nPavlov, I. P. (1927). *Conditioned reflexes*. *Oxford University Press*.  \nSkinner, B. F. (1938). *The behavior of organisms: An experimental analysis*. *Appleton-Century*.  \nBouton, M. E. (2007). Learning and behavior: A contemporary synthesis. *Sinauer*.  \nBandura, A. (1977). Social learning theory. *Prentice-Hall*.  \nZentall, T. R. (2012). Perspectives on observational learning in animals. *Journal of Comparative Psychology, 126*(2), 114\u2013127.",
-  "time_minutes": 0.08,
-  "timestamp": "2025-12-16 11:24:33"
-}
