@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Essay Explorer - Rami's Research Tool</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <!-- Header -->
+    <header class="header">
+        <div class="header-container">
+            <h1>AI Essay Explorer</h1>
+            <p>Explore GenAI-generated essays and assessments</p>
+        </div>
+    </header>
+
+    <!-- Main Container -->
+    <div class="main-container">
+        <!-- Left Panel -->
+        <div class="left-panel">
+            <h2>📁 Essays</h2>
+            
+            <!-- Upload Box -->
+            <div class="upload-box" id="uploadBox">
+                <div class="upload-icon">📁</div>
+                <p class="upload-text">Drag & Drop JSON files here</p>
+                <p class="upload-subtext">or click to browse</p>
+                <input type="file" id="fileInput" multiple accept=".json" hidden>
+            </div>
+
+            <!-- GitHub Button -->
+            <button class="copy-btn" id="githubBtn" style="width: 100%; margin-top: 1rem; background: rgba(85, 255, 221, 0.2);">
+                🌐 Load from GitHub
+            </button>
+
+            <!-- Filters -->
+            <div class="filters" id="filters" style="display: none;">
+                <h3>🔍 Filters</h3>
+                
+                <!-- Model Filter -->
+                <div class="filter-group">
+                    <label>Model:</label>
+                    <select id="modelFilter"></select>
+                </div>
+                
+                <!-- Essay Name Filter -->
+                <div class="filter-group">
+                    <label>Essay Name:</label>
+                    <select id="essayFilter"></select>
+                </div>
+                
+                <!-- Rubric Filter -->
+                <div class="filter-group">
+                    <label>Rubric Type:</label>
+                    <select id="rubricFilter"></select>
+                </div>
+                
+                <!-- Command Type Filter -->
+                <div class="filter-group">
+                    <label>Command Type:</label>
+                    <div class="checkbox-group">
+                        <label><input type="checkbox" id="filterGenerate" checked> Generate</label>
+                        <label><input type="checkbox" id="filterTune" checked> Tune</label>
+                        <label><input type="checkbox" id="filterScore" checked> Score</label>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Essay List -->
+            <div class="essay-list" id="essayList"></div>
+        </div>
+
+        <!-- Right Panel -->
+        <div class="right-panel" id="rightPanel">
+            <div class="welcome-message">
+                <h2>👋 Welcome!</h2>
+                <p>Upload your JSON files to get started.</p>
+                <div class="instructions">
+                    <h3>How to use:</h3>
+                    <ol>
+                        <li>Click or drag JSON files to the upload box</li>
+                        <li>Files will be organized by essay name</li>
+                        <li>Click on any item to view details</li>
+                        <li>Use the copy button to copy content</li>
+                    </ol>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <p>Created by Rami Huu Nguyen</p>
+    </footer>
+
+    <script src="script.js"></script>
+</body>
+</html>
