@@ -494,19 +494,19 @@ class UIRenderer {
      * @private
      */
     updateRightPanelSummary(rubricGroups, filters) {
-        let html = '<h2>📊 Filter Summary</h2>';
+        let html = '<h2> Filter Summary</h2>';
 
         html += '<div class="content-info" style="background: rgba(255, 255, 255, 0.05); border-left: 4px solid var(--rami-highlight);">';
         html += '<p><strong>Active Filters:</strong></p>';
         
         if (filters.essay !== 'all') {
-            html += `<p style="margin: 0.5rem 0; padding-left: 1rem;">📝 Assignment: <strong>${this.getDisplayName(filters.essay)}</strong></p>`;
+            html += `<p style="margin: 0.5rem 0; padding-left: 1rem;"> Assignment: <strong>${this.getDisplayName(filters.essay)}</strong></p>`;
         }
         if (filters.model !== 'all') {
-            html += `<p style="margin: 0.5rem 0; padding-left: 1rem;">🤖 Model: <strong>${filters.model}</strong></p>`;
+            html += `<p style="margin: 0.5rem 0; padding-left: 1rem;"> Model: <strong>${filters.model}</strong></p>`;
         }
         if (filters.rubric !== 'all') {
-            html += `<p style="margin: 0.5rem 0; padding-left: 1rem;">📋 Rubric: <strong>${ModelParser.formatRubricName(filters.rubric)}</strong></p>`;
+            html += `<p style="margin: 0.5rem 0; padding-left: 1rem;"> Rubric: <strong>${ModelParser.formatRubricName(filters.rubric)}</strong></p>`;
         }
         
         const commands = [];
@@ -525,20 +525,20 @@ class UIRenderer {
             
             if (assignmentPrompt) {
                 html += '<div class="content-box prompt-box">';
-                html += '<h3>✅ Assignment Prompt</h3>';
+                html += '<h3> ✅ Assignment Prompt</h3>';
                 html += `<div class="prompt-text">${assignmentPrompt}</div>`;
                 html += '</div>';
             }
             
             if (gradePrompt) {
                 html += '<div class="content-box prompt-box">';
-                html += '<h3>✅ Grading Prompt</h3>';
+                html += '<h3> ✅ Grading Prompt</h3>';
                 html += `<div class="prompt-text">${gradePrompt}</div>`;
                 html += '</div>';
             }
         }
 
-        html += '<div class="content-box"><h3>💡 Tip</h3><p>Click on any item in the left panel to view its full content below.</p></div>';
+        html += '<div class="content-box"><h3> Tip</h3><p>Click on any item in the left panel to view its full content below.</p></div>';
         html += '<hr style="border: 1px solid rgba(85, 255, 221, 0.2); margin: 2rem 0;">';
 
         this.elements.rightPanel.innerHTML = html;
