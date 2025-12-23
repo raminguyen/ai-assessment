@@ -11,7 +11,7 @@ class PromptLoader {
      * Load prompts from JSON file
      * @returns {Promise<object>} Promise that resolves with prompts object
      */
-    async loadPrompts(filePath = '/ai-assessment/src/ai_assessment/prompt.json') {
+    async loadPrompts(filePath = '/src/ai_assessment/prompt.json') {
         try {
             const response = await fetch(filePath);
             if (!response.ok) {

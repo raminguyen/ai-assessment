@@ -15,9 +15,10 @@ class ContentRenderer {
      * Render content in right panel
      * @param {string} commandType - Type of command (Generate/Tune/Score)
      * @param {object} data - Essay data object
+     * @param {string} gradePrompt - Grade prompt from UIRenderer
      */
-    render(commandType, data) {
-        const html = this.buildHTML(commandType, data);
+    render(commandType, data, gradePrompt = '') {
+        const html = this.buildHTML(commandType, data, gradePrompt);
         this.rightPanel.innerHTML = html;
 
         // Smooth scroll to top
@@ -26,17 +27,16 @@ class ContentRenderer {
             contentStart.scrollIntoView({ behavior: 'smooth', block: 'start' });
         }
     }
-
-    /**
+        /**
      * Build complete HTML for content
      * @private
      * @returns {string} HTML string
      */
-    buildHTML(commandType, data) {
+    buildHTML(commandType, data, gradePrompt = '') {
         let html = `<h2>${data.essay_name}</h2>`;
 
         html += this.buildInfoBox(commandType, data);
-        html += this.buildContentBox(commandType, data);
+        html += this.buildContentBox(commandType, data, gradePrompt);
         html += this.buildCopyButton(commandType);
 
         return html;
@@ -73,7 +73,7 @@ class ContentRenderer {
      * Build content box with essay or score
      * @private
      */
-    buildContentBox(commandType, data) {
+    buildContentBox(commandType, data, gradePrompt = '') {
         let html = '';
 
         // Display prompt if available
@@ -90,23 +90,23 @@ class ContentRenderer {
             html += `<div class="essay-text" id="essayText">${this.formatText(data.result)}</div>`;
             html += '</div>';
         } else if (commandType === 'Score') {
+            // Display grade prompt from UIRenderer
+            if (gradePrompt) {
+                html += '<div class="content-box prompt-box">';
+                html += '<h3>✅ Grading Prompt (Rubric)</h3>';
+                html += `<div class="prompt-text">${this.formatText(gradePrompt)}</div>`;
+                html += '</div>';
+            }
+
             html += '<div class="content-box">';
             html += '<h3>Evaluation</h3>';
             html += `<div class="essay-text" id="evaluationText">${this.formatText(data.result)}</div>`;
             html += '</div>';
-
-            if (data.scored_essay_text) {
-                html += '<div class="content-box">';
-                html += '<h3>Original Essay (Being Scored)</h3>';
-                html += `<div class="essay-text" id="originalEssay">${this.formatText(data.scored_essay_text)}</div>`;
-                html += '</div>';
-            }
         }
 
         return html;
     }
-
-    /**
+        /**
      * Build copy button
      * @private
      */

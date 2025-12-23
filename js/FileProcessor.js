@@ -20,7 +20,10 @@ class FileProcessor {
      */
     async loadPrompts() {
         try {
-            const response = await fetch('/src/ai_assessment/prompt.json');
+            const response = await fetch('src/ai_assessment/prompt.json');
+
+
+         
             if (!response.ok) {
                 console.warn('Could not load prompts');
                 return;
