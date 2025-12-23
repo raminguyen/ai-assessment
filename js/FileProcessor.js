@@ -10,16 +10,34 @@ class FileProcessor {
      */
     constructor(dataManager) {
         this.dataManager = dataManager;
-        this.promptLoader = new PromptLoader();
-        this.initPrompts();
+        this.prompts = {};
+        this.loadPrompts();
     }
 
     /**
-     * Initialize prompt loader
+     * Load prompts from JSON file
      * @private
      */
-    async initPrompts() {
-        await this.promptLoader.loadPrompts('/src/ai_assessment/prompt.json');
+    async loadPrompts() {
+        try {
+            const response = await fetch('/ai-assessment/src/ai_assessment/prompt.json');
+            if (!response.ok) {
+                console.warn('Could not load prompts');
+                return;
+            }
+            this.prompts = await response.json();
+            console.log('Prompts loaded successfully');
+        } catch (error) {
+            console.warn('Error loading prompts:', error);
+        }
+    }
+
+    /**
+     * Get prompt by key
+     * @private
+     */
+    getPrompt(key) {
+        return this.prompts[key] || '';
     }
 
     /**
@@ -147,7 +165,7 @@ class FileProcessor {
         if (!data.prompt) {
             const promptKey = this.getPromptKeyForEssay(essayName);
             if (promptKey) {
-                const prompt = this.promptLoader.getPrompt(promptKey);
+                const prompt = this.getPrompt(promptKey);
                 if (prompt) {
                     data.prompt = prompt;
                 }
