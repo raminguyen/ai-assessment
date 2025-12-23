@@ -55,11 +55,14 @@ class Util:
     
         
     @staticmethod
-    def create_essay(assignment):
+    def create_essay(assignment, rubric_folder="critical_thinking"):
         """Create and load essay"""
-        essay = Essay('Essay_' + str(assignment))
-        essay.load_prompt(assignment)
+        essay = Essay(
+            name='Assignment_' + str(assignment),
+            rubric_folder=rubric_folder
+        )
         return essay
+    
     
     @staticmethod
     def save_data(data, assignment):

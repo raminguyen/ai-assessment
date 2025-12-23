@@ -1,8 +1,0 @@
-{
-  "command": "generate",
-  "model": "claude-sonnet-4-5-20250929",
-  "essay_name": "Essay_1",
-  "result": "# Conditioning in Professor Catlove's Kitchen\n\nProfessor Catlove's morning routine demonstrates multiple learning paradigms. The cats exhibit classical conditioning, associating the can-opening sound (conditioned stimulus) with food (unconditioned stimulus), eliciting approach behaviors (conditioned response). Their rubbing behavior reflects operant conditioning, previously reinforced by receiving food. The professor's consistent feeding schedule represents operant conditioning maintained by positive reinforcement from the cats' affectionate responses, creating a mutually reinforcing behavioral loop.\n\n## References\n\nDomjan, M. (2005). Pavlovian conditioning: A functional perspective. *Annual Review of Psychology*, 56, 179-206.\n\nPanksepp, J. (2004). Affective neuroscience of the emotional BrainMind: Evolutionary perspectives and implications for understanding depression. *Dialogues in Clinical Neuroscience*, 6(4), 533-545.\n\nPierce, W. D., & Cheney, C. D. (2017). *Behavior analysis and learning: A biobehavioral approach* (6th ed.). Psychology Press.\n\nRescorla, R. A. (1988). Pavlovian conditioning: It's not what you think it is. *American Psychologist*, 43(3), 151-160.\n\nSkinner, B. F. (1953). *Science and human behavior*. Simon and Schuster.",
-  "time_minutes": 0.14,
-  "timestamp": "2025-12-16 11:34:10"
-}

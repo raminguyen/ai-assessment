@@ -1,9 +1,10 @@
 {
   "command": "tune",
   "model": "gpt-5.2-2025-12-11",
-  "essay_name": "Essay_1",
-  "result": "The can-opening sound becomes a conditioned stimulus predicting food, eliciting cats\u2019 approach and vocalizing (classical conditioning). Rubbing and meowing are reinforced when Catlove feeds them (operant conditioning), and Catlove\u2019s prompt serving is reinforced by reduced pestering (negative reinforcement). Cats may also learn the routine by observing each other\u2019s responses (social learning).\n\n**Peer-reviewed sources (examples):**  \nSkinner, B. F. (1938). *The Behavior of Organisms: An Experimental Analysis*. Appleton-Century.  \nPavlov, I. P. (1927). *Conditioned Reflexes*. Oxford University Press.  \nBandura, A. (1977). Social learning theory. *Prentice-Hall*.  \nFitzgerald, B. M., & Turner, D. C. (2000). Hunting behaviour of domestic cats and their impact on prey populations. *Mammal Review, 30*(2), 1\u201317.  \nMcCune, S. (1995). The impact of paternity and early socialisation on the development of cats\u2019 behaviour to people and novel objects. *Applied Animal Behaviour Science, 45*(1\u20132), 109\u2013124.",
-  "time_minutes": 0.11,
-  "timestamp": "2025-12-16 10:53:18",
-  "rubric": "critical_thinking"
+  "essay_name": "Assignment_1",
+  "result": "The can\u2019s opening sound becomes a conditioned stimulus predicting food, eliciting approach, purring, and meowing (classical conditioning). Rubbing against Catlove is operantly reinforced when it yields feeding or attention. Catlove\u2019s opening routine is reinforced by cats\u2019 affiliative responses. Cats may also learn by observing each other\u2019s rushing and vocalizing (social learning).\n\n**Peer\u2011reviewed sources**  \nPavlov, I. P. (1927). *Conditioned Reflexes*. Oxford University Press.  \nSkinner, B. F. (1938). *The Behavior of Organisms*. Appleton-Century.  \nBandura, A. (1977). Social learning theory. *Prentice-Hall*.  \nGalef, B. G., Jr., & Laland, K. N. (2005). Social learning in animals: Empirical studies and theoretical models. *BioScience, 55*(6), 489\u2013499.  \nHoppitt, W., & Laland, K. N. (2013). Social learning: An introduction to mechanisms, methods, and models. *Princeton University Press*.",
+  "time_minutes": 0.12,
+  "timestamp": "2025-12-22 18:44:11",
+  "rubric": "critical_thinking",
+  "folder": "critical_thinking"
 }

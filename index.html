@@ -35,6 +35,21 @@
                 🌐 Load from GitHub
             </button>
 
+            <button id="loadFolderBtn" style="
+            width: 100%;
+            padding: 12px 20px;
+            margin-top: 10px;
+            background: rgba(85, 255, 221, 0.2);
+            border: 2px solid rgba(85, 255, 221, 0.5);
+            border-radius: 8px;
+            color: #55ffdd;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        ">
+            📁 Load from Folder
+        </button>
+
             <!-- Filters -->
             <div class="filters" id="filters" style="display: none;">
                 <h3>🔍 Filters</h3>
@@ -45,9 +60,9 @@
                     <select id="modelFilter"></select>
                 </div>
                 
-                <!-- Essay Name Filter -->
+                <!-- Assignment Filter -->
                 <div class="filter-group">
-                    <label>Essay Name:</label>
+                    <label>Assignment:</label>
                     <select id="essayFilter"></select>
                 </div>
                 
@@ -73,23 +88,21 @@
         </div>
 
         <!-- Right Panel -->
+        <!-- Right Panel -->
         <div class="right-panel" id="rightPanel">
             <div class="welcome-message">
-                <h2> Welcome!</h2>
+                <h2>🎯 Welcome!</h2>
                 <p>Upload your JSON files to get started.</p>
                 <div class="instructions">
                     <h3>How to use:</h3>
                     <ol>
-                        <li>Click or drag JSON files to the upload box</li>
-                        <li>Files will be organized by essay name</li>
-                        <li>Click on any item to view details</li>
-                        <li>Use the copy button to copy content</li>
+                        <li>Upload files: Drag & drop, click to browse, or use GitHub/Folder buttons</li>
+                        <li>Filter: Use dropdowns to find specific essays</li>
+                        <li>View: Click any item in the left panel to see details</li>
+                        <li>Copy: Use the copy button to save content to clipboard</li>
                     </ol>
                 </div>
-            </div>
-        </div>
-    </div>
-
+                
     <!-- Footer -->
     <footer class="footer">
         <p>Created by Rami Huu Nguyen</p>
@@ -101,6 +114,9 @@
     
     <script src="js/ModelParser.js"></script>
     
+    <!-- Prompt Loading (MUST come before FileProcessor) -->
+    <script src="js/PromptLoader.js"></script>
+
     <!-- Processing Layer -->
     <script src="js/FileProcessor.js"></script>
     <script src="js/GitHubLoader.js"></script>

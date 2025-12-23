@@ -7,10 +7,11 @@ class Model:
         self.name = model_name
         self.client = None
     
-    def generate(self, essay):
+    def generate(self, essay, rubric_folder=None):
 
         print("Generating an essay")
         start = time.time()
+  
         result = self.api_call(essay.write_prompt)
         
         essay.essay_text = result
@@ -24,6 +25,7 @@ class Model:
             "command": "generate",
             "model": self.name,
             "essay_name": essay.name,
+            "folder": essay.rubric_folder,
             "result": result,
             "time_minutes": round(essay.time / 60, 2),
             "timestamp": datetime.now().strftime("%Y-%m-%d %H:%M:%S")
@@ -72,9 +74,10 @@ class Model:
             "writer": writer,
             "essay_type": essay_type,
             "essay_name": essay.name,
+            "folder": essay.rubric_folder,  # ← ADD THIS
             "result": result,
             "time_minutes": round(elapsed / 60, 2),
             "timestamp": datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-    }
+        }
         return data
     

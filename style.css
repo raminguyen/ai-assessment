@@ -409,3 +409,33 @@ html, body {
 ::-webkit-scrollbar-thumb:hover {
     background: var(--rami-lightgreen);
 }
+
+/* Prompt Box Styling */
+.prompt-box {
+    background: linear-gradient(135deg, rgba(170, 252, 225, 0.08) 0%, rgba(178, 222, 171, 0.08) 100%);
+    border: 2px solid rgba(85, 255, 221, 0.3);
+    border-left: 4px solid var(--rami-highlight);
+}
+
+.prompt-box h3 {
+    color: var(--rami-highlight);
+    margin-top: 0;
+}
+
+.prompt-text {
+    line-height: 1.8;
+    white-space: pre-wrap;
+    word-wrap: break-word;
+    color: var(--rami-lightgreen);
+    font-size: 0.95rem;
+    background-color: rgba(0, 0, 0, 0.3);
+    padding: 1rem;
+    border-radius: 4px;
+    font-family: 'Poppins', sans-serif;
+    border-left: 3px solid var(--rami-highlight);
+}
+
+.prompt-box:hover {
+    border-color: var(--rami-lightgreen);
+    background: linear-gradient(135deg, rgba(170, 252, 225, 0.12) 0%, rgba(178, 222, 171, 0.12) 100%);
+}

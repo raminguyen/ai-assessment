@@ -1,0 +1,9 @@
+{
+  "command": "generate",
+  "model": "gpt-5.2-2025-12-11",
+  "essay_name": "Assignment_1",
+  "folder": "oral_communication",
+  "result": "The can\u2019s opening sound predicts food; cats classically condition approach and arousal. Their rubbing/purring is operantly conditioned because attention and feeding follow, reinforcing greeting. Professor Catlove may be operantly conditioned to open cans quickly because affectionate cat behavior rewards him. Cats may also socially learn kitchen-running by observing other cats.\n\n**References (peer\u2011reviewed)**  \nPavlov, I. P. (1927). *Conditioned reflexes*. Oxford University Press.  \nSkinner, B. F. (1938). *The behavior of organisms*. Appleton-Century.  \nBandura, A. (1977). Social learning theory. *Prentice-Hall*.  \nMikl\u00f3si, \u00c1. (2014). Dog behaviour, evolution, and cognition. *Oxford University Press*.  \nGalef, B. G., Jr., & Laland, K. N. (2005). Social learning in animals: Empirical studies and theoretical models. *Bioscience, 55*(6), 489\u2013499.",
+  "time_minutes": 0.09,
+  "timestamp": "2025-12-22 18:38:45"
+}

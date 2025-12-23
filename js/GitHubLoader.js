@@ -18,16 +18,13 @@ class GitHubLoader {
      */
     async loadFromGitHub() {
         let totalLoaded = 0;
-
         for (const folder of this.folders) {
             const apiUrl = `https://api.github.com/repos/raminguyen/ai-assessment/contents/data/${folder}`;
             const rawUrl = `https://raw.githubusercontent.com/raminguyen/ai-assessment/main/data/${folder}/`;
-
             try {
                 const response = await fetch(apiUrl);
                 const files = await response.json();
                 const jsonFiles = files.filter(file => file.name.endsWith('.json'));
-
                 for (const file of jsonFiles) {
                     try {
                         const fileResponse = await fetch(rawUrl + file.name);
@@ -45,7 +42,6 @@ class GitHubLoader {
                 console.error(`Error loading from folder ${folder}:`, error);
             }
         }
-
         return totalLoaded;
     }
 }

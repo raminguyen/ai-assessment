@@ -1,8 +1,0 @@
-{
-  "command": "generate",
-  "model": "grok-4-1-fast-reasoning",
-  "essay_name": "Essay_1",
-  "result": "Professor Catlove's can-opening triggers classical conditioning in cats: sound (CS) paired with food (US) elicits running, purring, rubbing (CRs). Operant conditioning reinforces these via food rewards. Social learning occurs as cats imitate peers. Professor exhibits operant conditioning, his routine strengthened by affectionate responses.\n\n(50 words)\n\nPavlov, I. P. (1927). Conditioned reflexes. Oxford University Press.\n\nSkinner, B. F. (1953). Science and human behavior. Macmillan.\n\nBandura, A. (1977). Social learning theory. Prentice Hall.\n\nRescorla, R. A. (1988). Pavlovian conditioning: It's not what you think it is. *American Psychologist, 43*(3), 151-160.\n\nHeyes, C. M. (1994). Social learning in animals: Categories and mechanisms. *Biological Reviews, 69*(4), 207-231.",
-  "time_minutes": 0.27,
-  "timestamp": "2025-12-16 11:02:16"
-}

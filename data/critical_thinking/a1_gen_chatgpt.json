@@ -1,8 +1,9 @@
 {
   "command": "generate",
   "model": "gpt-5.2-2025-12-11",
-  "essay_name": "Essay_1",
-  "result": "The can-opening sound becomes a conditioned stimulus predicting food, eliciting cats\u2019 approach and vocalizing (classical). Cats\u2019 rubbing and meowing are reinforced by receiving food or attention (operant). Professor\u2019s can-opening and feeding persist because cats\u2019 affectionate responses positively reinforce him (operant). Cats may also copy each other\u2019s rushing behavior (social learning).\n\n**References (peer-reviewed)**  \nPavlov, I. P. (1927). *Conditioned reflexes*. Oxford University Press.  \nThorndike, E. L. (1911). *Animal intelligence: Experimental studies*. Macmillan.  \nSkinner, B. F. (1938). *The behavior of organisms: An experimental analysis*. Appleton-Century.  \nZentall, T. R. (2012). Perspectives on observational learning in animals. *Journal of Comparative Psychology, 126*(2), 114\u2013128.  \nFugazza, C., & Mikl\u00f3si, \u00c1. (2014). Social learning in dog training: The effectiveness of the \u201cDo as I do\u201d method. *Animal Cognition, 17*(6), 1415\u20131424.",
-  "time_minutes": 0.08,
-  "timestamp": "2025-12-16 10:53:05"
+  "essay_name": "Assignment_1",
+  "folder": "critical_thinking",
+  "result": "The can\u2019s opening sound becomes a conditioned stimulus predicting food, eliciting cats\u2019 approach, purring, and rubbing (classical conditioning). Their attention-getting behaviors are reinforced when feeding follows (operant conditioning). Professor Catlove may be conditioned to open cans to stop meowing (negative reinforcement). Cats may also learn by observing others rush in (social learning).\n\n**References (peer-reviewed):**  \nPavlov, I. P. (1927). *Conditioned reflexes*. Oxford University Press.  \nSkinner, B. F. (1938). *The behavior of organisms*. Appleton-Century.  \nBandura, A., Ross, D., & Ross, S. A. (1961). Transmission of aggression through imitation of aggressive models. *Journal of Abnormal and Social Psychology, 63*(3), 575\u2013582.  \nThorndike, E. L. (1898). Animal intelligence: An experimental study of the associative processes in animals. *Psychological Review Monograph Supplements, 2*(4), i\u2013109.  \nMineka, S., & Cook, M. (1993). Mechanisms involved in the observational conditioning of fear. *Journal of Experimental Psychology: General, 122*(1), 23\u201338.",
+  "time_minutes": 0.11,
+  "timestamp": "2025-12-22 18:35:36"
 }

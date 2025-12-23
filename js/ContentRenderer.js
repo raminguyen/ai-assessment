@@ -76,6 +76,14 @@ class ContentRenderer {
     buildContentBox(commandType, data) {
         let html = '';
 
+        // Display prompt if available
+        if (data.prompt) {
+            html += '<div class="content-box prompt-box">';
+            html += '<h3>📝 Prompt</h3>';
+            html += `<div class="prompt-text">${this.formatText(data.prompt)}</div>`;
+            html += '</div>';
+        }
+
         if (commandType === 'Generate' || commandType === 'Tune') {
             html += '<div class="content-box">';
             html += '<h3>Essay Text</h3>';

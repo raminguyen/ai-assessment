@@ -1,8 +1,0 @@
-{
-  "command": "generate",
-  "model": "gpt-5.2-2025-12-11",
-  "essay_name": "Essay_2",
-  "result": "Data weakly contradict hypothesis; relationship mixed, sometimes positive; no inverse. (Alesina & Rodrik, 1994; Barro, 1991; Lindert, 2004; Easterly & Rebelo, 1993; OECD, 2019)",
-  "time_minutes": 0.04,
-  "timestamp": "2025-12-16 11:08:58"
-}

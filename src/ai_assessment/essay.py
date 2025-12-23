@@ -3,12 +3,13 @@ import json
 
 
 class Essay:
-    def __init__(self, name):
+    def __init__(self, name, rubric_folder):
         self.status = 0
         self.name = name
         self.prompt = None
         self.model = None
         self.essay_text = None
+        self.rubric_folder = rubric_folder
     
     def load_prompt(self, assignment_num=1):
         base_direction = os.path.dirname(os.path.abspath(__file__))
@@ -16,7 +17,8 @@ class Essay:
         
         with open(file_path, 'r') as f:
             data = json.load(f)
-        
+
+
         self.write_prompt = data[f"assignment_{assignment_num}_prompt"]
         self.grade_prompt = data["grade_prompt"]
         

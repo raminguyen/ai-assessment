@@ -10,7 +10,7 @@ class Runner:
         }
     
     def generate(self, model, assignment, folder):
-        
+    
         gen_model = self.all_models[model]
         rubric = folder
 
@@ -18,7 +18,8 @@ class Runner:
             print('Already exists, skipping: ' + model + ' generate assignment ' + str(assignment))
             return
 
-        essay = Util.create_essay(assignment)
+        essay = Util.create_essay(assignment, rubric_folder=folder)
+        essay.load_prompt(assignment) 
         data = gen_model.generate(essay)
         Util.save_individual_file(data, assignment, 'generate', model, rubric=rubric)
 
@@ -32,11 +33,14 @@ class Runner:
             return
 
         essay = Util.create_essay(assignment)
+        essay.load_prompt(assignment)  # ← ADD THIS
 
         rubric_obj = Rubric(rubric)
 
         data = tune_model.tune(essay, rubric_obj)
         data['rubric'] = rubric
+        data['folder'] = 'critical_thinking'
+
         Util.save_individual_file(data, assignment, 'tune', model, rubric=rubric)
 
     def score(self, grader, rubric, filename, assignment):
@@ -50,15 +54,17 @@ class Runner:
             return
         
         essay = Util.create_essay(assignment)
+        essay.load_prompt(assignment)  # ← ADD THIS
+        
         rubric_obj = Rubric(rubric)
         essay.essay_text = essay_text
 
         data = grader_model.score(essay, rubric_obj, writer=writer_name, essay_type=essay_type)
 
         data['rubric'] = rubric
+        data['folder'] = 'critical_thinking'  # ← ADD THIS
         data['scored_essay_text'] = essay_text
         data['essay_type'] = essay_type
 
         Util.save_individual_file(data, assignment, 'score', grader, essay_type=essay_type, rubric=rubric, writer=writer_name)
-
-    
+        

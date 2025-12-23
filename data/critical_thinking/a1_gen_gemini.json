@@ -1,8 +1,0 @@
-{
-  "command": "generate",
-  "model": "gemini-3-pro-preview",
-  "essay_name": "Essay_1",
-  "result": "The can opener\u2019s sound triggers the cats\u2019 approach via classical conditioning, associating noise with food. Operant conditioning reinforces their leg-rubbing with the reward of eating, while the professor is reinforced to feed them to stop the meowing. Furthermore, younger cats likely acquire these behaviors through social learning by observing the group.\n\n**References**\n\nGalef, B. G., & Laland, K. N. (2005). Social learning in animals: Empirical studies and theoretical models. *BioScience*, 55(6), 489-499.\n\nHerbert, M. J., & Harsh, C. M. (1944). Observational learning by cats. *Journal of Comparative Psychology*, 37(2), 81-95.\n\nRescorla, R. A. (1988). Pavlovian conditioning: It's not what you think it is. *American Psychologist*, 43(3), 151-160.\n\nSkinner, B. F. (1963). Operant behavior. *American Psychologist*, 18(8), 503-515.\n\nVitale Shreve, K. R., & Udell, M. A. (2015). What\u2019s inside your cat\u2019s head? A review of cat (Felis catus) ecological and social cognition. *Behavioural Processes*, 119, 1-12.",
-  "time_minutes": 0.42,
-  "timestamp": "2025-12-16 10:58:39"
-}

@@ -1,8 +1,0 @@
-{
-  "command": "generate",
-  "model": "grok-4-1-fast-reasoning",
-  "essay_name": "Essay_1",
-  "result": "In Professor Catlove's routine, cats display classical conditioning: the can-opening sound (CS), paired with food (US), elicits running, purring, and rubbing (CR). Operantly, food reinforces their behaviors, while feline affection positively reinforces his can-opening. Social learning emerges if cats mimic peers' excitement.\n\n(48 words)\n\nReferences:  \n1. Rescorla, R. A. (1967). Pavlovian conditioning and its proper control procedures. *Psychological Review*, 74(1), 71-80.  \n2. Skinner, B. F. (1953). Science and human behavior. *Macmillan*.  \n3. Bandura, A. (1977). Social learning theory. *Prentice Hall*.  \n4. Domjan, M., & Purdy, J. E. (1995). Animal research in psychology: More than meets the eye of the general psychology student. *American Psychologist*, 50(5), 496-503.  \n5. Turner, D. C., & Bateson, P. (2000). The domestic cat: The biology of its behaviour. *Cambridge University Press*.  \n6. casey, r. a., & Bradshaw, j. w. s. (2008). The effects of additional socialisation for kittens in a rescue centre on their behaviour and suitability as a pet. *Applied Animal Behaviour Science*, 114(3-4), 196-205.",
-  "time_minutes": 0.38,
-  "timestamp": "2025-12-16 11:30:59"
-}

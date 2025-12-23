@@ -1,6 +1,6 @@
 /**
- * UIRenderer - Manages all UI rendering and user interactions
- * Handles filters, essay list display, and event listeners
+ * UIRenderer - Manages all UI rendering with dynamic prompt loading
+ * Works directly with Assignment_1 format (no conversion)
  */
 class UIRenderer {
     /**
@@ -10,12 +10,64 @@ class UIRenderer {
     constructor(dataManager) {
         this.dataManager = dataManager;
         this.elements = this.cacheElements();
+        this.prompts = {}; // Will be loaded from file
+        this.gradePrompt = ''; // Grade prompt from file
+        this.loadPrompts(); // Load prompts from JSON file
+    }
+
+    /**
+     * Load prompts from JSON file dynamically
+     * @private
+     */
+    async loadPrompts() {
+        try {
+            // Try to load from prompt.json
+            const response = await fetch('./src/ai_assessment/prompt.json');
+            if (!response.ok) {
+                console.warn('Could not load prompt.json, using default prompts');
+                this.setDefaultPrompts();
+                return;
+            }
+            
+            const data = await response.json();
+            
+            // Dynamically map all assignment_X_prompt keys to Assignment_X
+            this.prompts = {};
+            for (const key in data) {
+                if (key.startsWith('assignment_') && key.endsWith('_prompt')) {
+                    const match = key.match(/assignment_(\d+)_prompt/);
+                    if (match) {
+                        const assignmentKey = `Assignment_${match[1]}`;
+                        this.prompts[assignmentKey] = data[key];
+                    }
+                }
+            }
+            
+            this.gradePrompt = data.grade_prompt || '';
+            console.log('Prompts loaded successfully from prompt.json:', Object.keys(this.prompts));
+        } catch (error) {
+            console.warn('Error loading prompts:', error);
+            this.setDefaultPrompts();
+        }
+    }
+
+    /**
+     * Set default prompts as fallback
+     * @private
+     */
+    setDefaultPrompts() {
+        this.prompts = {
+            'Assignment_1': "Let's write a 50 word fully written college essay, plus at least 5 citations from peer-reviewed articles in the end of essay not embedded links, that answers this question: Consider the following problem: In the morning, when Professor Catlove opens a new can of cat food, his cats run into the kitchen purring and meowing and rubbing their backs against his legs. What examples, if any, of classical conditioning, operant conditioning, and social learning are at work in this brief scene? Note that both the cats and the professor might be exhibiting conditioned behavior here.",
+            'Assignment_2': "Let's write a 10 word fully written college essay, plus at least 5 citations from peer-reviewed articles, that answers this question. To what extent do the attached economic data support the hypothesis \"social service spending is inversely related to economic growth\"? Formulate a verbal argument analyzing whether the data do or do not support the hypothesis.",
+            'Assignment_3': "Generate a 1/4-page full essay in paragraph format that includes a real estate investment market analysis in the Boston Metropolitan Area for 2024. Summarize the key findings, insights from the analysis, highlight the best real estate investment opportunities, and any significant patterns observed. Please include at least 5 citations from peer reviewed articles."
+        };
+        
+        this.gradePrompt = "After grading the essay using the rubric, please explain how the essay was tuned to achieve a perfect score on the rubric. Add the total score at the end using this format: Total Score is [X]/[Y].";
     }
 
     /**
      * Cache references to all DOM elements
      * @private
-     * @returns {object} Object containing cached DOM elements
      */
     cacheElements() {
         return {
@@ -32,6 +84,32 @@ class UIRenderer {
             filterScore: document.getElementById('filterScore'),
             githubBtn: document.getElementById('githubBtn')
         };
+    }
+
+    /**
+     * Display name - no conversion needed
+     * @private
+     */
+    getDisplayName(essayName) {
+        if (!essayName) return 'Unknown';
+        if (typeof essayName !== 'string') return 'Unknown';
+        return essayName; // Return as-is (Assignment_1, Assignment_2, etc)
+    }
+
+    /**
+     * Get prompt for essay
+     * @private
+     */
+    getPromptForEssay(essayName) {
+        return this.prompts[essayName] || '';
+    }
+
+    /**
+     * Get grade prompt
+     * @private
+     */
+    getGradePrompt() {
+        return this.gradePrompt;
     }
 
     /**
@@ -59,15 +137,15 @@ class UIRenderer {
             option.textContent = model;
             this.elements.modelFilter.appendChild(option);
         });
-        this.elements.modelFilter.value = 'ChatGPT';
+        this.elements.modelFilter.value = 'all';
     }
 
     /**
-     * Populate essay filter dropdown
+     * Populate essay filter dropdown with display names
      * @private
      */
     populateEssayFilter() {
-        this.elements.essayFilter.innerHTML = '<option value="all">All Essays</option>';
+        this.elements.essayFilter.innerHTML = '<option value="all">All Assignments</option>';
         const essayNames = new Set();
         Object.values(this.dataManager.allData).forEach(item => {
             essayNames.add(item.essayName);
@@ -76,10 +154,10 @@ class UIRenderer {
         Array.from(essayNames).sort().forEach(name => {
             const option = document.createElement('option');
             option.value = name;
-            option.textContent = name;
+            option.textContent = this.getDisplayName(name);
             this.elements.essayFilter.appendChild(option);
         });
-        this.elements.essayFilter.value = 'Essay_1';
+        this.elements.essayFilter.value = 'Assignment_1';
     }
 
     /**
@@ -165,13 +243,12 @@ class UIRenderer {
 
         this.renderSummary(rubricGroups);
         this.renderRubricGroups(rubricGroups);
-        this.updateRightPanelSummary(rubricGroups);
+        this.updateRightPanelSummary(rubricGroups, filters);
     }
 
     /**
      * Get current filter values
      * @private
-     * @returns {object} Current filter values
      */
     getActiveFilters() {
         return {
@@ -187,14 +264,11 @@ class UIRenderer {
     /**
      * Group data according to filters
      * @private
-     * @param {object} filters - Filter criteria
-     * @returns {object} Grouped data structure
      */
     groupDataByFilters(filters) {
         const rubricGroups = {};
 
         Object.entries(this.dataManager.allData).forEach(([key, item]) => {
-            // Apply filters
             if (filters.essay !== 'all' && item.essayName !== filters.essay) return;
             if (filters.model !== 'all' && item.modelName !== filters.model) return;
             if (filters.rubric !== 'all' && item.rubric !== filters.rubric) return;
@@ -202,7 +276,6 @@ class UIRenderer {
             if (item.command === 'tune' && !filters.showTune) return;
             if (item.command === 'score' && !filters.showScore) return;
 
-            // Group by rubric -> essay -> model
             if (!rubricGroups[item.rubric]) {
                 rubricGroups[item.rubric] = {};
             }
@@ -218,7 +291,6 @@ class UIRenderer {
                 };
             }
 
-            // Place in appropriate bucket
             if (item.command === 'generate') {
                 rubricGroups[item.rubric][item.essayName][item.modelName].generate.push(item);
             } else if (item.command === 'tune') {
@@ -297,7 +369,7 @@ class UIRenderer {
 
             const header = document.createElement('div');
             header.className = 'essay-header';
-            header.textContent = essayName;
+            header.textContent = this.getDisplayName(essayName);
             essayItem.appendChild(header);
 
             const commands = document.createElement('div');
@@ -407,31 +479,53 @@ class UIRenderer {
     }
 
     /**
-     * Update right panel with summary
+     * Update right panel with filter summary and prompts
      * @private
      */
-    updateRightPanelSummary(rubricGroups) {
-        let html = '<h2>Filter Results Summary</h2>';
+    updateRightPanelSummary(rubricGroups, filters) {
+        let html = '<h2>📊 Filter Summary</h2>';
 
-        html += '<div class="content-info">';
-        html += `<p><strong>Total Items:</strong> ${this.dataManager.getTotalCount()}</p>`;
-        html += `<p><strong>Rubrics:</strong> ${this.dataManager.allRubrics.size}</p>`;
-        html += `<p><strong>Models:</strong> ${this.dataManager.allModels.size}</p>`;
+        html += '<div class="content-info" style="background: rgba(255, 255, 255, 0.05); border-left: 4px solid var(--rami-highlight);">';
+        html += '<p><strong>Active Filters:</strong></p>';
+        
+        if (filters.essay !== 'all') {
+            html += `<p style="margin: 0.5rem 0; padding-left: 1rem;">📝 Assignment: <strong>${this.getDisplayName(filters.essay)}</strong></p>`;
+        }
+        if (filters.model !== 'all') {
+            html += `<p style="margin: 0.5rem 0; padding-left: 1rem;">🤖 Model: <strong>${filters.model}</strong></p>`;
+        }
+        if (filters.rubric !== 'all') {
+            html += `<p style="margin: 0.5rem 0; padding-left: 1rem;">📋 Rubric: <strong>${ModelParser.formatRubricName(filters.rubric)}</strong></p>`;
+        }
+        
+        const commands = [];
+        if (filters.showGenerate) commands.push('Generate');
+        if (filters.showTune) commands.push('Tune');
+        if (filters.showScore) commands.push('Score');
+        if (commands.length > 0 && commands.length < 3) {
+            html += `<p style="margin: 0.5rem 0; padding-left: 1rem;">⚙️ Commands: <strong>${commands.join(', ')}</strong></p>`;
+        }
+        
         html += '</div>';
 
-        html += '<div class="content-box"><h3>By Rubric</h3>';
-        Object.entries(rubricGroups).forEach(([rubricName, essayGroups]) => {
-            const essayCount = Object.keys(essayGroups).length;
-            let totalItems = 0;
-            Object.values(essayGroups).forEach(models => {
-                Object.values(models).forEach(buckets => {
-                    totalItems += buckets.generate.length + buckets.tune.length + buckets.generate_scores.length + buckets.tune_scores.length;
-                });
-            });
-            const formatted = ModelParser.formatRubricName(rubricName);
-            html += `<p><strong>${formatted}:</strong> ${essayCount} essays, ${totalItems} items</p>`;
-        });
-        html += '</div>';
+        if (filters.essay !== 'all') {
+            const assignmentPrompt = this.getPromptForEssay(filters.essay);
+            const gradePrompt = this.getGradePrompt();
+            
+            if (assignmentPrompt) {
+                html += '<div class="content-box prompt-box">';
+                html += '<h3>📝 Assignment Prompt</h3>';
+                html += `<div class="prompt-text">${assignmentPrompt}</div>`;
+                html += '</div>';
+            }
+            
+            if (gradePrompt) {
+                html += '<div class="content-box prompt-box">';
+                html += '<h3>✅ Grading Prompt</h3>';
+                html += `<div class="prompt-text">${gradePrompt}</div>`;
+                html += '</div>';
+            }
+        }
 
         html += '<div class="content-box"><h3>💡 Tip</h3><p>Click on any item in the left panel to view its full content below.</p></div>';
         html += '<hr style="border: 1px solid rgba(85, 255, 221, 0.2); margin: 2rem 0;">';
