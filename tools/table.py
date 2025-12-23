@@ -7,71 +7,65 @@ rows = []
 
 data_path = os.path.join('..', 'data')
 
-# Get all .json files from data/ folder (generate files)
-json_files = glob.glob(os.path.join(data_path, '*.json'))
-
-for filepath in json_files:
-    with open(filepath, 'r') as f:
-        data = json.load(f)
+# Get all rubric folders (critical_thinking, oral_communication, etc)
+for rubric_folder in os.listdir(data_path):
+    rubric_path = os.path.join(data_path, rubric_folder)
     
-    essay_text = data.get('scored_essay_text') or data.get('result', '')
-    if essay_text and len(essay_text) > 500:
-        essay_text = essay_text[:500] + "..."
-    
-    filename = os.path.basename(filepath)
-    assignment = filename.split('_')[1]
-    
-    row = {
-        'Assignment': data.get('essay_name'),
-        'Command': data.get('command'),
-        'Model/Grader': data.get('model') or data.get('grader'),
-        'Writer': data.get('writer'),
-        'Essay Type': data.get('essay_type'),
-        'Rubric': '',
-        'Time (mins)': data.get('time_minutes'),
-        'Timestamp': data.get('timestamp'),
-        'Result': data.get('result', ''),
-        'Essay Text': essay_text
-    }
-    rows.append(row)
-
-# Get all rubric folders
-for rubric in os.listdir(data_path):
-    rubric_path = os.path.join(data_path, rubric)
+    # Skip if not a directory
     if not os.path.isdir(rubric_path):
         continue
     
-    # Get all .json files in rubric folder
+    # Get all .json files in each rubric folder
     json_files = glob.glob(os.path.join(rubric_path, '*.json'))
     
     for filepath in json_files:
-        with open(filepath, 'r') as f:
-            data = json.load(f)
+        try:
+            with open(filepath, 'r') as f:
+                data = json.load(f)
+            
+            # Extract essay text (use scored_essay_text for scores, result for others)
+            essay_text = data.get('scored_essay_text') or data.get('result', '')
+            if essay_text and len(essay_text) > 500:
+                essay_text = essay_text[:500] + '...'
+            
+            # Extract filename info
+            filename = os.path.basename(filepath)
+            
+            # Build row with all available data
+            row = {
+                'Rubric': rubric_folder,
+                'Essay Name': data.get('essay_name', 'Unknown'),
+                'Command': data.get('command', 'Unknown'),
+                'Model': data.get('model', ''),
+                'Grader': data.get('grader', ''),
+                'Writer': data.get('writer', ''),
+                'Essay Type': data.get('essay_type', ''),
+                'Folder': data.get('folder', rubric_folder),
+                'Time (mins)': data.get('time_minutes', ''),
+                'Timestamp': data.get('timestamp', ''),
+                'Result Preview': essay_text,
+                'Filename': filename
+            }
+            rows.append(row)
         
-        essay_text = data.get('scored_essay_text') or data.get('result', '')
-        if essay_text and len(essay_text) > 500:
-            essay_text = essay_text[:500] + "..."
-        
-        filename = os.path.basename(filepath)
-        assignment = filename.split('_')[1]
-        
-        row = {
-            'Assignment': 'assignment_' + assignment,
-            'Command': data.get('command'),
-            'Model/Grader': data.get('model') or data.get('grader'),
-            'Writer': data.get('writer'),
-            'Essay Type': data.get('essay_type'),
-            'Rubric': rubric,
-            'Time (mins)': data.get('time_minutes'),
-            'Timestamp': data.get('timestamp'),
-            'Result': data.get('result', ''),
-            'Essay Text': essay_text
-        }
-        rows.append(row)
+        except json.JSONDecodeError:
+            print(f'Error decoding JSON: {filename}')
+        except Exception as e:
+            print(f'Error processing {filename}: {str(e)}')
 
+# Create DataFrame
 df = pd.DataFrame(rows)
 
+# Sort by Rubric, Essay Name, Command
+df = df.sort_values(by=['Rubric', 'Essay Name', 'Command']).reset_index(drop=True)
 
+# Save to CSV
 csv_path = os.path.join('..', 'data', 'alldata.csv')
+os.makedirs(os.path.dirname(csv_path), exist_ok=True)
 df.to_csv(csv_path, index=False)
-print('\nSaved to alldata.csv')
+
+print(f'\n✓ Processed {len(df)} files')
+print(f'✓ Rubrics found: {df["Rubric"].nunique()}')
+print(f'✓ Essays found: {df["Essay Name"].nunique()}')
+print(f'✓ Commands found: {df["Command"].nunique()}')
+print(f'✓ Saved to alldata.csv')
