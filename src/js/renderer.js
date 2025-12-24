@@ -119,7 +119,7 @@ class Renderer {
         this.dataManager.getRubrics().forEach(rubric => {
             const option = document.createElement('option');
             option.value = rubric;
-            option.textContent = ModelParser.formatRubricName(rubric);
+            option.textContent = Parser.formatRubricName(rubric);
             this.elements.rubricFilter.appendChild(option);
         });
         this.elements.rubricFilter.value = 'critical_thinking';
@@ -202,7 +202,7 @@ class Renderer {
 
             let writerModel = item.modelName;
             if (item.command === 'score') {
-                writerModel = ModelParser.getModelName(item.data.writer);
+                writerModel = Parser.getModelName(item.data.writer);
             }
             
             if (filters.model !== 'all' && writerModel !== filters.model) return;
@@ -269,7 +269,7 @@ class Renderer {
             border-left: 4px solid ${color};
         `;
 
-        header.textContent = `📋 ${ModelParser.formatRubricName(rubricName)}`;
+        header.textContent = `📋 ${Parser.formatRubricName(rubricName)}`;
         this.elements.essayList.appendChild(header);
     }
 
@@ -339,7 +339,7 @@ class Renderer {
 
         if (command === 'Score') {
             const essayType = data.essay_type || 'generate';
-            const graderName = ModelParser.getModelName(data.grader);
+            const graderName = Parser.getModelName(data.grader);
             const essayTypeCapitalized = essayType.charAt(0).toUpperCase() + essayType.slice(1);
             label = `        ${essayTypeCapitalized} Essay (by ${graderName})`;
         }
@@ -382,7 +382,7 @@ class Renderer {
             html += `<p style="margin: 0.5rem 0; padding-left: 1rem;"> Model: <strong>${filters.model}</strong></p>`;
         }
         if (filters.rubric !== 'all') {
-            html += `<p style="margin: 0.5rem 0; padding-left: 1rem;"> Rubric: <strong>${ModelParser.formatRubricName(filters.rubric)}</strong></p>`;
+            html += `<p style="margin: 0.5rem 0; padding-left: 1rem;"> Rubric: <strong>${Parser.formatRubricName(filters.rubric)}</strong></p>`;
         }
         
         const commands = [];

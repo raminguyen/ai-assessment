@@ -21,7 +21,7 @@ class Data {
     generateKey(essayName, modelName, command, rubric, data) {
         if (command === 'score') {
             const essayType = data.essay_type || 'generate';
-            const graderName = ModelParser.getModelName(data.grader);
+            const graderName = Parser.getModelName(data.grader);
             return `${essayName}_${modelName}_${essayType}_score_${graderName}_${rubric}`;
         }
         return `${essayName}_${modelName}_${command}_${rubric}`;

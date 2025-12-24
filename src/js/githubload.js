@@ -31,7 +31,7 @@ class LoadGitHub {
                 const fileText = await fileResponse.text();
                 const data = JSON.parse(fileText);
                 
-                const processor = new FileProcessor(this.dataManager);
+                const processor = new File(this.dataManager);
                 processor.processData(data, folder);
                 totalLoaded++;
             }

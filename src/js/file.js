@@ -111,9 +111,9 @@ class File {
 
         let modelName;
         if (command === 'score') {
-            modelName = ModelParser.getModelName(data.writer);
+            modelName = Parser.getModelName(data.writer);
         } else {
-            modelName = ModelParser.getModelName(data.model);
+            modelName = Parser.getModelName(data.model);
         }
 
         this.dataManager.addData(essayName, modelName, command, rubric, data);

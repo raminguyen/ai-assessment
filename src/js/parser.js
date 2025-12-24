@@ -1,4 +1,4 @@
-class parser {
+class Parser {
     static parseEssayName(filename) {
         if (!filename) return 'unknown';
         
