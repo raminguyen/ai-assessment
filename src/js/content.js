@@ -1,56 +1,30 @@
-/**
- * ContentRenderer - Renders essay content in the right panel
- * Handles building and formatting of content HTML
- */
-class ContentRenderer {
-    /**
-     * Initialize ContentRenderer
-     * @param {HTMLElement} rightPanel - Reference to right panel element
-     */
+class Content {
     constructor(rightPanel) {
         this.rightPanel = rightPanel;
     }
 
-    /**
-     * Render content in right panel
-     * @param {string} commandType - Type of command (Generate/Tune/Score)
-     * @param {object} data - Essay data object
-     * @param {string} gradePrompt - Grade prompt from UIRenderer
-     */
     render(commandType, data, gradePrompt = '') {
         const html = this.buildHTML(commandType, data, gradePrompt);
         this.rightPanel.innerHTML = html;
 
-        // Smooth scroll to top
         const contentStart = this.rightPanel.querySelector('h2:last-of-type');
         if (contentStart) {
             contentStart.scrollIntoView({ behavior: 'smooth', block: 'start' });
         }
     }
-        /**
-     * Build complete HTML for content
-     * @private
-     * @returns {string} HTML string
-     */
+
     buildHTML(commandType, data, gradePrompt = '') {
         let html = `<h2>${data.essay_name}</h2>`;
-
         html += this.buildInfoBox(commandType, data);
         html += this.buildContentBox(commandType, data, gradePrompt);
         html += this.buildCopyButton(commandType);
-
         return html;
     }
 
-     /**
-     * Build content box with essay or score
-     * @private
-     */
     buildContentBox(commandType, data, gradePrompt = '') {
         let html = '';
 
         if (commandType === 'Generate') {
-            // Generate: Show ONLY prompt
             if (data.prompt) {
                 html += '<div class="content-box prompt-box">';
                 html += '<h3>📝 Prompt</h3>';
@@ -64,7 +38,6 @@ class ContentRenderer {
             html += '</div>';
 
         } else if (commandType === 'Tune') {
-            // Tune: Show ONLY prompt and rubric
             if (data.prompt) {
                 html += '<div class="content-box prompt-box">';
                 html += '<h3>Prompt</h3>';
@@ -85,7 +58,6 @@ class ContentRenderer {
             html += '</div>';
 
         } else if (commandType === 'Score') {
-            // Score: Show assignment prompt and rubric (grading prompt)
             if (data.prompt) {
                 html += '<div class="content-box prompt-box">';
                 html += '<h3>📝 Assignment Prompt</h3>';
@@ -116,10 +88,6 @@ class ContentRenderer {
         return html;
     }
 
-    /**
-     * Build rubric link button
-     * @private
-     */
     buildRubricLink(rubric) {
         const rubricLinks = {
             'critical_thinking': 'https://chsu.edu/wp-content/uploads/CriticalThinking.pdf',
@@ -127,16 +95,10 @@ class ContentRenderer {
         };
 
         const url = rubricLinks[rubric] || 'https://www.aacu.org/value/rubrics';
-        const rubricName = ModelParser.formatRubricName(rubric);
         
-        return ' <a href="' + url + '" target="_blank" style="color: #55ffdd; text-decoration: underline; cursor: pointer;">' +
-            'view full version here' +
-            '</a>';
+        return ' <a href="' + url + '" target="_blank" style="color: #55ffdd; text-decoration: underline; cursor: pointer;">view full version here</a>';
     }
-    /**
-     * Build info box with metadata
-     * @private
-     */
+
     buildInfoBox(commandType, data) {
         let html = '<div class="content-info">';
         html += `<p><strong>Command:</strong> ${commandType}</p>`;
@@ -160,12 +122,6 @@ class ContentRenderer {
         return html;
     }
 
-   
-    
-        /**
-     * Build copy button
-     * @private
-     */
     buildCopyButton(commandType) {
         if (commandType === 'Generate' || commandType === 'Tune') {
             return '<button class="copy-btn" onclick="app.copyEssayText()">📋 Copy Essay</button>';
@@ -175,21 +131,15 @@ class ContentRenderer {
         return '';
     }
 
-    /**
-     * Format text by removing markdown
-     * @private
-     * @param {string} text - Text to format
-     * @returns {string} Formatted text with HTML
-     */
     formatText(text) {
         return text
-            .replace(/^#{1,6}\s+/gm, '')           // Remove markdown headers
-            .replace(/\*\*(.+?)\*\*/g, '$1')       // Remove bold (**text**)
-            .replace(/__(.+?)__/g, '$1')           // Remove bold (__text__)
-            .replace(/\*(.+?)\*/g, '$1')           // Remove italic (*text*)
-            .replace(/_(.+?)_/g, '$1')             // Remove italic (_text_)
-            .replace(/^---+$/gm, '')               // Remove horizontal rules
-            .replace(/^[\*\-]\s+/gm, '')           // Remove bullet points
-            .replace(/\n/g, '<br>');               // Convert newlines to <br>
+            .replace(/^#{1,6}\s+/gm, '')
+            .replace(/\*\*(.+?)\*\*/g, '$1')
+            .replace(/__(.+?)__/g, '$1')
+            .replace(/\*(.+?)\*/g, '$1')
+            .replace(/_(.+?)_/g, '$1')
+            .replace(/^---+$/gm, '')
+            .replace(/^[\*\-]\s+/gm, '')
+            .replace(/\n/g, '<br>');
     }
 }
