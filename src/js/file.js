@@ -2,10 +2,10 @@ class File {
     constructor(dataManager) {
         this.dataManager = dataManager;
         this.prompts = {};
-        this.loadPrompts();
+        this.load_prompts();
     }
 
-    async loadPrompts() {
+    async load_prompts() {
         const response = await fetch('src/ai_assessment/prompt.json');
         if (!response.ok) {
             console.warn('Could not load prompts');
@@ -15,11 +15,11 @@ class File {
         console.log('Prompts loaded successfully');
     }
 
-    getPrompt(key) {
+    get_prompt(key) {
         return this.prompts[key] || '';
     }
 
-    processLocalFiles(files) {
+    process_local_files(files) {
         return new Promise((resolve, reject) => {
             const jsonFiles = Array.from(files).filter(f => f.name.endsWith('.json'));
             if (jsonFiles.length === 0) {
@@ -31,8 +31,8 @@ class File {
                 const reader = new FileReader();
                 reader.onload = (e) => {
                     const data = JSON.parse(e.target.result);
-                    const folderGuess = this.guessFolderFromFilename(file.name);
-                    this.processData(data, folderGuess);
+                    const folderGuess = this.guess_folder_from_filename(file.name);
+                    this.process_data(data, folderGuess);
                     filesRead++;
                     if (filesRead === jsonFiles.length) {
                         resolve(filesRead);
@@ -43,11 +43,11 @@ class File {
         });
     }
 
-    async processFolder() {
+    async process_folder() {
         const handle = await window.showDirectoryPicker();
         const files = [];
         
-        await this.collectJsonFiles(handle, files);
+        await this.collect_json_files(handle, files);
         
         if (files.length === 0) {
             throw new Error('No JSON files found in folder!');
@@ -59,8 +59,8 @@ class File {
                 const reader = new FileReader();
                 reader.onload = (e) => {
                     const data = JSON.parse(e.target.result);
-                    const folderGuess = this.guessFolderFromFilename(file.name);
-                    this.processData(data, folderGuess);
+                    const folderGuess = this.guess_folder_from_filename(file.name);
+                    this.process_data(data, folderGuess);
                     filesRead++;
                     if (filesRead === files.length) {
                         resolve(filesRead);
@@ -71,7 +71,7 @@ class File {
         });
     }
 
-    async collectJsonFiles(handle, files, path = '') {
+    async collect_json_files(handle, files, path = '') {
         for await (const entry of handle.values()) {
             const currentPath = path ? path + '/' + entry.name : entry.name;
             
@@ -79,12 +79,12 @@ class File {
                 const file = await entry.getFile();
                 files.push({file, path: currentPath});
             } else if (entry.kind === 'directory') {
-                await this.collectJsonFiles(entry, files, currentPath);
+                await this.collect_json_files(entry, files, currentPath);
             }
         }
     }
 
-    guessFolderFromFilename(filename) {
+    guess_folder_from_filename(filename) {
         if (filename.includes('critical')) {
             return 'critical_thinking';
         } else if (filename.includes('oral')) {
@@ -93,16 +93,16 @@ class File {
         return null;
     }
 
-    processData(data, folderName) {
+    process_data(data, folderName) {
         const essayName = data.essay_name;
         const command = data.command;
         let rubric = data.folder || data.rubric || folderName || 'unknown';
         this.dataManager.allRubrics.add(rubric);
 
         if (!data.prompt) {
-            const promptKey = this.getPromptKeyForEssay(essayName);
+            const promptKey = this.get_prompt_key_for_essay(essayName);
             if (promptKey) {
-                const prompt = this.getPrompt(promptKey);
+                const prompt = this.get_prompt(promptKey);
                 if (prompt) {
                     data.prompt = prompt;
                 }
@@ -111,15 +111,15 @@ class File {
 
         let modelName;
         if (command === 'score') {
-            modelName = Parser.getModelName(data.writer);
+            modelName = Parser.get_model_name(data.writer);
         } else {
-            modelName = Parser.getModelName(data.model);
+            modelName = Parser.get_model_name(data.model);
         }
 
-        this.dataManager.addData(essayName, modelName, command, rubric, data);
+        this.dataManager.add_data(essayName, modelName, command, rubric, data);
     }
 
-    getPromptKeyForEssay(essayName) {
+    get_prompt_key_for_essay(essayName) {
         const mapping = {
             'Psychology_Essay_1': 'assignment_1_prompt',
             'Economics_Essay_1': 'assignment_2_prompt',

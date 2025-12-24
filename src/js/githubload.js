@@ -4,7 +4,7 @@ class LoadGitHub {
         this.folders = ['critical_thinking', 'oral_communication'];
     }
 
-    async loadFromGitHub() {
+    async load_from_github() {
         let totalLoaded = 0;
         for (const folder of this.folders) {
             const apiUrl = `https://api.github.com/repos/raminguyen/ai-assessment/contents/data/${folder}`;
@@ -32,7 +32,7 @@ class LoadGitHub {
                 const data = JSON.parse(fileText);
                 
                 const processor = new File(this.dataManager);
-                processor.processData(data, folder);
+                processor.process_data(data, folder);
                 totalLoaded++;
             }
         }

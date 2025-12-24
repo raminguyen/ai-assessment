@@ -1,12 +1,13 @@
 class Data {
+    
     constructor() {
         this.allData = {};
         this.allModels = new Set();
         this.allRubrics = new Set();
     }
 
-    addData(essayName, modelName, command, rubric, data) {
-        const uniqueKey = this.generateKey(essayName, modelName, command, rubric, data);
+    add_data(essayName, modelName, command, rubric, data) {
+        const uniqueKey = this.generate_key(essayName, modelName, command, rubric, data);
         this.allData[uniqueKey] = {
             essayName,
             modelName,
@@ -18,24 +19,24 @@ class Data {
         this.allRubrics.add(rubric);
     }
 
-    generateKey(essayName, modelName, command, rubric, data) {
+    generate_key(essayName, modelName, command, rubric, data) {
         if (command === 'score') {
             const essayType = data.essay_type || 'generate';
-            const graderName = Parser.getModelName(data.grader);
+            const graderName = Parser.get_model_name(data.grader);
             return `${essayName}_${modelName}_${essayType}_score_${graderName}_${rubric}`;
         }
         return `${essayName}_${modelName}_${command}_${rubric}`;
     }
 
-    getData() {
+    get_data() {
         return this.allData;
     }
 
-    getModels() {
+    get_models() {
         return Array.from(this.allModels).sort();
     }
 
-    getRubrics() {
+    get_rubrics() {
         return Array.from(this.allRubrics).sort();
     }
 
@@ -45,7 +46,7 @@ class Data {
         this.allRubrics.clear();
     }
 
-    getTotalCount() {
+    get_total_count() {
         return Object.keys(this.allData).length;
     }
 }

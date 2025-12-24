@@ -1,5 +1,5 @@
 class Parser {
-    static parseEssayName(filename) {
+    static parse_essay_name(filename) {
         if (!filename) return 'unknown';
         
         const parts = filename.toLowerCase().split('_');
@@ -12,7 +12,8 @@ class Parser {
         return 'unknown';
     }
     
-    static getModelName(modelString) {
+    static get_model_name(modelString) {
+        
         if (!modelString) return 'unknown';
         const model = modelString.toLowerCase();
 
@@ -24,7 +25,7 @@ class Parser {
         return modelString.split('-')[0];
     }
 
-    static formatRubricName(rubricName) {
+    static format_rubric_name(rubricName) {
         return rubricName
             .split('_')
             .map(word => word.charAt(0).toUpperCase() + word.slice(1))

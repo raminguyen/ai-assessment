@@ -20,39 +20,33 @@
     <div class="main-container">
         <!-- Left Panel -->
         <div class="left-panel">
-            <h2>📁 Essays</h2>
+            <h2>Essays</h2>
             
             <!-- Upload Box -->
             <div class="upload-box" id="uploadBox">
-                <div class="upload-icon">📁</div>
-                <p class="upload-text">Drag & Drop JSON files here</p>
-                <p class="upload-subtext">or click to browse</p>
-                <input type="file" id="fileInput" multiple accept=".json" hidden>
+                <div class="upload-icon"></div>
+                <p class="upload-text">Drag & Drop files or folders here</p>
+                <p class="upload-subtext">or use buttons below</p>
             </div>
 
-            <!-- GitHub Button -->
-            <button class="copy-btn" id="githubBtn" style="width: 100%; margin-top: 1rem; background: rgba(85, 255, 221, 0.2);">
-                🌐 Load from GitHub
+            <input type="file" id="fileInput" multiple accept=".json" hidden>
+            <input type="file" id="folderInput" multiple accept=".json" webkitdirectory hidden>
+
+            <button class="copy-btn" id="browseFilesBtn" style="width: 100%; margin-top: 1rem; background: rgba(85, 255, 221, 0.2);">
+                Browse Files
             </button>
 
-            <button id="loadFolderBtn" style="
-            width: 100%;
-            padding: 12px 20px;
-            margin-top: 10px;
-            background: rgba(85, 255, 221, 0.2);
-            border: 2px solid rgba(85, 255, 221, 0.5);
-            border-radius: 8px;
-            color: #55ffdd;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s ease;
-        ">
-            📁 Load from Folder
-        </button>
+            <button class="copy-btn" id="browseFoldersBtn" style="width: 100%; margin-top: 0.5rem; background: rgba(85, 255, 221, 0.2);">
+                Browse Folders
+            </button>
+
+            <button class="copy-btn" id="githubBtn" style="width: 100%; margin-top: 0.5rem; background: rgba(85, 255, 221, 0.2);">
+                Load from GitHub
+            </button>
 
             <!-- Filters -->
             <div class="filters" id="filters" style="display: none;">
-                <h3>🔍 Filters</h3>
+                <h3>Filters</h3>
                 
                 <!-- Model Filter -->
                 <div class="filter-group">
@@ -88,10 +82,9 @@
         </div>
 
         <!-- Right Panel -->
-        <!-- Right Panel -->
         <div class="right-panel" id="rightPanel">
             <div class="welcome-message">
-                <h2>🎯 Welcome!</h2>
+                <h2>Welcome!</h2>
                 <p>Upload your JSON files to get started.</p>
                 <div class="instructions">
                     <h3>How to use:</h3>
@@ -102,7 +95,36 @@
                         <li>Copy: Use the copy button to save content to clipboard</li>
                     </ol>
                 </div>
-                
+            </div>
+        </div>
+    </div>
+
+    <!-- Hidden Templates -->
+    <template id="summaryTemplate">
+        <div class="summary-box">
+            <strong>Total:</strong> <span class="total-count"></span> items |
+            <strong>Rubrics:</strong> <span class="rubrics-count"></span> |
+            <strong>Models:</strong> <span class="models-count"></span>
+        </div>
+    </template>
+
+    <template id="noResultsTemplate">
+        <div class="no-results">
+            <p>No essays match your filters</p>
+        </div>
+    </template>
+
+    <template id="noResultsPanelTemplate">
+        <div class="welcome-message">
+            <h2>🔍 No Results</h2>
+            <p>No essays match your current filters. Try adjusting your search criteria.</p>
+        </div>
+    </template>
+
+    <template id="notificationTemplate">
+        <div class="notification"></div>
+    </template>
+
     <!-- Footer -->
     <footer class="footer">
         <p>Developed by Rami Huu Nguyen - Started Since December 2025</p>

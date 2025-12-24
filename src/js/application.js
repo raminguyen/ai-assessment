@@ -5,45 +5,90 @@ class Application {
         this.gitHubLoader = new LoadGitHub(this.dataManager);
         this.uiRenderer = new Renderer(this.dataManager);
         
-        this.setupButtons();
-        this.setupDragAndDrop();
-        this.setupFolderPicker();
+        this.setup_buttons();
+        this.setup_drag_and_drop();
+        this.setup_folder_picker();
     }
 
-    setupButtons() {
-        this.uiRenderer.elements.uploadBox.addEventListener('click', () => {
+    setup_buttons() {
+        const browseFilesBtn = document.getElementById('browseFilesBtn');
+        const browseFoldersBtn = document.getElementById('browseFoldersBtn');
+        const folderInput = document.getElementById('folderInput');
+
+        browseFilesBtn.addEventListener('click', () => {
             this.uiRenderer.elements.fileInput.click();
         });
-        
-        this.uiRenderer.elements.fileInput.addEventListener('change', (e) => {
-            this.uploadFiles(e.target.files);
+
+        browseFoldersBtn.addEventListener('click', () => {
+            folderInput.click();
         });
-        
+
+        this.uiRenderer.elements.fileInput.addEventListener('change', (e) => {
+            this.upload_files(e.target.files);
+        });
+
+        folderInput.addEventListener('change', (e) => {
+            this.upload_files(e.target.files);
+        });
+
         this.uiRenderer.elements.githubBtn.addEventListener('click', () => {
-            this.loadFromGitHub();
+            this.load_from_github();
         });
     }
 
-    setupDragAndDrop() {
+    setup_drag_and_drop() {
         const box = this.uiRenderer.elements.uploadBox;
-        
+
         box.addEventListener('dragover', (e) => {
             e.preventDefault();
             box.classList.add('drag-over');
         });
-        
+
         box.addEventListener('dragleave', () => {
             box.classList.remove('drag-over');
         });
-        
-        box.addEventListener('drop', (e) => {
+
+        box.addEventListener('drop', async (e) => {
             e.preventDefault();
             box.classList.remove('drag-over');
-            this.uploadFiles(e.dataTransfer.files);
+
+            const items = e.dataTransfer.items;
+            if (!items) {
+                this.upload_files(e.dataTransfer.files);
+                return;
+            }
+
+            const files = [];
+            for (let i = 0; i < items.length; i++) {
+                const item = items[i].webkitGetAsEntry();
+                if (item) {
+                    await this.scan_item(item, files);
+                }
+            }
+
+            if (files.length > 0) {
+                await this.read_all_files(files);
+                this.uiRenderer.setup_filters();
+                this.uiRenderer.display_essay_list();
+                this.uiRenderer.show_notification(`✓ Added ${files.length} files!`);
+            }
         });
     }
 
-    setupFolderPicker() {
+    async scan_item(item, files) {
+        if (item.isFile && item.name.endsWith('.json')) {
+            const file = await new Promise(resolve => item.file(resolve));
+            files.push({ file, path: item.fullPath });
+        } else if (item.isDirectory) {
+            const reader = item.createReader();
+            const entries = await new Promise(resolve => reader.readEntries(resolve));
+            for (const entry of entries) {
+                await this.scan_item(entry, files);
+            }
+        }
+    }
+
+    setup_folder_picker() {
         const button = document.getElementById('loadFolderBtn');
         if (!button) return;
         
@@ -54,31 +99,31 @@ class Application {
             }
             
             button.disabled = true;
-            button.textContent = '📁 Loading...';
+            button.textContent = 'Loading...';
             
-            const count = await this.loadFolder();
+            const count = await this.load_folder();
+
+            this.uiRenderer.setup_filters();
+            this.uiRenderer.display_essay_list();
+            this.uiRenderer.show_notification(`✓ Loaded ${count} files!`);
             
-            this.uiRenderer.setupFilters();
-            this.uiRenderer.displayEssayList();
-            this.uiRenderer.showNotification(`✓ Loaded ${count} files!`);
-            
-            button.textContent = '📁 Load from Folder';
+            button.textContent = 'Load from Folder';
             button.disabled = false;
         });
     }
 
-    async loadFolder() {
+    async load_folder() {
         const folderHandle = await window.showDirectoryPicker();
         
         const jsonFiles = [];
-        await this.findJsonFiles(folderHandle, jsonFiles, '');
+        await this.find_json_files(folderHandle, jsonFiles, '');
         
-        await this.readAllFiles(jsonFiles);
+        await this.read_all_files(jsonFiles);
         
         return jsonFiles.length;
     }
 
-    async findJsonFiles(folderHandle, filesList, currentPath) {
+    async find_json_files(folderHandle, filesList, currentPath) {
         for await (const entry of folderHandle.values()) {
             const path = currentPath ? `${currentPath}/${entry.name}` : entry.name;
             
@@ -86,21 +131,21 @@ class Application {
                 const file = await entry.getFile();
                 filesList.push({ file, path });
             } else if (entry.kind === 'directory') {
-                await this.findJsonFiles(entry, filesList, path);
+                await this.find_json_files(entry, filesList, path);
             }
         }
     }
 
-    async readAllFiles(filesList) {
+    async read_all_files(filesList) {
         for (const { file, path } of filesList) {
             const text = await file.text();
             const data = JSON.parse(text);
-            const folder = data.folder || this.guessFolder(path);
+            const folder = data.folder || this.guess_folder(path);
             this.fileProcessor.processData(data, folder);
         }
     }
 
-    guessFolder(path) {
+    guess_folder(path) {
         if (path.includes('critical')) return 'critical_thinking';
         if (path.includes('oral')) return 'oral_communication';
         
@@ -108,34 +153,34 @@ class Application {
         return firstFolder !== path ? firstFolder : null;
     }
 
-    async uploadFiles(files) {
-        const count = await this.fileProcessor.processLocalFiles(files);
-        this.uiRenderer.setupFilters();
-        this.uiRenderer.displayEssayList();
-        this.uiRenderer.showNotification(`✓ Added ${count} files!`);
+    async upload_files(files) {
+        const count = await this.fileProcessor.process_local_files(files);
+        this.uiRenderer.setup_filters();
+        this.uiRenderer.display_essay_list();
+        this.uiRenderer.show_notification(`✓ Added ${count} files!`);
     }
 
-    async loadFromGitHub() {
-        this.uiRenderer.showNotification('Loading from GitHub...');
-        const count = await this.gitHubLoader.loadFromGitHub();
-        this.uiRenderer.setupFilters();
-        this.uiRenderer.displayEssayList();
-        this.uiRenderer.showNotification(`✓ Loaded ${count} files!`);
+    async load_from_github() {
+        this.uiRenderer.show_notification('Loading from GitHub...');
+        const count = await this.gitHubLoader.load_from_github();
+        this.uiRenderer.setup_filters();
+        this.uiRenderer.display_essay_list();
+        this.uiRenderer.show_notification(`✓ Loaded ${count} files!`);
     }
 
-    copyEssayText() {
+    copy_essay_text() {
         const text = document.getElementById('essayText').innerText;
-        this.copyText(text);
+        this.copy_text(text);
     }
 
-    copyEvaluationText() {
+    copy_evaluation_text() {
         const text = document.getElementById('evaluationText').innerText;
-        this.copyText(text);
+        this.copy_text(text);
     }
 
-    copyText(text) {
+    copy_text(text) {
         navigator.clipboard.writeText(text);
-        this.uiRenderer.showNotification('✓ Copied!');
+        this.uiRenderer.show_notification('✓ Copied!');
     }
 }
 
