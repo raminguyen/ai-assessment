@@ -116,75 +116,6 @@ html, body {
     color: var(--rami-lightgreen);
 }
 
-/* Filters */
-.filters {
-    background-color: rgba(34, 204, 157, 0.08);
-    border: 1px solid rgba(34, 204, 157, 0.3);
-    border-radius: 8px;
-    padding: 1rem;
-    margin-bottom: 1rem;
-}
-
-.filters h3 {
-    margin: 0 0 1rem 0;
-    font-size: 1rem;
-    font-weight: 600;
-    color: var(--rami-highlight);
-}
-
-.filter-group {
-    margin-bottom: 1rem;
-}
-
-.filter-group:last-child {
-    margin-bottom: 0;
-}
-
-.filter-group label {
-    display: block;
-    font-size: 0.85rem;
-    color: var(--rami-lightgreen);
-    margin-bottom: 0.5rem;
-    font-weight: 500;
-}
-
-.filter-group input[type="text"],
-.filter-group select {
-    width: 100%;
-    padding: 0.5rem;
-    background-color: rgba(67, 68, 67, 0.3);
-    border: 1px solid rgba(34, 204, 157, 0.4);
-    border-radius: 4px;
-    color: var(--rami-white);
-    font-family: 'Poppins', sans-serif;
-    font-size: 0.9rem;
-}
-
-.filter-group input[type="text"]:focus,
-.filter-group select:focus {
-    outline: none;
-    border-color: var(--rami-highlight);
-}
-
-.checkbox-group {
-    display: flex;
-    flex-direction: column;
-    gap: 0.5rem;
-}
-
-.checkbox-group label {
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-    color: var(--rami-white);
-    cursor: pointer;
-    font-size: 0.85rem;
-}
-
-.checkbox-group input[type="checkbox"] {
-    cursor: pointer;
-}
-
 /* Essay List */
 .essay-list {
     margin-top: 1rem;
@@ -302,7 +233,7 @@ html, body {
 
 /* Content Info Box */
 .content-info {
-    background-color: rgba(34, 204, 157, 0.08);
+    background-color: rgba(4, 31, 24, 1);
     border: 1px solid rgba(34, 204, 157, 0.3);
     border-radius: 6px;
     padding: 1rem;
@@ -320,7 +251,7 @@ html, body {
 
 /* Content Box */
 .content-box {
-    background-color: rgba(67, 68, 67, 0.2);
+    background-color: rgba(4, 31, 24, 1);
     border: 1px solid rgba(34, 204, 157, 0.3);
     border-radius: 6px;
     padding: 1.5rem;
@@ -411,7 +342,7 @@ html, body {
 
 /* Prompt Box Styling */
 .prompt-box {
-    background: linear-gradient(135deg, rgba(34, 204, 157, 0.08) 0%, rgba(145, 145, 145, 0.08) 100%);
+    background: rgba(4, 31, 24, 1);
     border: 2px solid rgba(34, 204, 157, 0.4);
     border-left: 4px solid var(--rami-highlight);
 }
@@ -427,7 +358,7 @@ html, body {
     word-wrap: break-word;
     color: var(--rami-lightgreen);
     font-size: 0.95rem;
-    background-color: rgba(67, 68, 67, 0.3);
+    background-color: rgba(4, 31, 24, 1);
     padding: 1rem;
     border-radius: 4px;
     font-family: 'Poppins', sans-serif;
@@ -436,7 +367,7 @@ html, body {
 
 .prompt-box:hover {
     border-color: var(--rami-lightgreen);
-    background: linear-gradient(135deg, rgba(34, 204, 157, 0.12) 0%, rgba(145, 145, 145, 0.12) 100%);
+    background: rgba(4, 31, 24, 1);
 }
 
 /* Summary Box */
@@ -509,26 +440,6 @@ html, body {
     }
 }
 
-/* Filter Summary Box */
-.filter-summary-box {
-    background: rgba(255, 255, 255, 0.05);
-    border-left: 4px solid var(--rami-highlight);
-}
-
-.active-filters-list {
-    padding-left: 0;
-}
-
-.filter-item {
-    margin: 0.5rem 0;
-    padding-left: 1rem;
-    font-size: 0.95rem;
-}
-
-.filter-label::after {
-    content: ': ';
-}
-
 /* NEW LAYOUT STYLES */
 
 /* Rubric Section */
@@ -538,9 +449,9 @@ html, body {
 
 .rubric-section-header {
     background: linear-gradient(135deg, rgba(67, 68, 67, 0.3) 0%, rgba(34, 204, 157, 0.15) 100%);
-    padding: 1rem 1.25rem;
+    padding: 0.75rem 1rem;
     font-weight: 700;
-    font-size: 1.3rem;
+    font-size: 1.1rem;
     color: #ffffffa8;
     border-radius: 8px;
     border-left: 5px solid var(--rami-highlight);
@@ -615,12 +526,12 @@ html, body {
 
 /* Scores Section */
 .scores-section {
-    background: linear-gradient(135deg, rgba(255, 215, 0, 0.05) 0%, rgba(255, 165, 0, 0.05) 100%);
+    background: rgba(4, 31, 24, 1);
     border-left: 4px solid rgba(255, 215, 0, 0.6);
 }
 
 .score-item {
-    background-color: rgba(67, 68, 67, 0.3);
+    background-color: rgba(4, 31, 24, 1);
     border: 1px solid rgba(34, 204, 157, 0.3);
     border-radius: 6px;
     padding: 1rem;
@@ -672,7 +583,7 @@ html, body {
 }
 
 .score-tab {
-    background-color: rgba(67, 68, 67, 0.3);
+    background-color: rgba(4, 31, 24, 1);
     color: var(--rami-lightgreen);
     border: 1px solid rgba(34, 204, 157, 0.4);
     padding: 0.5rem 1rem;
@@ -717,7 +628,7 @@ html, body {
 .score-tab-content {
     min-height: 200px;
     padding: 1rem;
-    background-color: rgba(67, 68, 67, 0.25);
+    background-color: rgba(4, 31, 24, 1);
     border-radius: 6px;
 }
 
@@ -737,7 +648,7 @@ html, body {
 }
 
 .score-meta {
-    background-color: rgba(34, 204, 157, 0.08);
+    background-color: rgba(4, 31, 24, 1);
     border: 1px solid rgba(34, 204, 157, 0.3);
     border-radius: 4px;
     padding: 0.75rem;
@@ -760,7 +671,7 @@ html, body {
     word-wrap: break-word;
     color: var(--rami-white);
     font-size: 0.95rem;
-    background-color: rgba(67, 68, 67, 0.3);
+    background-color: rgba(4, 31, 24, 1);
     padding: 1rem;
     border-radius: 4px;
     border-left: 3px solid var(--rami-highlight);

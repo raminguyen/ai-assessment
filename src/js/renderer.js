@@ -4,6 +4,7 @@
 let elements = {};
 let prompts = {};
 let gradePrompt = '';
+let rubrics = {};
 
 // Start the renderer
 async function initRenderer() {
@@ -16,13 +17,6 @@ function findElements() {
     elements = {
         essayList: document.getElementById('essayList'),
         rightPanel: document.getElementById('rightPanel'),
-        filters: document.getElementById('filters'),
-        modelFilter: document.getElementById('modelFilter'),
-        essayFilter: document.getElementById('essayFilter'),
-        rubricFilter: document.getElementById('rubricFilter'),
-        filterGenerate: document.getElementById('filterGenerate'),
-        filterTune: document.getElementById('filterTune'),
-        filterScore: document.getElementById('filterScore')
     };
 }
 
@@ -70,91 +64,6 @@ function getPromptForEssay(essayName) {
 
 function getGradePrompt() {
     return gradePrompt;
-}
-
-// Setup all filters
-function setupFilters() {
-    elements.filters.style.display = 'block';
-    fillModelDropdown();
-    fillEssayDropdown();
-    fillRubricDropdown();
-    addResetButton();
-    attachFilterListeners();
-}
-
-// Fill model dropdown
-function fillModelDropdown() {
-    elements.modelFilter.innerHTML = '<option value="all">All Models</option>';
-    getModels().forEach(model => {
-        const option = document.createElement('option');
-        option.value = model;
-        option.textContent = model;
-        elements.modelFilter.appendChild(option);
-    });
-}
-
-// Fill essay dropdown
-function fillEssayDropdown() {
-    elements.essayFilter.innerHTML = '<option value="all">All Assignments</option>';
-    const names = new Set();
-    Object.values(getData()).forEach(item => names.add(item.essayName));
-
-    Array.from(names).sort().forEach(name => {
-        const option = document.createElement('option');
-        option.value = name;
-        option.textContent = name;
-        elements.essayFilter.appendChild(option);
-    });
-    elements.essayFilter.value = 'Assignment_1';
-}
-
-// Fill rubric dropdown
-function fillRubricDropdown() {
-    elements.rubricFilter.innerHTML = '<option value="all">All Rubrics</option>';
-    getRubrics().forEach(rubric => {
-        const option = document.createElement('option');
-        option.value = rubric;
-        option.textContent = formatRubricName(rubric);
-        elements.rubricFilter.appendChild(option);
-    });
-    elements.rubricFilter.value = 'critical_thinking';
-}
-
-// Add reset button
-function addResetButton() {
-    if (!document.getElementById('resetBtn')) {
-        const btn = document.createElement('button');
-        btn.id = 'resetBtn';
-        btn.className = 'copy-btn';
-        btn.style.cssText = 'width: 100%; margin-top: 1rem; background: rgba(255, 85, 85, 0.3);';
-        btn.innerHTML = 'Reset Filters';
-        btn.onclick = resetFilters;
-        elements.filters.appendChild(btn);
-    }
-}
-
-// Listen for filter changes
-function attachFilterListeners() {
-    if (elements.filters.dataset.listening) return;
-
-    elements.essayFilter.addEventListener('change', displayEssayList);
-    elements.modelFilter.addEventListener('change', displayEssayList);
-    elements.rubricFilter.addEventListener('change', displayEssayList);
-    elements.filterGenerate.addEventListener('change', displayEssayList);
-    elements.filterTune.addEventListener('change', displayEssayList);
-    elements.filterScore.addEventListener('change', displayEssayList);
-    elements.filters.dataset.listening = 'true';
-}
-
-// Reset all filters
-function resetFilters() {
-    elements.modelFilter.value = 'all';
-    elements.essayFilter.value = 'all';
-    elements.rubricFilter.value = 'all';
-    elements.filterGenerate.checked = true;
-    elements.filterTune.checked = true;
-    elements.filterScore.checked = true;
-    displayEssayList();
 }
 
 // Show the essay list - NEW SIMPLE VERSION
@@ -424,7 +333,8 @@ function renderEssayDetails(item, scores) {
 
     // Add header
     const header = document.createElement('h2');
-    header.textContent = `${item.essayName} - ${item.command.toUpperCase()}`;
+    const commandText = item.command === 'generate' ? 'Generate an essay' : 'Tune an essay with rubric';
+    header.textContent = `${item.essayName}: ${commandText}`;
     panel.appendChild(header);
 
     // Add model info
@@ -445,6 +355,12 @@ function renderEssayDetails(item, scores) {
         promptBox.innerHTML = '<h3>Prompt</h3><div class="prompt-text">' + prompt + '</div>';
         panel.appendChild(promptBox);
     }
+
+    // Add rubric section with link
+    const rubricBox = document.createElement('div');
+    rubricBox.className = 'content-box';
+    rubricBox.innerHTML = '<h3>Rubric</h3><div class="rubric-link-text"><a href="https://chsu.edu/wp-content/uploads/CriticalThinking.pdf" target="_blank" style="color: var(--rami-lightgreen); text-decoration: underline;">Click to view rubric (Critical Thinking PDF)</a></div>';
+    panel.appendChild(rubricBox);
 
     // Add response with toggle functionality
     const responseBox = document.createElement('div');
@@ -638,17 +554,6 @@ function showScoreContent(scoreItem, contentContainer) {
     contentContainer.appendChild(scoreContent);
 }
 
-// Check if item matches filters
-function itemMatchesFilters(item, model, filters) {
-    if (filters.essay !== 'all' && item.essayName !== filters.essay) return false;
-    if (filters.rubric !== 'all' && item.rubric !== filters.rubric) return false;
-    if (filters.model !== 'all' && model !== filters.model) return false;
-    if (item.command === 'generate' && !filters.showGenerate) return false;
-    if (item.command === 'tune' && !filters.showTune) return false;
-    if (item.command === 'score' && !filters.showScore) return false;
-    return true;
-}
-
 // Get model for item
 function getModelForItem(item) {
     if (item.command === 'score') {
@@ -690,9 +595,6 @@ function groupEssays(filters) {
     // Look at each item
     Object.values(getData()).forEach(item => {
         const model = getModelForItem(item);
-
-        // Skip if doesn't match filters
-        if (!itemMatchesFilters(item, model, filters)) return;
 
         // Get the names we need
         const rubricName = item.rubric;
@@ -835,57 +737,6 @@ function showNoResults() {
     const panelTemplate = document.getElementById('noResultsPanelTemplate');
     elements.essayList.appendChild(listTemplate.content.cloneNode(true));
     elements.rightPanel.appendChild(panelTemplate.content.cloneNode(true));
-}
-
-// Show right panel summary
-function showRightPanel(filters) {
-    elements.rightPanel.innerHTML = '';
-
-    // Add summary template
-    const summaryTemplate = document.getElementById('rightPanelSummaryTemplate');
-    const summary = summaryTemplate.content.cloneNode(true);
-
-    // Get the filter list container
-    const filtersList = summary.querySelector('.active-filters-list');
-
-    // Add active filters
-    if (filters.essay !== 'all') {
-        filtersList.appendChild(createFilterItem('Assignment', filters.essay));
-    }
-    if (filters.model !== 'all') {
-        filtersList.appendChild(createFilterItem('Model', filters.model));
-    }
-    if (filters.rubric !== 'all') {
-        filtersList.appendChild(createFilterItem('Rubric', formatRubricName(filters.rubric)));
-    }
-
-    elements.rightPanel.appendChild(summary);
-
-    // Show prompts if essay selected
-    if (filters.essay !== 'all') {
-        const prompt = getPromptForEssay(filters.essay);
-        if (prompt) {
-            elements.rightPanel.appendChild(createPromptBox('Assignment Prompt', prompt));
-        }
-
-        const grade = getGradePrompt();
-        if (grade) {
-            elements.rightPanel.appendChild(createPromptBox('Grading Prompt', grade));
-        }
-    }
-
-    // Add tip box
-    const tipTemplate = document.getElementById('tipBoxTemplate');
-    elements.rightPanel.appendChild(tipTemplate.content.cloneNode(true));
-}
-
-// Create a filter item from template
-function createFilterItem(label, value) {
-    const template = document.getElementById('filterItemTemplate');
-    const item = template.content.cloneNode(true);
-    item.querySelector('.filter-label').textContent = label;
-    item.querySelector('.filter-value').textContent = value;
-    return item;
 }
 
 // Create a prompt box from template

@@ -13,6 +13,7 @@
         <div class="header-container">
             <h1>AI Essay Explorer</h1>
             <p>Explore GenAI-generated essays and assessments</p>
+
         </div>
     </header>
 
@@ -25,31 +26,6 @@
             <button class="copy-btn" id="githubBtn" style="width: 100%; margin-top: 1rem; background: rgba(85, 255, 221, 0.2);">
                 Load from GitHub
             </button>
-
-            <!-- Filters - Hidden for now, can be enabled later -->
-            <div class="filters" id="filters" style="display: none;">
-                <h3>Filters</h3>
-                <div class="filter-group">
-                    <label>Model:</label>
-                    <select id="modelFilter"></select>
-                </div>
-                <div class="filter-group">
-                    <label>Assignment:</label>
-                    <select id="essayFilter"></select>
-                </div>
-                <div class="filter-group">
-                    <label>Rubric Type:</label>
-                    <select id="rubricFilter"></select>
-                </div>
-                <div class="filter-group">
-                    <label>Command Type:</label>
-                    <div class="checkbox-group">
-                        <label><input type="checkbox" id="filterGenerate" checked> Generate</label>
-                        <label><input type="checkbox" id="filterTune" checked> Tune</label>
-                        <label><input type="checkbox" id="filterScore" checked> Score</label>
-                    </div>
-                </div>
-            </div>
 
             <!-- Essay List -->
             <div class="essay-list" id="essayList"></div>
@@ -64,7 +40,6 @@
                     <h3>How to use:</h3>
                     <ol>
                         <li>Load files: Click "Load from GitHub" button</li>
-                        <li>Filter: Use dropdowns to find specific essays</li>
                         <li>View: Click any item in the left panel to see details</li>
                         <li>Copy: Use the copy button to save content to clipboard</li>
                     </ol>
@@ -84,34 +59,12 @@
 
     <template id="noResultsTemplate">
         <div class="no-results">
-            <p>No essays match your filters</p>
-        </div>
-    </template>
-
-    <template id="noResultsPanelTemplate">
-        <div class="welcome-message">
-            <h2>No Results</h2>
-            <p>No essays match your current filters. Try adjusting your search criteria.</p>
+            <p>No essays found</p>
         </div>
     </template>
 
     <template id="notificationTemplate">
         <div class="notification"></div>
-    </template>
-
-    <template id="rightPanelSummaryTemplate">
-        <h2>Filter Summary</h2>
-        <div class="content-info filter-summary-box">
-            <p><strong>Active Filters:</strong></p>
-            <div class="active-filters-list"></div>
-        </div>
-    </template>
-
-    <template id="filterItemTemplate">
-        <p class="filter-item">
-            <span class="filter-label"></span>
-            <strong class="filter-value"></strong>
-        </p>
     </template>
 
     <template id="promptBoxTemplate">
