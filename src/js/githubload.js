@@ -17,7 +17,9 @@ async function loadFromGitHub() {
 
         // Download each JSON file
         for (const file of jsonFiles) {
-            const fileResponse = await fetch(rawUrl + file.name);
+            // Add cache-busting parameter to ensure fresh data
+            const cacheBuster = `?t=${Date.now()}`;
+            const fileResponse = await fetch(rawUrl + file.name + cacheBuster);
             const fileText = await fileResponse.text();
             const data = JSON.parse(fileText);
 
