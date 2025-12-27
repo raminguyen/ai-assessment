@@ -11,9 +11,9 @@ function addData(essayName, modelName, command, rubric, data) {
     if (command === 'score') {
         const essayType = data.essay_type || 'unknown';
         const grader = data.grader || 'unknown';
-        uniqueName = `${essayName}_${modelName}_${command}_${essayType}_${grader}_${rubric}`;
+        uniqueName = essayName + '_' + modelName + '_' + command + '_' + essayType + '_' + grader + '_' + rubric;
     } else {
-        uniqueName = `${essayName}_${modelName}_${command}_${rubric}`;
+        uniqueName = essayName + '_' + modelName + '_' + command + '_' + rubric;
     }
 
     // Store the essay

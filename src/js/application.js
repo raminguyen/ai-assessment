@@ -3,13 +3,13 @@ async function handleLoadFromGitHub() {
     showNotification('Loading from GitHub...');
     const count = await loadFromGitHub();
     displayEssayList();
-    showNotification(`✓ Loaded ${count} files!`);
+    showNotification('Loaded ' + count + ' files!');
 }
 
 // Copy text to clipboard
 function copyText(text) {
     navigator.clipboard.writeText(text);
-    showNotification('✓ Copied!');
+    showNotification('Copied!');
 }
 
 // Initialize app

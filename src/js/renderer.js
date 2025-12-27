@@ -127,7 +127,7 @@ function addResetButton() {
         btn.id = 'resetBtn';
         btn.className = 'copy-btn';
         btn.style.cssText = 'width: 100%; margin-top: 1rem; background: rgba(255, 85, 85, 0.3);';
-        btn.innerHTML = '🔄 Reset Filters';
+        btn.innerHTML = 'Reset Filters';
         btn.onclick = resetFilters;
         elements.filters.appendChild(btn);
     }
@@ -207,7 +207,7 @@ function showRubricSection(rubricName, experimentNames) {
     // Add rubric header
     const rubricHeader = document.createElement('div');
     rubricHeader.className = 'rubric-section-header';
-    rubricHeader.textContent = `📋 ${formatRubricName(rubricName)}`;
+    rubricHeader.textContent = formatRubricName(rubricName);
     rubricDiv.appendChild(rubricHeader);
 
     // Show each experiment in this rubric
@@ -239,31 +239,56 @@ function showExperiment(experimentName, rubricFilter, parentContainer) {
     // Add experiment header
     const header = document.createElement('div');
     header.className = 'experiment-header';
-    header.textContent = `${experimentName} (${essays.length} essays)`;
+    header.textContent = experimentName;
     experimentDiv.appendChild(header);
 
     // Group by model and type (generate/tune)
     const grouped = groupByModelAndType(essays);
 
-    // Show each model's essays
+    // Show each model's essays with model header
     Object.keys(grouped).sort().forEach(modelName => {
         const modelData = grouped[modelName];
 
-        // Show GENERATED essays
+        // Create model section
+        const modelSection = document.createElement('div');
+        modelSection.className = 'model-section';
+        modelSection.style.marginLeft = '1rem';
+
+        // Add model header
+        const modelHeader = document.createElement('div');
+        modelHeader.className = 'model-section-header';
+        modelHeader.textContent = modelName;
+        modelHeader.style.cssText = `
+            font-weight: 600;
+            color: var(--rami-white);
+            margin: 0.75rem 0 0.5rem 0;
+            font-size: 1rem;
+        `;
+        modelSection.appendChild(modelHeader);
+
+        // Create a container for badges in one line
+        const badgesContainer = document.createElement('div');
+        badgesContainer.style.cssText = `
+            display: flex;
+            gap: 0.5rem;
+            margin-left: 1rem;
+            margin-bottom: 0.5rem;
+        `;
+
+        // Add GENERATE badge if exists
         if (modelData.generate.length > 0) {
-            modelData.generate.forEach(item => {
-                const essayBtn = createEssayButton('GENERATED', modelName, item);
-                experimentDiv.appendChild(essayBtn);
-            });
+            const generateBadge = createEssayBadge('Generate', modelData.generate[0]);
+            badgesContainer.appendChild(generateBadge);
         }
 
-        // Show TUNED essays
+        // Add TUNE badge if exists
         if (modelData.tune.length > 0) {
-            modelData.tune.forEach(item => {
-                const essayBtn = createEssayButton('TUNED', modelName, item);
-                experimentDiv.appendChild(essayBtn);
-            });
+            const tuneBadge = createEssayBadge('Tune', modelData.tune[0]);
+            badgesContainer.appendChild(tuneBadge);
         }
+
+        modelSection.appendChild(badgesContainer);
+        experimentDiv.appendChild(modelSection);
     });
 
     parentContainer.appendChild(experimentDiv);
@@ -302,23 +327,46 @@ function groupByModelAndType(essays) {
     return grouped;
 }
 
+// Create a badge for an essay type
+function createEssayBadge(type, item) {
+    const badge = document.createElement('span');
+    badge.className = 'model-badge';
+    badge.textContent = type;
+    badge.style.cursor = 'pointer';
+    badge.style.transition = 'all 0.3s ease';
+
+    // Click handler
+    badge.onclick = () => showEssayDetails(item, badge);
+
+    // Hover effect
+    badge.onmouseenter = function() {
+        this.style.backgroundColor = 'rgba(34, 204, 157, 0.3)';
+    };
+    badge.onmouseleave = function() {
+        this.style.backgroundColor = '#083e30';
+    };
+
+    return badge;
+}
+
 // Create a button for an essay
 function createEssayButton(type, modelName, item) {
     const btn = document.createElement('div');
     btn.className = 'essay-button';
 
     // Create badge for model
-    const badge = document.createElement('span');
-    badge.className = 'model-badge';
-    badge.textContent = modelName;
+    const modelBadge = document.createElement('span');
+    modelBadge.className = 'model-badge';
+    modelBadge.textContent = modelName;
 
-    // Create label for type
-    const label = document.createElement('span');
-    label.className = 'essay-type-label';
-    label.textContent = type;
+    // Create badge for type
+    const typeBadge = document.createElement('span');
+    typeBadge.className = 'model-badge';
+    typeBadge.textContent = type;
+    typeBadge.style.marginLeft = '0.5rem';
 
-    btn.appendChild(badge);
-    btn.appendChild(label);
+    btn.appendChild(modelBadge);
+    btn.appendChild(typeBadge);
 
     // Click handler
     btn.onclick = () => showEssayDetails(item, btn);
@@ -328,14 +376,21 @@ function createEssayButton(type, modelName, item) {
 
 // Show essay details in right panel
 function showEssayDetails(item, buttonElement) {
-    // Remove active class from all buttons
+    // Remove active class from all buttons and badges
     document.querySelectorAll('.essay-button').forEach(btn =>
         btn.classList.remove('active')
     );
+    document.querySelectorAll('.model-badge').forEach(badge => {
+        badge.style.backgroundColor = '#083e30';
+    });
 
-    // Add active class to clicked button
+    // Add active class/style to clicked element
     if (buttonElement) {
-        buttonElement.classList.add('active');
+        if (buttonElement.classList.contains('essay-button')) {
+            buttonElement.classList.add('active');
+        } else if (buttonElement.classList.contains('model-badge')) {
+            buttonElement.style.backgroundColor = 'rgba(34, 204, 157, 0.5)';
+        }
     }
 
     // Get scores for this essay
@@ -387,10 +442,7 @@ function renderEssayDetails(item, scores) {
     if (prompt) {
         const promptBox = document.createElement('div');
         promptBox.className = 'content-box prompt-box';
-        promptBox.innerHTML = `
-            <h3>📝 Prompt</h3>
-            <div class="prompt-text">${prompt}</div>
-        `;
+        promptBox.innerHTML = '<h3>Prompt</h3><div class="prompt-text">' + prompt + '</div>';
         panel.appendChild(promptBox);
     }
 
@@ -399,7 +451,7 @@ function renderEssayDetails(item, scores) {
     responseBox.className = 'content-box';
 
     const responseHeader = document.createElement('h3');
-    responseHeader.textContent = '📄 Response';
+    responseHeader.textContent = 'Click to view essay';
     responseHeader.style.cursor = 'pointer';
     responseHeader.style.userSelect = 'none';
 
@@ -409,19 +461,18 @@ function renderEssayDetails(item, scores) {
 
     const responseText = item.data.result || item.data.essay || 'No content';
     const cleanResponseText = removeMarkdown(responseText);
-    responseContent.innerHTML = `
-        <div class="essay-text">${cleanResponseText}</div>
-        <button class="copy-btn" onclick="copyText(\`${cleanResponseText.replace(/`/g, '\\`').replace(/\$/g, '\\$')}\`)">📋 Copy</button>
-    `;
+    const escapedText = cleanResponseText.replace(/`/g, '\\`').replace(/\$/g, '\\$').replace(/'/g, "\\'");
+    responseContent.innerHTML = '<div class="essay-text">' + cleanResponseText + '</div>' +
+        '<button class="copy-btn" onclick="copyText(\'' + escapedText + '\')">Copy</button>';
 
     // Toggle on header click
-    responseHeader.onclick = () => {
+    responseHeader.onclick = function() {
         if (responseContent.style.display === 'none') {
             responseContent.style.display = 'block';
-            responseHeader.textContent = '📄 Response ▼';
+            responseHeader.textContent = 'Response ▼';
         } else {
             responseContent.style.display = 'none';
-            responseHeader.textContent = '📄 Response';
+            responseHeader.textContent = 'Click to view essay';
         }
     };
 
@@ -433,7 +484,7 @@ function renderEssayDetails(item, scores) {
     if (scores.length > 0) {
         const scoresBox = document.createElement('div');
         scoresBox.className = 'content-box scores-section';
-        scoresBox.innerHTML = '<h3>📊 Scores</h3>';
+        scoresBox.innerHTML = '<h3>Scores</h3>';
 
         // Create tabs container
         const tabsContainer = document.createElement('div');
@@ -448,7 +499,7 @@ function renderEssayDetails(item, scores) {
         const aiScores = [];
         const humanScores = [];
 
-        scores.forEach(scoreItem => {
+        scores.forEach(function(scoreItem) {
             const graderModel = getModelName(scoreItem.data.grader);
             if (graderModel.startsWith('Human')) {
                 humanScores.push(scoreItem);
@@ -458,22 +509,22 @@ function renderEssayDetails(item, scores) {
         });
 
         // Add AI model tabs
-        aiScores.forEach(scoreItem => {
+        aiScores.forEach(function(scoreItem) {
             const graderModel = getModelName(scoreItem.data.grader);
             const tab = document.createElement('button');
             tab.className = 'score-tab';
             tab.textContent = graderModel;
-            tab.onclick = () => switchScoreTab(tab, scoreItem, contentContainer);
+            tab.onclick = function() { switchScoreTab(tab, scoreItem, contentContainer); };
             tabsContainer.appendChild(tab);
         });
 
         // Add Human tabs dynamically
-        humanScores.forEach(scoreItem => {
+        humanScores.forEach(function(scoreItem) {
             const graderModel = getModelName(scoreItem.data.grader);
             const tab = document.createElement('button');
             tab.className = 'score-tab human-tab';
             tab.textContent = graderModel;
-            tab.onclick = () => switchScoreTab(tab, scoreItem, contentContainer);
+            tab.onclick = function() { switchScoreTab(tab, scoreItem, contentContainer); };
             tabsContainer.appendChild(tab);
         });
 
@@ -527,16 +578,62 @@ function showScoreContent(scoreItem, contentContainer) {
     const fullGraderName = scoreItem.data.grader || graderModel;
     const scoreText = scoreItem.data.result || scoreItem.data.score || 'No score available';
     const cleanScoreText = removeMarkdown(scoreText);
+    const essayType = scoreItem.data.essay_type || 'generate';
+    const timestamp = scoreItem.data.timestamp || 'N/A';
 
-    scoreContent.innerHTML = `
-        <div class="score-meta">
-            <p><strong>Graded by:</strong> ${fullGraderName}</p>
-            <p><strong>Essay Type:</strong> ${scoreItem.data.essay_type || 'generate'}</p>
-            <p><strong>Time:</strong> ${scoreItem.data.timestamp || 'N/A'}</p>
-        </div>
-        <div class="score-text">${cleanScoreText}</div>
-        <button class="copy-btn" onclick="copyText(\`${cleanScoreText.replace(/`/g, '\\`').replace(/\$/g, '\\$')}\`)">📋 Copy Score</button>
-    `;
+    // Add metadata
+    const metaDiv = document.createElement('div');
+    metaDiv.className = 'score-meta';
+    metaDiv.innerHTML = '<p><strong>Graded by:</strong> ' + fullGraderName + '</p>' +
+        '<p><strong>Essay Type:</strong> ' + essayType + '</p>' +
+        '<p><strong>Time:</strong> ' + timestamp + '</p>';
+    scoreContent.appendChild(metaDiv);
+
+    // Add grading prompt with toggle
+    const gradePromptText = getGradePrompt();
+    if (gradePromptText) {
+        const promptBox = document.createElement('div');
+        promptBox.className = 'content-box prompt-box';
+        promptBox.style.marginBottom = '1rem';
+
+        const promptHeader = document.createElement('h3');
+        promptHeader.textContent = 'Click to view grading prompt';
+        promptHeader.style.cursor = 'pointer';
+        promptHeader.style.userSelect = 'none';
+
+        const promptContent = document.createElement('div');
+        promptContent.className = 'prompt-content';
+        promptContent.style.display = 'none';
+        promptContent.innerHTML = '<div class="prompt-text">' + gradePromptText + '</div>';
+
+        // Toggle on header click
+        promptHeader.onclick = function() {
+            if (promptContent.style.display === 'none') {
+                promptContent.style.display = 'block';
+                promptHeader.textContent = 'Grading Prompt ▼';
+            } else {
+                promptContent.style.display = 'none';
+                promptHeader.textContent = 'Click to view grading prompt';
+            }
+        };
+
+        promptBox.appendChild(promptHeader);
+        promptBox.appendChild(promptContent);
+        scoreContent.appendChild(promptBox);
+    }
+
+    // Add score text
+    const scoreTextDiv = document.createElement('div');
+    scoreTextDiv.className = 'score-text';
+    scoreTextDiv.textContent = cleanScoreText;
+    scoreContent.appendChild(scoreTextDiv);
+
+    // Add copy button
+    const copyBtn = document.createElement('button');
+    copyBtn.className = 'copy-btn';
+    copyBtn.textContent = 'Copy Score';
+    copyBtn.onclick = function() { copyText(cleanScoreText); };
+    scoreContent.appendChild(copyBtn);
 
     contentContainer.appendChild(scoreContent);
 }
@@ -653,7 +750,7 @@ function showRubricHeader(rubric) {
     header.style.background = colors.bgColor;
     header.style.color = colors.color;
     header.style.borderLeftColor = colors.color;
-    header.textContent = `📋 ${formatRubricName(rubric)}`;
+    header.textContent = formatRubricName(rubric);
     elements.essayList.appendChild(header);
 }
 
@@ -753,13 +850,13 @@ function showRightPanel(filters) {
 
     // Add active filters
     if (filters.essay !== 'all') {
-        filtersList.appendChild(createFilterItem('📝 Assignment', filters.essay));
+        filtersList.appendChild(createFilterItem('Assignment', filters.essay));
     }
     if (filters.model !== 'all') {
-        filtersList.appendChild(createFilterItem('🤖 Model', filters.model));
+        filtersList.appendChild(createFilterItem('Model', filters.model));
     }
     if (filters.rubric !== 'all') {
-        filtersList.appendChild(createFilterItem('📋 Rubric', formatRubricName(filters.rubric)));
+        filtersList.appendChild(createFilterItem('Rubric', formatRubricName(filters.rubric)));
     }
 
     elements.rightPanel.appendChild(summary);
@@ -768,12 +865,12 @@ function showRightPanel(filters) {
     if (filters.essay !== 'all') {
         const prompt = getPromptForEssay(filters.essay);
         if (prompt) {
-            elements.rightPanel.appendChild(createPromptBox('📝 Assignment Prompt', prompt));
+            elements.rightPanel.appendChild(createPromptBox('Assignment Prompt', prompt));
         }
 
         const grade = getGradePrompt();
         if (grade) {
-            elements.rightPanel.appendChild(createPromptBox('✅ Grading Prompt', grade));
+            elements.rightPanel.appendChild(createPromptBox('Grading Prompt', grade));
         }
     }
 

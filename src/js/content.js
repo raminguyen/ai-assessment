@@ -27,7 +27,7 @@ function renderContent(rightPanel, commandType, data, gradePrompt = '') {
     html += '</div>';
 
     // Add copy button
-    html += '<button class="copy-btn" onclick="copyEssayText()">📋 Copy</button>';
+    html += '<button class="copy-btn" onclick="copyEssayText()">Copy</button>';
 
     // Step 2: Put HTML on the page
     rightPanel.innerHTML = html;

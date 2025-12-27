@@ -24,7 +24,7 @@ function getModelName(modelString) {
         // Extract human number if present (e.g., "Human Grader 1" -> "Human 1")
         const match = modelString.match(/human.*?(\d+)/i);
         if (match) {
-            return `Human ${match[1]}`;
+            return 'Human ' + match[1];
         }
         return 'Human';
     }
