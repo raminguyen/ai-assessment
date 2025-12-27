@@ -1,34 +1,47 @@
-class Parser {
-    static parse_essay_name(filename) {
-        if (!filename) return 'unknown';
-        
-        const parts = filename.toLowerCase().split('_');
-        const prefix = parts[0];
-        
-        if (prefix.startsWith('a') && !isNaN(prefix.slice(1))) {
-            return prefix;
+// Look for essay names "a1, a2"
+function parseEssayName(filename) {
+    if (!filename) return 'unknown';
+
+    // Get first part: "a1_essay" → "a1"
+    const firstPart = filename.toLowerCase().split('_')[0];
+
+    // If starts with 'a' and has number, return it
+    if (firstPart.startsWith('a')) {
+        return firstPart;
+    }
+
+    return 'unknown';
+}
+
+// Figure out which AI model
+function getModelName(modelString) {
+    if (!modelString) return 'unknown';
+
+    const model = modelString.toLowerCase();
+
+    // Check for human graders first
+    if (model.includes('human')) {
+        // Extract human number if present (e.g., "Human Grader 1" -> "Human 1")
+        const match = modelString.match(/human.*?(\d+)/i);
+        if (match) {
+            return `Human ${match[1]}`;
         }
-        
-        return 'unknown';
-    }
-    
-    static get_model_name(modelString) {
-        
-        if (!modelString) return 'unknown';
-        const model = modelString.toLowerCase();
-
-        if (model.includes('gpt') || model.includes('chatgpt') || model.includes('openai')) return 'ChatGPT';
-        if (model.includes('claude') || model.includes('anthropic')) return 'Claude';
-        if (model.includes('gemini') || model.includes('google')) return 'Gemini';
-        if (model.includes('grok') || model.includes('xai') || model.includes('x.ai')) return 'Grok';
-
-        return modelString.split('-')[0];
+        return 'Human';
     }
 
-    static format_rubric_name(rubricName) {
-        return rubricName
-            .split('_')
-            .map(word => word.charAt(0).toUpperCase() + word.slice(1))
-            .join(' ');
-    }
+    // Check in order: more specific patterns first
+    if (model.startsWith('gpt-') || model.startsWith('gpt') || model.includes('chatgpt')) return 'ChatGPT';
+    if (model.includes('claude')) return 'Claude';
+    if (model.includes('gemini')) return 'Gemini';
+    if (model.includes('grok')) return 'Grok';
+
+    return modelString;
+}
+
+// Format name: "critical_thinking" → "Critical Thinking"
+function formatRubricName(rubricName) {
+    return rubricName
+        .split('_')
+        .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+        .join(' ');
 }

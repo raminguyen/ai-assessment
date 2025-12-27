@@ -505,3 +505,270 @@ html, body {
         opacity: 1;
     }
 }
+
+/* Filter Summary Box */
+.filter-summary-box {
+    background: rgba(255, 255, 255, 0.05);
+    border-left: 4px solid var(--rami-highlight);
+}
+
+.active-filters-list {
+    padding-left: 0;
+}
+
+.filter-item {
+    margin: 0.5rem 0;
+    padding-left: 1rem;
+    font-size: 0.95rem;
+}
+
+.filter-label::after {
+    content: ': ';
+}
+
+/* NEW LAYOUT STYLES */
+
+/* Rubric Section */
+.rubric-section {
+    margin-bottom: 2rem;
+}
+
+.rubric-section-header {
+    background: linear-gradient(135deg, rgba(3, 98, 76, 0.3) 0%, rgba(44, 194, 149, 0.2) 100%);
+    padding: 1rem 1.25rem;
+    font-weight: 700;
+    font-size: 1.3rem;
+    color: var(--rami-highlight);
+    border-radius: 8px;
+    border-left: 5px solid var(--rami-highlight);
+    margin-bottom: 1rem;
+    box-shadow: 0 2px 8px rgba(85, 255, 221, 0.1);
+}
+
+/* Experiment Section */
+.experiment-section {
+    margin-bottom: 1.5rem;
+    border: 1px solid rgba(85, 255, 221, 0.2);
+    border-radius: 8px;
+    overflow: hidden;
+    background-color: rgba(255, 255, 255, 0.03);
+}
+
+.experiment-header {
+    background: linear-gradient(135deg, rgba(85, 255, 221, 0.2) 0%, rgba(170, 252, 225, 0.15) 100%);
+    padding: 0.75rem 1rem;
+    font-weight: 700;
+    font-size: 1.1rem;
+    color: var(--rami-highlight);
+    border-bottom: 2px solid rgba(85, 255, 221, 0.3);
+}
+
+/* Essay Button */
+.essay-button {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.75rem 1rem;
+    margin: 0.25rem 0.5rem;
+    border-left: 3px solid transparent;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    border-radius: 4px;
+    background-color: rgba(255, 255, 255, 0.02);
+}
+
+.essay-button:hover {
+    background-color: rgba(85, 255, 221, 0.1);
+    border-left-color: var(--rami-highlight);
+    transform: translateX(4px);
+}
+
+.essay-button.active {
+    background-color: rgba(85, 255, 221, 0.15);
+    border-left-color: var(--rami-highlight);
+    transform: translateX(4px);
+}
+
+/* Model Badge */
+.model-badge {
+    display: inline-block;
+    background-color: var(--rami-highlight);
+    color: var(--rami-black);
+    padding: 0.25rem 0.75rem;
+    border-radius: 12px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+/* Essay Type Label */
+.essay-type-label {
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: var(--rami-white);
+}
+
+/* Scores Section */
+.scores-section {
+    background: linear-gradient(135deg, rgba(255, 215, 0, 0.05) 0%, rgba(255, 165, 0, 0.05) 100%);
+    border-left: 4px solid rgba(255, 215, 0, 0.6);
+}
+
+.score-item {
+    background-color: rgba(0, 0, 0, 0.3);
+    border: 1px solid rgba(85, 255, 221, 0.2);
+    border-radius: 6px;
+    padding: 1rem;
+    margin-bottom: 1rem;
+}
+
+.score-item:last-child {
+    margin-bottom: 0;
+}
+
+.score-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 0.75rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 1px solid rgba(85, 255, 221, 0.2);
+}
+
+.score-header strong {
+    color: var(--rami-highlight);
+    font-size: 1rem;
+}
+
+.rubric-badge {
+    background-color: rgba(85, 255, 221, 0.2);
+    color: var(--rami-lightgreen);
+    padding: 0.25rem 0.75rem;
+    border-radius: 12px;
+    font-size: 0.75rem;
+    font-weight: 600;
+}
+
+.score-content {
+    line-height: 1.8;
+    white-space: pre-wrap;
+    word-wrap: break-word;
+    color: var(--rami-white);
+    font-size: 0.9rem;
+}
+
+/* Score Tabs */
+.score-tabs {
+    display: flex;
+    gap: 0.5rem;
+    margin-bottom: 1rem;
+    border-bottom: 2px solid rgba(85, 255, 221, 0.2);
+    padding-bottom: 0.5rem;
+}
+
+.score-tab {
+    background-color: rgba(255, 255, 255, 0.05);
+    color: var(--rami-lightgreen);
+    border: 1px solid rgba(85, 255, 221, 0.3);
+    padding: 0.5rem 1rem;
+    border-radius: 6px 6px 0 0;
+    font-family: 'Poppins', sans-serif;
+    font-weight: 600;
+    font-size: 0.9rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    border-bottom: 2px solid transparent;
+}
+
+.score-tab:hover {
+    background-color: rgba(85, 255, 221, 0.1);
+    border-color: var(--rami-highlight);
+}
+
+.score-tab.active {
+    background-color: rgba(85, 255, 221, 0.15);
+    color: var(--rami-highlight);
+    border-color: var(--rami-highlight);
+    border-bottom-color: var(--rami-highlight);
+}
+
+.score-tab.human-tab {
+    border-color: rgba(255, 215, 0, 0.5);
+    color: rgba(255, 215, 0, 0.8);
+}
+
+.score-tab.human-tab:hover {
+    background-color: rgba(255, 215, 0, 0.1);
+    border-color: rgba(255, 215, 0, 0.7);
+}
+
+.score-tab.human-tab.active {
+    background-color: rgba(255, 215, 0, 0.15);
+    color: rgba(255, 215, 0, 1);
+    border-color: rgba(255, 215, 0, 0.8);
+}
+
+/* Score Tab Content */
+.score-tab-content {
+    min-height: 200px;
+    padding: 1rem;
+    background-color: rgba(0, 0, 0, 0.2);
+    border-radius: 6px;
+}
+
+.score-details {
+    animation: fadeIn 0.3s ease;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.score-meta {
+    background-color: rgba(85, 255, 221, 0.05);
+    border: 1px solid rgba(85, 255, 221, 0.2);
+    border-radius: 4px;
+    padding: 0.75rem;
+    margin-bottom: 1rem;
+}
+
+.score-meta p {
+    margin: 0.25rem 0;
+    font-size: 0.9rem;
+    color: var(--rami-white);
+}
+
+.score-meta strong {
+    color: var(--rami-highlight);
+}
+
+.score-text {
+    line-height: 1.8;
+    white-space: pre-wrap;
+    word-wrap: break-word;
+    color: var(--rami-white);
+    font-size: 0.95rem;
+    background-color: rgba(0, 0, 0, 0.3);
+    padding: 1rem;
+    border-radius: 4px;
+    border-left: 3px solid rgba(255, 215, 0, 0.6);
+    margin-bottom: 1rem;
+}
+
+.score-placeholder {
+    text-align: center;
+    padding: 3rem 1rem;
+}
+
+.score-placeholder p {
+    font-size: 1rem;
+    margin: 0;
+}

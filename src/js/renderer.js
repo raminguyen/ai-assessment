@@ -1,491 +1,792 @@
-class Renderer {
-    constructor(dataManager) {
-        this.dataManager = dataManager;
-        this.elements = this.cache_elements();
-        this.prompts = {};
-        this.gradePrompt = '';
-        this.load_prompts();
-    }
+// SIMPLE VERSION - Show essays on screen
 
-    async load_prompts() {
+// Keep track of HTML elements
+let elements = {};
+let prompts = {};
+let gradePrompt = '';
 
+// Start the renderer
+async function initRenderer() {
+    findElements();
+    await loadPrompts();
+}
+
+// Find all HTML elements we need
+function findElements() {
+    elements = {
+        essayList: document.getElementById('essayList'),
+        rightPanel: document.getElementById('rightPanel'),
+        filters: document.getElementById('filters'),
+        modelFilter: document.getElementById('modelFilter'),
+        essayFilter: document.getElementById('essayFilter'),
+        rubricFilter: document.getElementById('rubricFilter'),
+        filterGenerate: document.getElementById('filterGenerate'),
+        filterTune: document.getElementById('filterTune'),
+        filterScore: document.getElementById('filterScore')
+    };
+}
+
+// Load prompts from file
+async function loadPrompts() {
     const response = await fetch('src/ai_assessment/prompt.json');
 
     if (!response.ok) {
-        console.warn('Could not load prompt.json, using default prompts');
-        this.set_default_prompts();
+        console.warn('Could not load prompt.json, using defaults');
+        useDefaultPrompts();
         return;
     }
-    
-    const data = await response.json();
-    
-    this.prompts = {};
 
+    const data = await response.json();
+    prompts = {};
+
+    // Get assignment prompts
     for (const key in data) {
         if (key.startsWith('assignment_') && key.endsWith('_prompt')) {
             const match = key.match(/assignment_(\d+)_prompt/);
             if (match) {
-                const assignmentKey = 'Assignment_' + match[1];
-                this.prompts[assignmentKey] = data[key];
+                prompts['Assignment_' + match[1]] = data[key];
             }
         }
     }
-    
-    this.gradePrompt = data.grade_prompt || '';
-    
-    console.log('Prompts loaded successfully');
+
+    gradePrompt = data.grade_prompt || '';
+    console.log('Prompts loaded');
 }
 
-    set_default_prompts() {
-        this.prompts = {
-            'Assignment_1': "Let's write a 1000 word fully written college essa, plus at least 5 citations from peer-reviewed articles in the end of essay not embedded links, that answers this question: Consider the following problem: In the morning, when Professor Catlove opens a new can of cat food, his cats run into the kitchen purring and meowing and rubbing their backs against his legs. What examples, if any, of classical conditioning, operant conditioning, and social learning are at work in this brief scene? Note that both the cats and the professor might be exhibiting conditioned behavior here.",
-            'Assignment_2': "Let's write a 1000 word fully written college essay, plus at least 5 citations from peer-reviewed articles, that answers this question. To what extent do the attached economic data support the hypothesis \"social service spending is inversely related to economic growth\"? Formulate a verbal argument analyzing whether the data do or do not support the hypothesis.",
-            'Assignment_3': "Let's write a 1000 word fully written college essay, that includes a real estate investment market analysis in the Boston Metropolitan Area for 2024. Summarize the key findings, insights from the analysis, highlight the best real estate investment opportunities, and any significant patterns observed. Please include at least 5 citations from peer reviewed articles."
-        };
-        
-        this.gradePrompt = "After grading the essay using the rubric, please explain how the essay was tuned to achieve a perfect score on the rubric. Add the total score at the end using this format: Total Score is [X]/[Y].";
+// Default prompts if file not found
+function useDefaultPrompts() {
+    prompts = {
+        'Assignment_1': "Let's write a 1000 word fully written college essa, plus at least 5 citations from peer-reviewed articles in the end of essay not embedded links, that answers this question: Consider the following problem: In the morning, when Professor Catlove opens a new can of cat food, his cats run into the kitchen purring and meowing and rubbing their backs against his legs. What examples, if any, of classical conditioning, operant conditioning, and social learning are at work in this brief scene? Note that both the cats and the professor might be exhibiting conditioned behavior here.",
+        'Assignment_2': "Let's write a 1000 word fully written college essay, plus at least 5 citations from peer-reviewed articles, that answers this question. To what extent do the attached economic data support the hypothesis \"social service spending is inversely related to economic growth\"? Formulate a verbal argument analyzing whether the data do or do not support the hypothesis.",
+        'Assignment_3': "Let's write a 1000 word fully written college essay, that includes a real estate investment market analysis in the Boston Metropolitan Area for 2024. Summarize the key findings, insights from the analysis, highlight the best real estate investment opportunities, and any significant patterns observed. Please include at least 5 citations from peer reviewed articles."
+    };
+    gradePrompt = "After grading the essay using the rubric, please explain how the essay was tuned to achieve a perfect score on the rubric. Add the total score at the end using this format: Total Score is [X]/[Y].";
+}
+
+// Get prompt for an essay
+function getPromptForEssay(essayName) {
+    return prompts[essayName] || '';
+}
+
+function getGradePrompt() {
+    return gradePrompt;
+}
+
+// Setup all filters
+function setupFilters() {
+    elements.filters.style.display = 'block';
+    fillModelDropdown();
+    fillEssayDropdown();
+    fillRubricDropdown();
+    addResetButton();
+    attachFilterListeners();
+}
+
+// Fill model dropdown
+function fillModelDropdown() {
+    elements.modelFilter.innerHTML = '<option value="all">All Models</option>';
+    getModels().forEach(model => {
+        const option = document.createElement('option');
+        option.value = model;
+        option.textContent = model;
+        elements.modelFilter.appendChild(option);
+    });
+}
+
+// Fill essay dropdown
+function fillEssayDropdown() {
+    elements.essayFilter.innerHTML = '<option value="all">All Assignments</option>';
+    const names = new Set();
+    Object.values(getData()).forEach(item => names.add(item.essayName));
+
+    Array.from(names).sort().forEach(name => {
+        const option = document.createElement('option');
+        option.value = name;
+        option.textContent = name;
+        elements.essayFilter.appendChild(option);
+    });
+    elements.essayFilter.value = 'Assignment_1';
+}
+
+// Fill rubric dropdown
+function fillRubricDropdown() {
+    elements.rubricFilter.innerHTML = '<option value="all">All Rubrics</option>';
+    getRubrics().forEach(rubric => {
+        const option = document.createElement('option');
+        option.value = rubric;
+        option.textContent = formatRubricName(rubric);
+        elements.rubricFilter.appendChild(option);
+    });
+    elements.rubricFilter.value = 'critical_thinking';
+}
+
+// Add reset button
+function addResetButton() {
+    if (!document.getElementById('resetBtn')) {
+        const btn = document.createElement('button');
+        btn.id = 'resetBtn';
+        btn.className = 'copy-btn';
+        btn.style.cssText = 'width: 100%; margin-top: 1rem; background: rgba(255, 85, 85, 0.3);';
+        btn.innerHTML = '🔄 Reset Filters';
+        btn.onclick = resetFilters;
+        elements.filters.appendChild(btn);
+    }
+}
+
+// Listen for filter changes
+function attachFilterListeners() {
+    if (elements.filters.dataset.listening) return;
+
+    elements.essayFilter.addEventListener('change', displayEssayList);
+    elements.modelFilter.addEventListener('change', displayEssayList);
+    elements.rubricFilter.addEventListener('change', displayEssayList);
+    elements.filterGenerate.addEventListener('change', displayEssayList);
+    elements.filterTune.addEventListener('change', displayEssayList);
+    elements.filterScore.addEventListener('change', displayEssayList);
+    elements.filters.dataset.listening = 'true';
+}
+
+// Reset all filters
+function resetFilters() {
+    elements.modelFilter.value = 'all';
+    elements.essayFilter.value = 'all';
+    elements.rubricFilter.value = 'all';
+    elements.filterGenerate.checked = true;
+    elements.filterTune.checked = true;
+    elements.filterScore.checked = true;
+    displayEssayList();
+}
+
+// Show the essay list - NEW SIMPLE VERSION
+function displayEssayList() {
+    elements.essayList.innerHTML = '';
+
+    // Get all data grouped by rubric
+    const rubricGroups = groupByRubric();
+
+    if (Object.keys(rubricGroups).length === 0) {
+        showNoResults();
+        return;
     }
 
-    cache_elements() {
-        return {
-            uploadBox: document.getElementById('uploadBox'),
-            fileInput: document.getElementById('fileInput'),
-            essayList: document.getElementById('essayList'),
-            rightPanel: document.getElementById('rightPanel'),
-            filters: document.getElementById('filters'),
-            modelFilter: document.getElementById('modelFilter'),
-            essayFilter: document.getElementById('essayFilter'),
-            rubricFilter: document.getElementById('rubricFilter'),
-            filterGenerate: document.getElementById('filterGenerate'),
-            filterTune: document.getElementById('filterTune'),
-            filterScore: document.getElementById('filterScore'),
-            filterShowOriginal: document.getElementById('filterShowOriginal'),  
-            githubBtn: document.getElementById('githubBtn')
-        };
-    }
+    // Show each rubric and its experiments
+    Object.keys(rubricGroups).sort().forEach(rubricName => {
+        showRubricSection(rubricName, rubricGroups[rubricName]);
+    });
+}
 
-    get_display_name(essayName) {
-        if (!essayName) return 'Unknown';
-        if (typeof essayName !== 'string') return 'Unknown';
-        return essayName;
-    }
+// Group all data by rubric first
+function groupByRubric() {
+    const rubricGroups = {};
 
-    get_prompt_for_essay(essayName) {
-        return this.prompts[essayName] || '';
-    }
-
-    get_grade_prompt() {
-        return this.gradePrompt;
-    }
-
-    setup_filters() {
-        this.elements.filters.style.display = 'block';
-        this.populate_model_filter();
-        this.populate_essay_filter();
-        this.populate_rubric_filter();
-        this.add_reset_button();
-        this.attach_filter_listeners();
-    }
-
-    populate_model_filter() {
-        this.elements.modelFilter.innerHTML = '<option value="all">All Models</option>';
-        this.dataManager.get_models().forEach(model => {
-            const option = document.createElement('option');
-            option.value = model;
-            option.textContent = model;
-            this.elements.modelFilter.appendChild(option);
-        });
-        this.elements.modelFilter.value = 'all';
-    }
-
-    populate_essay_filter() {
-        this.elements.essayFilter.innerHTML = '<option value="all">All Assignments</option>';
-        const essayNames = new Set();
-        Object.values(this.dataManager.allData).forEach(item => {
-            essayNames.add(item.essayName);
-        });
-
-        Array.from(essayNames).sort().forEach(name => {
-            const option = document.createElement('option');
-            option.value = name;
-            option.textContent = this.get_display_name(name);
-            this.elements.essayFilter.appendChild(option);
-        });
-        this.elements.essayFilter.value = 'Assignment_1';
-    }
-
-    populate_rubric_filter() {
-        this.elements.rubricFilter.innerHTML = '<option value="all">All Rubrics</option>';
-        this.dataManager.get_rubrics().forEach(rubric => {
-            const option = document.createElement('option');
-            option.value = rubric;
-            option.textContent = Parser.format_rubric_name(rubric);
-            this.elements.rubricFilter.appendChild(option);
-        });
-        this.elements.rubricFilter.value = 'critical_thinking';
-    }
-
-    add_reset_button() {
-        if (!document.getElementById('resetBtn')) {
-            const resetBtn = document.createElement('button');
-            resetBtn.id = 'resetBtn';
-            resetBtn.className = 'copy-btn';
-            resetBtn.style.cssText = 'width: 100%; margin-top: 1rem; background: rgba(255, 85, 85, 0.3);';
-            resetBtn.innerHTML = '🔄 Reset Filters';
-            resetBtn.onclick = () => this.reset_filters();
-            this.elements.filters.appendChild(resetBtn);
-        }
-    }
-
-    attach_filter_listeners() {
-        if (!this.elements.filters.dataset.listening) {
-            this.elements.essayFilter.addEventListener('change', () => this.apply_filters());
-            this.elements.modelFilter.addEventListener('change', () => this.apply_filters());
-            this.elements.rubricFilter.addEventListener('change', () => this.apply_filters());
-            this.elements.filterGenerate.addEventListener('change', () => this.apply_filters());
-            this.elements.filterTune.addEventListener('change', () => this.apply_filters());
-            this.elements.filterScore.addEventListener('change', () => this.apply_filters());
-            this.elements.filters.dataset.listening = 'true';
-        }
-    }
-
-    reset_filters() {
-        this.elements.modelFilter.value = 'all';
-        this.elements.essayFilter.value = 'all';
-        this.elements.rubricFilter.value = 'all';
-        this.elements.filterGenerate.checked = true;
-        this.elements.filterTune.checked = true;
-        this.elements.filterScore.checked = true;
-        this.apply_filters();
-    }
-
-    apply_filters() {
-        this.display_essay_list();
-    }
-
-    display_essay_list() {
-        this.elements.essayList.innerHTML = '';
-
-        const filters = this.get_active_filters();
-        const rubricGroups = this.group_data_by_filters(filters);
-
-        if (Object.keys(rubricGroups).length === 0) {
-            this.render_no_results();
-            return;
-        }
-
-        this.render_summary(rubricGroups);
-        this.render_rubric_groups(rubricGroups);
-        this.update_right_panel_summary(rubricGroups, filters);
-    }
-
-    get_active_filters() {
-        return {
-            essay: this.elements.essayFilter.value,
-            model: this.elements.modelFilter.value,
-            rubric: this.elements.rubricFilter.value,
-            showGenerate: this.elements.filterGenerate.checked,
-            showTune: this.elements.filterTune.checked,
-            showScore: this.elements.filterScore.checked
-        };
-    }
-
-    group_data_by_filters(filters) {
-        const rubricGroups = {};
-
-        Object.entries(this.dataManager.allData).forEach(([key, item]) => {
-            if (filters.essay !== 'all' && item.essayName !== filters.essay) return;
-            if (filters.rubric !== 'all' && item.rubric !== filters.rubric) return;
-            if (item.command === 'generate' && !filters.showGenerate) return;
-            if (item.command === 'tune' && !filters.showTune) return;
-            if (item.command === 'score' && !filters.showScore) return;
-
-            let writerModel = item.modelName;
-            if (item.command === 'score') {
-                writerModel = Parser.get_model_name(item.data.writer);
+    Object.values(getData()).forEach(item => {
+        if (item.command === 'generate' || item.command === 'tune') {
+            const rubric = item.rubric;
+            if (!rubricGroups[rubric]) {
+                rubricGroups[rubric] = new Set();
             }
-            
-            if (filters.model !== 'all' && writerModel !== filters.model) return;
+            rubricGroups[rubric].add(item.essayName);
+        }
+    });
 
-            if (!rubricGroups[item.rubric]) rubricGroups[item.rubric] = {};
-            if (!rubricGroups[item.rubric][item.essayName]) rubricGroups[item.rubric][item.essayName] = {};
-            if (!rubricGroups[item.rubric][item.essayName][writerModel]) {
-                rubricGroups[item.rubric][item.essayName][writerModel] = {
-                    generate: [],
-                    tune: [],
-                    generate_scores: [],
-                    tune_scores: []
-                };
-            }
+    // Convert sets to arrays
+    Object.keys(rubricGroups).forEach(rubric => {
+        rubricGroups[rubric] = Array.from(rubricGroups[rubric]).sort();
+    });
 
-            if (item.command === 'generate') {
-                rubricGroups[item.rubric][item.essayName][writerModel].generate.push(item);
-            } else if (item.command === 'tune') {
-                rubricGroups[item.rubric][item.essayName][writerModel].tune.push(item);
-            } else if (item.command === 'score') {
-                const essayType = item.data.essay_type || 'generate';
-                const bucket = essayType === 'generate' ? 'generate_scores' : 'tune_scores';
-                rubricGroups[item.rubric][item.essayName][writerModel][bucket].push(item);
-            }
-        });
+    return rubricGroups;
+}
 
-        return rubricGroups;
-    }
+// Show a rubric section with all its experiments
+function showRubricSection(rubricName, experimentNames) {
+    // Create rubric container
+    const rubricDiv = document.createElement('div');
+    rubricDiv.className = 'rubric-section';
+    rubricDiv.style.marginBottom = '2rem';
 
-    render_summary(rubricGroups) {
-        const template = document.getElementById('summaryTemplate');
-        const summary = template.content.cloneNode(true);
+    // Add rubric header
+    const rubricHeader = document.createElement('div');
+    rubricHeader.className = 'rubric-section-header';
+    rubricHeader.textContent = `📋 ${formatRubricName(rubricName)}`;
+    rubricDiv.appendChild(rubricHeader);
 
-        summary.querySelector('.total-count').textContent = this.dataManager.get_total_count();
-        summary.querySelector('.rubrics-count').textContent = this.dataManager.allRubrics.size;
-        summary.querySelector('.models-count').textContent = this.dataManager.allModels.size;
+    // Show each experiment in this rubric
+    experimentNames.forEach(experimentName => {
+        showExperiment(experimentName, rubricName, rubricDiv);
+    });
 
-        this.elements.essayList.appendChild(summary);
-    }
+    elements.essayList.appendChild(rubricDiv);
+}
 
-    render_rubric_groups(rubricGroups) {
-        Object.keys(rubricGroups).sort().forEach(rubricName => {
-            this.render_rubric_header(rubricName);
-            this.render_essays_in_rubric(rubricGroups[rubricName], rubricName);
-        });
-    }
+// Get list of unique experiments (Assignment_1, Assignment_2, etc.)
+function getExperiments() {
+    const experiments = new Set();
+    Object.values(getData()).forEach(item => {
+        experiments.add(item.essayName);
+    });
+    return Array.from(experiments).sort();
+}
 
-    render_rubric_header(rubricName) {
-        const header = document.createElement('div');
-        header.className = 'rubric-header';
-        const { color, bgColor } = this.get_rubric_colors(rubricName);
+// Show one experiment section
+function showExperiment(experimentName, rubricFilter, parentContainer) {
+    // Create experiment container
+    const experimentDiv = document.createElement('div');
+    experimentDiv.className = 'experiment-section';
 
-        header.style.background = bgColor;
-        header.style.color = color;
-        header.style.borderLeftColor = color;
-        header.textContent = `📋 ${Parser.format_rubric_name(rubricName)}`;
+    // Get all essays for this experiment and rubric
+    const essays = getEssaysForExperiment(experimentName, rubricFilter);
 
-        this.elements.essayList.appendChild(header);
-    }
+    // Add experiment header
+    const header = document.createElement('div');
+    header.className = 'experiment-header';
+    header.textContent = `${experimentName} (${essays.length} essays)`;
+    experimentDiv.appendChild(header);
 
-    render_essays_in_rubric(essayGroups, rubricName) {
-        Object.keys(essayGroups).sort().forEach(essayName => {
-            const essayItem = document.createElement('div');
-            essayItem.className = 'essay-item';
+    // Group by model and type (generate/tune)
+    const grouped = groupByModelAndType(essays);
 
-            const header = document.createElement('div');
-            header.className = 'essay-header';
-            header.textContent = this.get_display_name(essayName);
-            essayItem.appendChild(header);
+    // Show each model's essays
+    Object.keys(grouped).sort().forEach(modelName => {
+        const modelData = grouped[modelName];
 
-            const commands = document.createElement('div');
-            commands.className = 'essay-commands';
-
-            Object.keys(essayGroups[essayName]).sort().forEach(modelName => {
-                this.render_model_section(commands, modelName, essayGroups[essayName][modelName]);
+        // Show GENERATED essays
+        if (modelData.generate.length > 0) {
+            modelData.generate.forEach(item => {
+                const essayBtn = createEssayButton('GENERATED', modelName, item);
+                experimentDiv.appendChild(essayBtn);
             });
-
-            essayItem.appendChild(commands);
-            this.elements.essayList.appendChild(essayItem);
-        });
-    }
-
-    render_model_section(container, modelName, items) {
-        const modelHeader = document.createElement('div');
-        modelHeader.className = 'model-header';
-        modelHeader.textContent = ` ${modelName}`;
-        container.appendChild(modelHeader);
-
-        items.generate.forEach(item => {
-            container.appendChild(this.create_command_element('Generate', item.data));
-        });
-
-        items.generate_scores.forEach(item => {
-            const el = this.create_command_element('Score', item.data);
-            el.style.marginLeft = '1.5rem';
-            container.appendChild(el);
-        });
-
-        items.tune.forEach(item => {
-            container.appendChild(this.create_command_element('Tune', item.data));
-        });
-
-        items.tune_scores.forEach(item => {
-            const el = this.create_command_element('Score', item.data);
-            el.style.marginLeft = '1.5rem';
-            container.appendChild(el);
-        });
-    }
-    create_command_element(command, data) {
-        const item = document.createElement('div');
-        item.className = 'command-item';
-
-        let label = `    ${command}`;
-
-        if (command === 'Score') {
-            const essayType = data.essay_type || 'generate';
-            const graderName = Parser.get_model_name(data.grader);
-            const essayTypeCapitalized = essayType.charAt(0).toUpperCase() + essayType.slice(1);
-            label = `        ${essayTypeCapitalized} Essay (by ${graderName})`;
         }
 
-        item.textContent = label;
-        item.addEventListener('click', (event) => this.show_content_detail(event, command, data));
+        // Show TUNED essays
+        if (modelData.tune.length > 0) {
+            modelData.tune.forEach(item => {
+                const essayBtn = createEssayButton('TUNED', modelName, item);
+                experimentDiv.appendChild(essayBtn);
+            });
+        }
+    });
 
-        return item;
-    }
+    parentContainer.appendChild(experimentDiv);
+}
 
-    show_content_detail(event, commandType, data) {
-        const allItems = document.querySelectorAll('.command-item');
-        allItems.forEach(item => item.classList.remove('active'));
-        event.target.closest('.command-item').classList.add('active');
+// Get all essays for an experiment
+function getEssaysForExperiment(experimentName, rubricFilter) {
+    return Object.values(getData()).filter(item =>
+        item.essayName === experimentName &&
+        (item.command === 'generate' || item.command === 'tune') &&
+        (!rubricFilter || item.rubric === rubricFilter)
+    );
+}
 
-        const contentRenderer = new Content(this.elements.rightPanel);
-        contentRenderer.render(commandType, data, this.gradePrompt);
-    }
+// Group essays by model and type
+function groupByModelAndType(essays) {
+    const grouped = {};
 
-    render_no_results() {
-        const listTemplate = document.getElementById('noResultsTemplate');
-        const panelTemplate = document.getElementById('noResultsPanelTemplate');
+    essays.forEach(item => {
+        const model = item.modelName;
 
-        this.elements.essayList.innerHTML = '';
-        this.elements.essayList.appendChild(listTemplate.content.cloneNode(true));
-
-        this.elements.rightPanel.innerHTML = '';
-        this.elements.rightPanel.appendChild(panelTemplate.content.cloneNode(true));
-    }
-
-    update_right_panel_summary(rubricGroups, filters) {
-        this.elements.rightPanel.innerHTML = '';
-
-        const title = document.createElement('h2');
-        title.textContent = ' Filter Summary';
-        this.elements.rightPanel.appendChild(title);
-
-        const filterInfo = this.create_filter_info(filters);
-        this.elements.rightPanel.appendChild(filterInfo);
-
-        if (filters.essay !== 'all') {
-            this.add_prompt_boxes(filters.essay);
+        if (!grouped[model]) {
+            grouped[model] = {
+                generate: [],
+                tune: []
+            };
         }
 
-        this.add_tip_box();
-        this.add_separator();
-    }
-
-    create_filter_info(filters) {
-        const filterDiv = document.createElement('div');
-        filterDiv.className = 'content-info';
-        filterDiv.style.background = 'rgba(255, 255, 255, 0.05)';
-        filterDiv.style.borderLeft = '4px solid var(--rami-highlight)';
-
-        const title = document.createElement('p');
-        const strong = document.createElement('strong');
-        strong.textContent = 'Active Filters:';
-        title.appendChild(strong);
-        filterDiv.appendChild(title);
-
-        if (filters.essay !== 'all') {
-            filterDiv.appendChild(this.create_filter_item(' Assignment:', this.get_display_name(filters.essay)));
+        if (item.command === 'generate') {
+            grouped[model].generate.push(item);
+        } else if (item.command === 'tune') {
+            grouped[model].tune.push(item);
         }
-        if (filters.model !== 'all') {
-            filterDiv.appendChild(this.create_filter_item(' Model:', filters.model));
-        }
-        if (filters.rubric !== 'all') {
-            filterDiv.appendChild(this.create_filter_item(' Rubric:', Parser.format_rubric_name(filters.rubric)));
-        }
+    });
 
-        const commands = [];
-        if (filters.showGenerate) commands.push('Generate');
-        if (filters.showTune) commands.push('Tune');
-        if (filters.showScore) commands.push('Score');
-        if (commands.length > 0 && commands.length < 3) {
-            filterDiv.appendChild(this.create_filter_item('⚙️ Commands:', commands.join(', ')));
-        }
+    return grouped;
+}
 
-        return filterDiv;
+// Create a button for an essay
+function createEssayButton(type, modelName, item) {
+    const btn = document.createElement('div');
+    btn.className = 'essay-button';
+
+    // Create badge for model
+    const badge = document.createElement('span');
+    badge.className = 'model-badge';
+    badge.textContent = modelName;
+
+    // Create label for type
+    const label = document.createElement('span');
+    label.className = 'essay-type-label';
+    label.textContent = type;
+
+    btn.appendChild(badge);
+    btn.appendChild(label);
+
+    // Click handler
+    btn.onclick = () => showEssayDetails(item, btn);
+
+    return btn;
+}
+
+// Show essay details in right panel
+function showEssayDetails(item, buttonElement) {
+    // Remove active class from all buttons
+    document.querySelectorAll('.essay-button').forEach(btn =>
+        btn.classList.remove('active')
+    );
+
+    // Add active class to clicked button
+    if (buttonElement) {
+        buttonElement.classList.add('active');
     }
 
-    create_filter_item(label, value) {
-        const p = document.createElement('p');
-        p.style.margin = '0.5rem 0';
-        p.style.paddingLeft = '1rem';
-        p.textContent = label + ' ';
+    // Get scores for this essay
+    const scores = getScoresForEssay(item);
 
-        const strong = document.createElement('strong');
-        strong.textContent = value;
-        p.appendChild(strong);
+    // Render in right panel
+    renderEssayDetails(item, scores);
+}
 
-        return p;
+// Get all scores for an essay
+function getScoresForEssay(item) {
+    const essayType = item.command; // 'generate' or 'tune'
+
+    const scores = Object.values(getData()).filter(scoreItem => {
+        const isScore = scoreItem.command === 'score';
+        const sameEssay = scoreItem.essayName === item.essayName;
+        const sameType = scoreItem.data.essay_type === essayType;
+        const sameWriter = getModelName(scoreItem.data.writer) === item.modelName;
+        const sameRubric = scoreItem.rubric === item.rubric;
+
+        return isScore && sameEssay && sameType && sameWriter && sameRubric;
+    });
+
+    return scores;
+}
+
+// Render essay details in right panel
+function renderEssayDetails(item, scores) {
+    const panel = elements.rightPanel;
+    panel.innerHTML = '';
+
+    // Add header
+    const header = document.createElement('h2');
+    header.textContent = `${item.essayName} - ${item.command.toUpperCase()}`;
+    panel.appendChild(header);
+
+    // Add model info
+    const info = document.createElement('div');
+    info.className = 'content-info';
+    info.innerHTML = `
+        <p><strong>Model:</strong> ${item.modelName}</p>
+        <p><strong>Rubric:</strong> ${formatRubricName(item.rubric)}</p>
+        <p><strong>Time:</strong> ${item.data.timestamp || 'N/A'}</p>
+    `;
+    panel.appendChild(info);
+
+    // Add prompt
+    const prompt = getPromptForEssay(item.essayName);
+    if (prompt) {
+        const promptBox = document.createElement('div');
+        promptBox.className = 'content-box prompt-box';
+        promptBox.innerHTML = `
+            <h3>📝 Prompt</h3>
+            <div class="prompt-text">${prompt}</div>
+        `;
+        panel.appendChild(promptBox);
     }
 
-    add_prompt_boxes(essayName) {
-        const assignmentPrompt = this.get_prompt_for_essay(essayName);
-        const gradePrompt = this.get_grade_prompt();
+    // Add response
+    const responseBox = document.createElement('div');
+    responseBox.className = 'content-box';
+    const responseText = item.data.result || item.data.essay || 'No content';
+    const cleanResponseText = removeMarkdown(responseText);
+    responseBox.innerHTML = `
+        <h3>📄 Response</h3>
+        <div class="essay-text">${cleanResponseText}</div>
+        <button class="copy-btn" onclick="copyText(\`${cleanResponseText.replace(/`/g, '\\`').replace(/\$/g, '\\$')}\`)">📋 Copy</button>
+    `;
+    panel.appendChild(responseBox);
 
-        if (assignmentPrompt) {
-            const box = this.create_prompt_box(' Assignment Prompt', assignmentPrompt);
-            this.elements.rightPanel.appendChild(box);
-        }
+    // Add scores section with tabs
+    if (scores.length > 0) {
+        const scoresBox = document.createElement('div');
+        scoresBox.className = 'content-box scores-section';
+        scoresBox.innerHTML = '<h3>📊 Scores</h3>';
 
-        if (gradePrompt) {
-            const box = this.create_prompt_box(' ✅ Grading Prompt', gradePrompt);
-            this.elements.rightPanel.appendChild(box);
-        }
-    }
+        // Create tabs container
+        const tabsContainer = document.createElement('div');
+        tabsContainer.className = 'score-tabs';
 
-    create_prompt_box(title, content) {
-        const box = document.createElement('div');
-        box.className = 'content-box prompt-box';
+        // Create content container
+        const contentContainer = document.createElement('div');
+        contentContainer.className = 'score-tab-content';
+        contentContainer.innerHTML = '<div class="score-placeholder"><p style="color: var(--rami-lightgreen); font-style: italic;">Click a tab to view score</p></div>';
 
-        const h3 = document.createElement('h3');
-        h3.textContent = title;
-        box.appendChild(h3);
+        // Separate AI and Human scores
+        const aiScores = [];
+        const humanScores = [];
 
-        const promptText = document.createElement('div');
-        promptText.className = 'prompt-text';
-        promptText.textContent = content;
-        box.appendChild(promptText);
-
-        return box;
-    }
-
-    add_tip_box() {
-        const tipBox = document.createElement('div');
-        tipBox.className = 'content-box';
-
-        const h3 = document.createElement('h3');
-        h3.textContent = ' Tip';
-        tipBox.appendChild(h3);
-
-        const p = document.createElement('p');
-        p.textContent = 'Click on any item in the left panel to view its full content below.';
-        tipBox.appendChild(p);
-
-        this.elements.rightPanel.appendChild(tipBox);
-    }
-
-    add_separator() {
-        const hr = document.createElement('hr');
-        hr.style.border = '1px solid rgba(85, 255, 221, 0.2)';
-        hr.style.margin = '2rem 0';
-        this.elements.rightPanel.appendChild(hr);
-    }
-
-    get_rubric_colors(rubricName) {
-        const colors = {
-            critical_thinking: { color: '#ffffff', bgColor: 'rgba(3, 98, 76, 0.15)' },
-            oral_communication: { color: '#2CC295', bgColor: 'rgba(44, 194, 149, 0.15)' }
-        };
-        return colors[rubricName] || { color: '#24ff02', bgColor: 'rgba(36, 255, 2, 0.15)' };
-    }
-
-    show_notification(message) {
-        const template = document.getElementById('notificationTemplate');
-        const notif = template.content.cloneNode(true).querySelector('.notification');
-
-        notif.textContent = message;
-        document.body.appendChild(notif);
-
-        setTimeout(() => {
-            if (document.body.contains(notif)) {
-                document.body.removeChild(notif);
+        scores.forEach(scoreItem => {
+            const graderModel = getModelName(scoreItem.data.grader);
+            if (graderModel.startsWith('Human')) {
+                humanScores.push(scoreItem);
+            } else {
+                aiScores.push(scoreItem);
             }
-        }, 3000);
+        });
+
+        // Add AI model tabs
+        aiScores.forEach(scoreItem => {
+            const graderModel = getModelName(scoreItem.data.grader);
+            const tab = document.createElement('button');
+            tab.className = 'score-tab';
+            tab.textContent = graderModel;
+            tab.onclick = () => switchScoreTab(tab, scoreItem, contentContainer);
+            tabsContainer.appendChild(tab);
+        });
+
+        // Add Human tabs dynamically
+        humanScores.forEach(scoreItem => {
+            const graderModel = getModelName(scoreItem.data.grader);
+            const tab = document.createElement('button');
+            tab.className = 'score-tab human-tab';
+            tab.textContent = graderModel;
+            tab.onclick = () => switchScoreTab(tab, scoreItem, contentContainer);
+            tabsContainer.appendChild(tab);
+        });
+
+        scoresBox.appendChild(tabsContainer);
+        scoresBox.appendChild(contentContainer);
+
+        panel.appendChild(scoresBox);
     }
+
+    panel.scrollTop = 0;
+}
+
+// Switch between score tabs
+function switchScoreTab(tabButton, scoreItem, contentContainer) {
+    // Remove active class from all tabs
+    const allTabs = tabButton.parentElement.querySelectorAll('.score-tab');
+    allTabs.forEach(tab => tab.classList.remove('active'));
+
+    // Add active class to clicked tab
+    tabButton.classList.add('active');
+
+    // Show content for this tab
+    showScoreContent(scoreItem, contentContainer);
+}
+
+// Show score content in the container
+function showScoreContent(scoreItem, contentContainer) {
+    contentContainer.innerHTML = '';
+
+    if (!scoreItem) {
+        // Show placeholder
+        contentContainer.innerHTML = `
+            <div class="score-placeholder">
+                <p style="color: var(--rami-lightgreen); font-style: italic;">No score data available</p>
+            </div>
+        `;
+        return;
+    }
+
+    // Create score content display
+    const scoreContent = document.createElement('div');
+    scoreContent.className = 'score-details';
+
+    const graderModel = getModelName(scoreItem.data.grader);
+    const fullGraderName = scoreItem.data.grader || graderModel;
+    const scoreText = scoreItem.data.result || scoreItem.data.score || 'No score available';
+    const cleanScoreText = removeMarkdown(scoreText);
+
+    scoreContent.innerHTML = `
+        <div class="score-meta">
+            <p><strong>Graded by:</strong> ${fullGraderName}</p>
+            <p><strong>Essay Type:</strong> ${scoreItem.data.essay_type || 'generate'}</p>
+            <p><strong>Time:</strong> ${scoreItem.data.timestamp || 'N/A'}</p>
+        </div>
+        <div class="score-text">${cleanScoreText}</div>
+        <button class="copy-btn" onclick="copyText(\`${cleanScoreText.replace(/`/g, '\\`').replace(/\$/g, '\\$')}\`)">📋 Copy Score</button>
+    `;
+
+    contentContainer.appendChild(scoreContent);
+}
+
+// Check if item matches filters
+function itemMatchesFilters(item, model, filters) {
+    if (filters.essay !== 'all' && item.essayName !== filters.essay) return false;
+    if (filters.rubric !== 'all' && item.rubric !== filters.rubric) return false;
+    if (filters.model !== 'all' && model !== filters.model) return false;
+    if (item.command === 'generate' && !filters.showGenerate) return false;
+    if (item.command === 'tune' && !filters.showTune) return false;
+    if (item.command === 'score' && !filters.showScore) return false;
+    return true;
+}
+
+// Get model for item
+function getModelForItem(item) {
+    if (item.command === 'score') {
+        return getModelName(item.data.writer);
+    }
+    return item.modelName;
+}
+
+// Make empty buckets
+function makeEmptyBuckets() {
+    return {
+        generate: [],
+        tune: [],
+        generate_scores: [],
+        tune_scores: []
+    };
+}
+
+// Add item to correct bucket
+function addItemToBucket(buckets, item) {
+    if (item.command === 'generate') {
+        buckets.generate.push(item);
+    } else if (item.command === 'tune') {
+        buckets.tune.push(item);
+    } else if (item.command === 'score') {
+        const type = item.data.essay_type || 'generate';
+        if (type === 'generate') {
+            buckets.generate_scores.push(item);
+        } else {
+            buckets.tune_scores.push(item);
+        }
+    }
+}
+
+// Group essays by rubric/essay/model
+function groupEssays(filters) {
+    const groups = {};
+
+    // Look at each item
+    Object.values(getData()).forEach(item => {
+        const model = getModelForItem(item);
+
+        // Skip if doesn't match filters
+        if (!itemMatchesFilters(item, model, filters)) return;
+
+        // Get the names we need
+        const rubricName = item.rubric;
+        const essayName = item.essayName;
+        const modelName = model;
+
+        // Create rubric if not exist
+        if (!groups[rubricName]) {
+            groups[rubricName] = {};
+        }
+
+        // Create essay if not exist
+        if (!groups[rubricName][essayName]) {
+            groups[rubricName][essayName] = {};
+        }
+
+        // Create model bucket if not exist
+        if (!groups[rubricName][essayName][modelName]) {
+            groups[rubricName][essayName][modelName] = makeEmptyBuckets();
+        }
+
+        // Get the bucket
+        const bucket = groups[rubricName][essayName][modelName];
+
+        // Put item in bucket
+        addItemToBucket(bucket, item);
+    });
+
+    return groups;
+}
+
+// Show summary at top
+function showSummary() {
+    const template = document.getElementById('summaryTemplate');
+    const summary = template.content.cloneNode(true);
+    summary.querySelector('.total-count').textContent = getTotalCount();
+    summary.querySelector('.rubrics-count').textContent = allRubrics.size;
+    summary.querySelector('.models-count').textContent = allModels.size;
+    elements.essayList.appendChild(summary);
+}
+
+// Show all groups
+function showGroups(groups) {
+    Object.keys(groups).sort().forEach(rubric => {
+        showRubricHeader(rubric);
+        showEssaysInRubric(groups[rubric]);
+    });
+}
+
+// Show rubric header
+function showRubricHeader(rubric) {
+    const header = document.createElement('div');
+    header.className = 'rubric-header';
+    const colors = getRubricColors(rubric);
+    header.style.background = colors.bgColor;
+    header.style.color = colors.color;
+    header.style.borderLeftColor = colors.color;
+    header.textContent = `📋 ${formatRubricName(rubric)}`;
+    elements.essayList.appendChild(header);
+}
+
+// Show essays in rubric
+function showEssaysInRubric(essays) {
+    Object.keys(essays).sort().forEach(essayName => {
+        const item = document.createElement('div');
+        item.className = 'essay-item';
+
+        const header = document.createElement('div');
+        header.className = 'essay-header';
+        header.textContent = essayName;
+        item.appendChild(header);
+
+        const commands = document.createElement('div');
+        commands.className = 'essay-commands';
+
+        Object.keys(essays[essayName]).sort().forEach(model => {
+            showModelCommands(commands, model, essays[essayName][model]);
+        });
+
+        item.appendChild(commands);
+        elements.essayList.appendChild(item);
+    });
+}
+
+// Show commands for a model
+function showModelCommands(container, model, items) {
+    const header = document.createElement('div');
+    header.className = 'model-header';
+    header.textContent = ` ${model}`;
+    container.appendChild(header);
+
+    items.generate.forEach(item => {
+        container.appendChild(makeCommandButton('Generate', item.data));
+    });
+
+    items.generate_scores.forEach(item => {
+        const btn = makeCommandButton('Score', item.data);
+        btn.style.marginLeft = '1.5rem';
+        container.appendChild(btn);
+    });
+
+    items.tune.forEach(item => {
+        container.appendChild(makeCommandButton('Tune', item.data));
+    });
+
+    items.tune_scores.forEach(item => {
+        const btn = makeCommandButton('Score', item.data);
+        btn.style.marginLeft = '1.5rem';
+        container.appendChild(btn);
+    });
+}
+
+// Make a clickable command button
+function makeCommandButton(command, data) {
+    const btn = document.createElement('div');
+    btn.className = 'command-item';
+
+    let label = `    ${command}`;
+    if (command === 'Score') {
+        const type = data.essay_type || 'generate';
+        const grader = getModelName(data.grader);
+        label = `        ${type.charAt(0).toUpperCase() + type.slice(1)} Essay (by ${grader})`;
+    }
+
+    btn.textContent = label;
+    btn.onclick = (e) => showContent(e, command, data);
+    return btn;
+}
+
+// Show content when clicked
+function showContent(event, command, data) {
+    document.querySelectorAll('.command-item').forEach(item => item.classList.remove('active'));
+    event.target.classList.add('active');
+    renderContent(elements.rightPanel, command, data, gradePrompt);
+}
+
+// Show no results message
+function showNoResults() {
+    const listTemplate = document.getElementById('noResultsTemplate');
+    const panelTemplate = document.getElementById('noResultsPanelTemplate');
+    elements.essayList.appendChild(listTemplate.content.cloneNode(true));
+    elements.rightPanel.appendChild(panelTemplate.content.cloneNode(true));
+}
+
+// Show right panel summary
+function showRightPanel(filters) {
+    elements.rightPanel.innerHTML = '';
+
+    // Add summary template
+    const summaryTemplate = document.getElementById('rightPanelSummaryTemplate');
+    const summary = summaryTemplate.content.cloneNode(true);
+
+    // Get the filter list container
+    const filtersList = summary.querySelector('.active-filters-list');
+
+    // Add active filters
+    if (filters.essay !== 'all') {
+        filtersList.appendChild(createFilterItem('📝 Assignment', filters.essay));
+    }
+    if (filters.model !== 'all') {
+        filtersList.appendChild(createFilterItem('🤖 Model', filters.model));
+    }
+    if (filters.rubric !== 'all') {
+        filtersList.appendChild(createFilterItem('📋 Rubric', formatRubricName(filters.rubric)));
+    }
+
+    elements.rightPanel.appendChild(summary);
+
+    // Show prompts if essay selected
+    if (filters.essay !== 'all') {
+        const prompt = getPromptForEssay(filters.essay);
+        if (prompt) {
+            elements.rightPanel.appendChild(createPromptBox('📝 Assignment Prompt', prompt));
+        }
+
+        const grade = getGradePrompt();
+        if (grade) {
+            elements.rightPanel.appendChild(createPromptBox('✅ Grading Prompt', grade));
+        }
+    }
+
+    // Add tip box
+    const tipTemplate = document.getElementById('tipBoxTemplate');
+    elements.rightPanel.appendChild(tipTemplate.content.cloneNode(true));
+}
+
+// Create a filter item from template
+function createFilterItem(label, value) {
+    const template = document.getElementById('filterItemTemplate');
+    const item = template.content.cloneNode(true);
+    item.querySelector('.filter-label').textContent = label;
+    item.querySelector('.filter-value').textContent = value;
+    return item;
+}
+
+// Create a prompt box from template
+function createPromptBox(title, text) {
+    const template = document.getElementById('promptBoxTemplate');
+    const box = template.content.cloneNode(true);
+    box.querySelector('.prompt-title').textContent = title;
+    box.querySelector('.prompt-text').textContent = text;
+    return box;
+}
+
+// Get colors for rubric
+function getRubricColors(rubric) {
+    const colors = {
+        critical_thinking: { color: '#ffffff', bgColor: 'rgba(3, 98, 76, 0.15)' },
+        oral_communication: { color: '#2CC295', bgColor: 'rgba(44, 194, 149, 0.15)' }
+    };
+    return colors[rubric] || { color: '#24ff02', bgColor: 'rgba(36, 255, 2, 0.15)' };
+}
+
+// Show notification popup
+function showNotification(message) {
+    const template = document.getElementById('notificationTemplate');
+    const notif = template.content.cloneNode(true).querySelector('.notification');
+    notif.textContent = message;
+    document.body.appendChild(notif);
+    setTimeout(() => {
+        if (document.body.contains(notif)) document.body.removeChild(notif);
+    }, 3000);
 }

@@ -1,52 +1,58 @@
-class Data {
-    
-    constructor() {
-        this.allData = {};
-        this.allModels = new Set();
-        this.allRubrics = new Set();
+// Storage boxes for all essays
+let allData = {};
+let allModels = new Set();
+let allRubrics = new Set();
+
+// Add an essay to storage
+function addData(essayName, modelName, command, rubric, data) {
+    // Make a unique name for this essay
+    // For scores, include essay_type and grader to avoid collisions
+    let uniqueName;
+    if (command === 'score') {
+        const essayType = data.essay_type || 'unknown';
+        const grader = data.grader || 'unknown';
+        uniqueName = `${essayName}_${modelName}_${command}_${essayType}_${grader}_${rubric}`;
+    } else {
+        uniqueName = `${essayName}_${modelName}_${command}_${rubric}`;
     }
 
-    add_data(essayName, modelName, command, rubric, data) {
-        const uniqueKey = this.generate_key(essayName, modelName, command, rubric, data);
-        this.allData[uniqueKey] = {
-            essayName,
-            modelName,
-            command,
-            rubric,
-            data
-        };
-        this.allModels.add(modelName);
-        this.allRubrics.add(rubric);
-    }
+    // Store the essay
+    allData[uniqueName] = {
+        essayName: essayName,
+        modelName: modelName,
+        command: command,
+        rubric: rubric,
+        data: data
+    };
 
-    generate_key(essayName, modelName, command, rubric, data) {
-        if (command === 'score') {
-            const essayType = data.essay_type || 'generate';
-            const graderName = Parser.get_model_name(data.grader);
-            return `${essayName}_${modelName}_${essayType}_score_${graderName}_${rubric}`;
-        }
-        return `${essayName}_${modelName}_${command}_${rubric}`;
-    }
+    // Remember this model and rubric
+    allModels.add(modelName);
+    allRubrics.add(rubric);
+}
 
-    get_data() {
-        return this.allData;
-    }
+// Get all essays
+function getData() {
+    return allData;
+}
 
-    get_models() {
-        return Array.from(this.allModels).sort();
-    }
+// Get list of all AI models (sorted A-Z)
+function getModels() {
+    return Array.from(allModels).sort();
+}
 
-    get_rubrics() {
-        return Array.from(this.allRubrics).sort();
-    }
+// Get list of all rubric types (sorted A-Z)
+function getRubrics() {
+    return Array.from(allRubrics).sort();
+}
 
-    clear() {
-        this.allData = {};
-        this.allModels.clear();
-        this.allRubrics.clear();
-    }
+// Empty all storage boxes
+function clearData() {
+    allData = {};
+    allModels.clear();
+    allRubrics.clear();
+}
 
-    get_total_count() {
-        return Object.keys(this.allData).length;
-    }
+// Count how many essays we have
+function getTotalCount() {
+    return Object.keys(allData).length;
 }

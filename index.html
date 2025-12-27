@@ -22,51 +22,25 @@
         <div class="left-panel">
             <h2>Essays</h2>
             
-            <!-- Upload Box -->
-            <div class="upload-box" id="uploadBox">
-                <div class="upload-icon"></div>
-                <p class="upload-text">Drag & Drop files or folders here</p>
-                <p class="upload-subtext">or use buttons below</p>
-            </div>
-
-            <input type="file" id="fileInput" multiple accept=".json" hidden>
-            <input type="file" id="folderInput" multiple accept=".json" webkitdirectory hidden>
-
-            <button class="copy-btn" id="browseFilesBtn" style="width: 100%; margin-top: 1rem; background: rgba(85, 255, 221, 0.2);">
-                Browse Files
-            </button>
-
-            <button class="copy-btn" id="browseFoldersBtn" style="width: 100%; margin-top: 0.5rem; background: rgba(85, 255, 221, 0.2);">
-                Browse Folders
-            </button>
-
-            <button class="copy-btn" id="githubBtn" style="width: 100%; margin-top: 0.5rem; background: rgba(85, 255, 221, 0.2);">
+            <button class="copy-btn" id="githubBtn" style="width: 100%; margin-top: 1rem; background: rgba(85, 255, 221, 0.2);">
                 Load from GitHub
             </button>
 
-            <!-- Filters -->
+            <!-- Filters - Hidden for now, can be enabled later -->
             <div class="filters" id="filters" style="display: none;">
                 <h3>Filters</h3>
-                
-                <!-- Model Filter -->
                 <div class="filter-group">
                     <label>Model:</label>
                     <select id="modelFilter"></select>
                 </div>
-                
-                <!-- Assignment Filter -->
                 <div class="filter-group">
                     <label>Assignment:</label>
                     <select id="essayFilter"></select>
                 </div>
-                
-                <!-- Rubric Filter -->
                 <div class="filter-group">
                     <label>Rubric Type:</label>
                     <select id="rubricFilter"></select>
                 </div>
-                
-                <!-- Command Type Filter -->
                 <div class="filter-group">
                     <label>Command Type:</label>
                     <div class="checkbox-group">
@@ -85,11 +59,11 @@
         <div class="right-panel" id="rightPanel">
             <div class="welcome-message">
                 <h2>Welcome!</h2>
-                <p>Upload your JSON files to get started.</p>
+                <p>Load your JSON files from GitHub to get started.</p>
                 <div class="instructions">
                     <h3>How to use:</h3>
                     <ol>
-                        <li>Upload files: Drag & drop, click to browse, or use GitHub/Folder buttons</li>
+                        <li>Load files: Click "Load from GitHub" button</li>
                         <li>Filter: Use dropdowns to find specific essays</li>
                         <li>View: Click any item in the left panel to see details</li>
                         <li>Copy: Use the copy button to save content to clipboard</li>
@@ -123,6 +97,36 @@
 
     <template id="notificationTemplate">
         <div class="notification"></div>
+    </template>
+
+    <template id="rightPanelSummaryTemplate">
+        <h2>📊 Filter Summary</h2>
+        <div class="content-info filter-summary-box">
+            <p><strong>Active Filters:</strong></p>
+            <div class="active-filters-list"></div>
+        </div>
+    </template>
+
+    <template id="filterItemTemplate">
+        <p class="filter-item">
+            <span class="filter-label"></span>
+            <strong class="filter-value"></strong>
+        </p>
+    </template>
+
+    <template id="promptBoxTemplate">
+        <div class="content-box prompt-box">
+            <h3 class="prompt-title"></h3>
+            <div class="prompt-text"></div>
+        </div>
+    </template>
+
+    <template id="tipBoxTemplate">
+        <div class="content-box">
+            <h3>💡 Tip</h3>
+            <p>Click on any item in the left panel to view its full content below.</p>
+        </div>
+        <hr style="border: 1px solid rgba(85, 255, 221, 0.2); margin: 2rem 0;">
     </template>
 
     <!-- Footer -->
