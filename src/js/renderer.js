@@ -465,15 +465,21 @@ function renderEssayDetails(item, scores) {
 
 // Switch between score tabs
 function switchScoreTab(tabButton, scoreItem, contentContainer) {
+    // Check if this tab is already active
+    const isActive = tabButton.classList.contains('active');
+
     // Remove active class from all tabs
     const allTabs = tabButton.parentElement.querySelectorAll('.score-tab');
     allTabs.forEach(tab => tab.classList.remove('active'));
 
-    // Add active class to clicked tab
-    tabButton.classList.add('active');
-
-    // Show content for this tab
-    showScoreContent(scoreItem, contentContainer);
+    if (isActive) {
+        // If clicking the same tab, close it (show placeholder)
+        contentContainer.innerHTML = '<div class="score-placeholder"><p style="color: var(--rami-lightgreen); font-style: italic;">Click a tab to view score</p></div>';
+    } else {
+        // Add active class to clicked tab and show content
+        tabButton.classList.add('active');
+        showScoreContent(scoreItem, contentContainer);
+    }
 }
 
 // Show score content in the container
