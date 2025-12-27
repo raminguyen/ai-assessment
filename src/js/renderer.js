@@ -394,16 +394,39 @@ function renderEssayDetails(item, scores) {
         panel.appendChild(promptBox);
     }
 
-    // Add response
+    // Add response with toggle functionality
     const responseBox = document.createElement('div');
     responseBox.className = 'content-box';
+
+    const responseHeader = document.createElement('h3');
+    responseHeader.textContent = '📄 Response';
+    responseHeader.style.cursor = 'pointer';
+    responseHeader.style.userSelect = 'none';
+
+    const responseContent = document.createElement('div');
+    responseContent.className = 'response-content';
+    responseContent.style.display = 'none'; // Start collapsed
+
     const responseText = item.data.result || item.data.essay || 'No content';
     const cleanResponseText = removeMarkdown(responseText);
-    responseBox.innerHTML = `
-        <h3>📄 Response</h3>
+    responseContent.innerHTML = `
         <div class="essay-text">${cleanResponseText}</div>
         <button class="copy-btn" onclick="copyText(\`${cleanResponseText.replace(/`/g, '\\`').replace(/\$/g, '\\$')}\`)">📋 Copy</button>
     `;
+
+    // Toggle on header click
+    responseHeader.onclick = () => {
+        if (responseContent.style.display === 'none') {
+            responseContent.style.display = 'block';
+            responseHeader.textContent = '📄 Response ▼';
+        } else {
+            responseContent.style.display = 'none';
+            responseHeader.textContent = '📄 Response';
+        }
+    };
+
+    responseBox.appendChild(responseHeader);
+    responseBox.appendChild(responseContent);
     panel.appendChild(responseBox);
 
     // Add scores section with tabs
