@@ -2,81 +2,31 @@ Rubric,Essay Name,Command,Model,Grader,Writer,Essay Type,Folder,Time (mins),Time
 critical_thinking,Assignment_1,generate,gpt-5.2-2025-12-11,,,,critical_thinking,0.95,2025-12-29 19:32:46,"## Conditioning and Learning in Catlove’s Kitchen: Classical, Operant, and Social Learning (≤1000 words)
 
 In the scene where Professor Catlove opens a can of cat food and the cats rush in, vocalize, and rub against his legs, several learning processes can be operating at once. The confusion usually comes from treating “conditioning” as a single thing. In reality, **classical conditioning** (Pavlovian learning), **operant conditioning** (consequence-based learning), and **social learning** (learn...",a1_gen_chatgpt.json
-critical_thinking,Assignment_1,generate,gemini-3-pro-preview,,,,critical_thinking,0.57,2025-12-29 20:49:00,"**Behavioral Mechanisms in the Catlove Household**
+critical_thinking,Assignment_1,reflection,,,gpt-5.2-2025-12-11,,critical_thinking,0.52,2025-12-29 22:00:33,"I changed the essay in ways that line up with what your rubric is actually rewarding (clear issue framing, evaluated evidence, context/assumptions, an explicit position with limits, and a logically prioritized conclusion). Concretely, here’s what I did:
 
-**Introduction**
+## 1) Made the “issue/problem” clearer and more bounded (Rubric: Explanation of issues)
+- **Added an explicit organizing claim up front**: I clearly separated the three learning mechanisms into *(1) triggers/cues (classical), (2) consequences (o...",a1_reflection_chatgpt.json
+critical_thinking,Assignment_1,score,,claude-sonnet-4-5-20250929,gpt-5.2-2025-12-11,tune,critical_thinking,0.05,2025-12-29 22:01:21,"### Learning in Professor Catlove’s Kitchen: Classical Conditioning, Operant Conditioning, and Social Learning (≤ 1000 words)
 
-Guys, I really enjoyed our coffee debate earlier, but I walked away feeling like we were mixing up our terms. I know Professor Catlove’s scenario seems simple—man opens can, cats go crazy, man feeds cats—but if we look at it through the lens of what we’ve actually covered in Intro Psych so far, it’s a lot messier. You were arguing that the cats are just ""instinctive"" or that the professor is simply ""being nice,"" but behavioris...",a1_gen_gemini.json
-critical_thinking,Assignment_1,reflection,,,gemini-3-pro-preview,,critical_thinking,0.41,2025-12-29 20:50:13,"Based on the provided rubric—which heavily emphasizes **Critical Thinking**, **Analysis of Assumptions**, and **Nuanced Positions**—here is a breakdown of the changes made between the Original and the Tuned essay.
-
-The Tuned Essay moves the work from a standard ""Milestone"" level to a ""Capstone"" level by shifting from simply identifying concepts to critically evaluating how they interact and questioning the limitations of the theories.
-
-### 1. Explanation of Issues
-*   **Original:** Stated the pr...",a1_reflection_gemini.json
-critical_thinking,Assignment_1,reflection,,,gpt-5.2-2025-12-11,,critical_thinking,0.53,2025-12-29 19:34:25,"I changed the essay in pretty targeted ways to match what the rubric rewards (clear issue framing, evaluated evidence, attention to assumptions/context, a defensible position with limits, and implications). Concretely:
-
-### 1) Clearer “issue/problem” statement (Rubric: Explanation of issues)
-- **Added an explicit section that frames what needs explaining** (“why *these* behaviors, *at this moment*, *in this setting*”), instead of jumping straight into definitions.
-- **Specified the scene’s relev...",a1_reflection_chatgpt.json
+In the scene, Professor Catlove opens a new can of cat food and his cats run in purring, meowing, and rubbing against his legs. Even though it seems simple, several learning processes could be operating at once. The important thing is to separate (1) *what triggers the behavior* (stimulus–response associations, typical of classical conditioning), (2) *what consequences m...",a1_tune_chatgpt_score_claude.json
 critical_thinking,Assignment_1,score,,claude-sonnet-4-5-20250929,gpt-5.2-2025-12-11,generate,critical_thinking,0.19,2025-12-29 20:36:23,"## Conditioning and Learning in Catlove’s Kitchen: Classical, Operant, and Social Learning (≤1000 words)
 
 In the scene where Professor Catlove opens a can of cat food and the cats rush in, vocalize, and rub against his legs, several learning processes can be operating at once. The confusion usually comes from treating “conditioning” as a single thing. In reality, **classical conditioning** (Pavlovian learning), **operant conditioning** (consequence-based learning), and **social learning** (learn...",a1_gen_chatgpt_score_claude.json
+critical_thinking,Assignment_1,score,,gemini-3-pro-preview,gpt-5.2-2025-12-11,tune,critical_thinking,0.35,2025-12-29 22:01:12,"### Learning in Professor Catlove’s Kitchen: Classical Conditioning, Operant Conditioning, and Social Learning (≤ 1000 words)
+
+In the scene, Professor Catlove opens a new can of cat food and his cats run in purring, meowing, and rubbing against his legs. Even though it seems simple, several learning processes could be operating at once. The important thing is to separate (1) *what triggers the behavior* (stimulus–response associations, typical of classical conditioning), (2) *what consequences m...",a1_tune_chatgpt_score_gemini.json
 critical_thinking,Assignment_1,score,,grok-4-1-fast-reasoning,gpt-5.2-2025-12-11,generate,critical_thinking,0.05,2025-12-29 20:35:18,"## Conditioning and Learning in Catlove’s Kitchen: Classical, Operant, and Social Learning (≤1000 words)
 
 In the scene where Professor Catlove opens a can of cat food and the cats rush in, vocalize, and rub against his legs, several learning processes can be operating at once. The confusion usually comes from treating “conditioning” as a single thing. In reality, **classical conditioning** (Pavlovian learning), **operant conditioning** (consequence-based learning), and **social learning** (learn...",a1_gen_chatgpt_score_grok.json
 critical_thinking,Assignment_1,score,,gemini-3-pro-preview,gpt-5.2-2025-12-11,generate,critical_thinking,0.22,2025-12-29 20:35:37,"## Conditioning and Learning in Catlove’s Kitchen: Classical, Operant, and Social Learning (≤1000 words)
 
 In the scene where Professor Catlove opens a can of cat food and the cats rush in, vocalize, and rub against his legs, several learning processes can be operating at once. The confusion usually comes from treating “conditioning” as a single thing. In reality, **classical conditioning** (Pavlovian learning), **operant conditioning** (consequence-based learning), and **social learning** (learn...",a1_gen_chatgpt_score_gemini.json
-critical_thinking,Assignment_1,score,,gpt-5.2-2025-12-11,gemini-3-pro-preview,tune,critical_thinking,0.04,2025-12-29 20:50:29,"**Course:** PSY 101: Introduction to Psychology
-**Assignment:** Application of Learning Theories
-**Student Name:** [Student Name]
-**Date:** October 24, 2023
+critical_thinking,Assignment_1,score,,grok-4-1-fast-reasoning,gpt-5.2-2025-12-11,tune,critical_thinking,0.08,2025-12-29 22:00:44,"### Learning in Professor Catlove’s Kitchen: Classical Conditioning, Operant Conditioning, and Social Learning (≤ 1000 words)
 
-**Beyond the Can Opener: Unpacking Conditioning in Professor Catlove’s Kitchen**
+In the scene, Professor Catlove opens a new can of cat food and his cats run in purring, meowing, and rubbing against his legs. Even though it seems simple, several learning processes could be operating at once. The important thing is to separate (1) *what triggers the behavior* (stimulus–response associations, typical of classical conditioning), (2) *what consequences m...",a1_tune_chatgpt_score_grok.json
+critical_thinking,Assignment_1,tune,gpt-5.2-2025-12-11,,,,critical_thinking,0.85,2025-12-29 21:59:39,"### Learning in Professor Catlove’s Kitchen: Classical Conditioning, Operant Conditioning, and Social Learning (≤ 1000 words)
 
-After our debate at the coffee shop this morning, I realized we are all circling the right ideas regarding Professor Catlove and his hungry cats, but we are mixing up the mechanisms. It is easy to look at the scene—the whir of the can opener, the stampede of c...",a1_tune_gemini_score_chatgpt.json
-critical_thinking,Assignment_1,score,,gpt-5.2-2025-12-11,gemini-3-pro-preview,generate,critical_thinking,0.04,2025-12-29 20:50:21,"**Behavioral Mechanisms in the Catlove Household**
-
-**Introduction**
-
-Guys, I really enjoyed our coffee debate earlier, but I walked away feeling like we were mixing up our terms. I know Professor Catlove’s scenario seems simple—man opens can, cats go crazy, man feeds cats—but if we look at it through the lens of what we’ve actually covered in Intro Psych so far, it’s a lot messier. You were arguing that the cats are just ""instinctive"" or that the professor is simply ""being nice,"" but behavioris...",a1_gen_gemini_score_chatgpt.json
-critical_thinking,Assignment_1,score,,claude-sonnet-4-5-20250929,gemini-3-pro-preview,generate,critical_thinking,0.22,2025-12-29 20:51:09,"**Behavioral Mechanisms in the Catlove Household**
-
-**Introduction**
-
-Guys, I really enjoyed our coffee debate earlier, but I walked away feeling like we were mixing up our terms. I know Professor Catlove’s scenario seems simple—man opens can, cats go crazy, man feeds cats—but if we look at it through the lens of what we’ve actually covered in Intro Psych so far, it’s a lot messier. You were arguing that the cats are just ""instinctive"" or that the professor is simply ""being nice,"" but behavioris...",a1_gen_gemini_score_claude.json
-critical_thinking,Assignment_1,score,,grok-4-1-fast-reasoning,gemini-3-pro-preview,tune,critical_thinking,0.09,2025-12-29 20:50:50,"**Course:** PSY 101: Introduction to Psychology
-**Assignment:** Application of Learning Theories
-**Student Name:** [Student Name]
-**Date:** October 24, 2023
-
-**Beyond the Can Opener: Unpacking Conditioning in Professor Catlove’s Kitchen**
-
-After our debate at the coffee shop this morning, I realized we are all circling the right ideas regarding Professor Catlove and his hungry cats, but we are mixing up the mechanisms. It is easy to look at the scene—the whir of the can opener, the stampede of c...",a1_tune_gemini_score_grok.json
-critical_thinking,Assignment_1,score,,grok-4-1-fast-reasoning,gemini-3-pro-preview,generate,critical_thinking,0.06,2025-12-29 20:50:38,"**Behavioral Mechanisms in the Catlove Household**
-
-**Introduction**
-
-Guys, I really enjoyed our coffee debate earlier, but I walked away feeling like we were mixing up our terms. I know Professor Catlove’s scenario seems simple—man opens can, cats go crazy, man feeds cats—but if we look at it through the lens of what we’ve actually covered in Intro Psych so far, it’s a lot messier. You were arguing that the cats are just ""instinctive"" or that the professor is simply ""being nice,"" but behavioris...",a1_gen_gemini_score_grok.json
-critical_thinking,Assignment_1,score,,claude-sonnet-4-5-20250929,gemini-3-pro-preview,tune,critical_thinking,0.04,2025-12-29 20:51:17,"**Course:** PSY 101: Introduction to Psychology
-**Assignment:** Application of Learning Theories
-**Student Name:** [Student Name]
-**Date:** October 24, 2023
-
-**Beyond the Can Opener: Unpacking Conditioning in Professor Catlove’s Kitchen**
-
-After our debate at the coffee shop this morning, I realized we are all circling the right ideas regarding Professor Catlove and his hungry cats, but we are mixing up the mechanisms. It is easy to look at the scene—the whir of the can opener, the stampede of c...",a1_tune_gemini_score_claude.json
-critical_thinking,Assignment_1,tune,gemini-3-pro-preview,,,,critical_thinking,0.61,2025-12-29 20:49:43,"**Course:** PSY 101: Introduction to Psychology
-**Assignment:** Application of Learning Theories
-**Student Name:** [Student Name]
-**Date:** October 24, 2023
-
-**Beyond the Can Opener: Unpacking Conditioning in Professor Catlove’s Kitchen**
-
-After our debate at the coffee shop this morning, I realized we are all circling the right ideas regarding Professor Catlove and his hungry cats, but we are mixing up the mechanisms. It is easy to look at the scene—the whir of the can opener, the stampede of c...",a1_tune_gemini.json
-critical_thinking,Assignment_1,tune,gpt-5.2-2025-12-11,,,,critical_thinking,0.67,2025-12-29 19:33:41,"## Conditioning in Professor Catlove’s Kitchen: What’s Classical, What’s Operant, and What’s Social?
-
-In the morning scene, Professor Catlove opens a new can of cat food and his cats immediately run into the kitchen purring, meowing, and rubbing against his legs. This looks simple, but it can involve multiple learning processes happening at once. My goal here is to separate **classical conditioning** (learning that one cue predicts another), **operant conditioning** (learning that a behavior pro...",a1_tune_chatgpt.json
+In the scene, Professor Catlove opens a new can of cat food and his cats run in purring, meowing, and rubbing against his legs. Even though it seems simple, several learning processes could be operating at once. The important thing is to separate (1) *what triggers the behavior* (stimulus–response associations, typical of classical conditioning), (2) *what consequences m...",a1_tune_chatgpt.json
 critical_thinking,Assignment_2,generate,gpt-5.2-2025-12-11,,,,critical_thinking,0.54,2025-12-29 21:36:25,"I can do this, but I don’t yet have the “attached economic data.” Please upload the dataset (table, spreadsheet, or image) or paste the numbers and tell me: (1) which countries/region, (2) what years, (3) how “social service spending” is measured (e.g., % of GDP, per capita, real terms), and (4) how “economic growth” is measured (e.g., real GDP growth rate).
 
 In the meantime, here is a **five-page-style essay (≤1000 words)** written at a **first-semester undergrad level** that explains *how to j...",a2_gen_chatgpt.json
