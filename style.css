@@ -7,7 +7,7 @@
     --rami-dark: #171515;
     --rami-white: #ffffff;
     --rami-accent: #434443;
-    --color-green: #4CAF50;
+    --color-green: #00f808;
     --color-yellow: #FFC107;
     --color-orange: #FF9800;
     --color-red: #F44336;
@@ -51,12 +51,57 @@ html, body {
     font-size: 0.95rem;
     cursor: pointer;
     transition: all 0.3s ease;
-    margin-bottom: 2rem;
+    margin-bottom: 0.75rem;
 }
 
 .load-btn:hover {
     background-color: #1ab085;
     transform: translateY(-2px);
+}
+
+.load-btn-secondary {
+    background-color: transparent;
+    border: 2px solid var(--rami-highlight);
+    color: var(--rami-highlight);
+    margin-bottom: 2rem;
+}
+
+.load-btn-secondary:hover {
+    background-color: rgba(34, 204, 157, 0.1);
+    border-color: #1ab085;
+    color: #1ab085;
+}
+
+.assignment-filter {
+    display: flex;
+    gap: 0.5rem;
+    margin-bottom: 1.5rem;
+}
+
+.filter-btn {
+    flex: 1;
+    background-color: transparent;
+    border: 2px solid var(--rami-accent);
+    color: var(--rami-lightgreen);
+    padding: 0.6rem 1rem;
+    border-radius: 6px;
+    font-family: 'Poppins', sans-serif;
+    font-weight: 600;
+    font-size: 0.9rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.filter-btn:hover {
+    border-color: var(--rami-highlight);
+    color: var(--rami-highlight);
+    background-color: rgba(34, 204, 157, 0.1);
+}
+
+.filter-btn.active {
+    border-color: var(--rami-highlight);
+    background-color: var(--rami-highlight);
+    color: var(--rami-dark);
 }
 
 .assignment-section {
@@ -92,11 +137,11 @@ html, body {
     min-width: 75px;
     background-color: transparent;
     color: var(--rami-lightgreen);
-    border: 1px solid var(--rami-accent);
-    padding: 0.6rem 0.6rem;
+    border: 2px solid var(--rami-accent);
+    padding: 0.65rem 0.75rem;
     text-align: center;
     font-family: 'Poppins', sans-serif;
-    font-weight: 400;
+    font-weight: 500;
     font-size: 0.8rem;
     cursor: pointer;
     transition: all 0.2s ease;
@@ -110,13 +155,14 @@ html, body {
     color: var(--rami-highlight);
     border-color: var(--rami-highlight);
     background-color: rgba(34, 204, 157, 0.1);
+    transform: translateY(-1px);
 }
 
 .action-btn.active {
-    color: var(--rami-highlight);
+    color: var(--rami-dark);
     font-weight: 600;
     border-color: var(--rami-highlight);
-    background-color: rgba(34, 204, 157, 0.2);
+    background-color: var(--rami-highlight);
 }
 
 /* Center Panel */
@@ -154,6 +200,26 @@ html, body {
 }
 
 .prompt-content {
+    color: var(--rami-lightgreen);
+    font-size: 0.9rem;
+    line-height: 1.6;
+    white-space: pre-wrap;
+    word-wrap: break-word;
+}
+
+.rubric-section {
+    margin-bottom: 2rem;
+    background: linear-gradient(90deg, rgba(34, 204, 157, 0.15) 0%, rgba(34, 204, 157, 0.05) 100%);
+    border-left: 4px solid var(--rami-highlight);
+    border-radius: 8px;
+    padding: 1.5rem;
+}
+
+.rubric-section .section-label {
+    color: var(--rami-highlight);
+}
+
+.rubric-content {
     color: var(--rami-lightgreen);
     font-size: 0.9rem;
     line-height: 1.6;

@@ -13,10 +13,18 @@
         <!-- Left Panel -->
         <div class="left-panel">
             <button class="load-btn" id="githubBtn">Load from GitHub</button>
+            <button class="load-btn load-btn-secondary" id="localBtn">Load Local Files</button>
 
-            <!-- E1: Critical Thinking -->
-            <div class="assignment-section">
-                <h2 class="assignment-title">A1: Critical Thinking</h2>
+            <!-- Assignment Filter -->
+            <div class="assignment-filter">
+                <button class="filter-btn active" data-assignment="a1">A1</button>
+                <button class="filter-btn" data-assignment="a2">A2</button>
+                <button class="filter-btn" data-assignment="a3">A3</button>
+            </div>
+
+            <!-- Assignment Section -->
+            <div class="assignment-section" data-assignment="a1">
+                <h2 class="assignment-title">Critical Thinking</h2>
 
                 <div class="model-group">
                     <h3 class="model-name">ChatGPT</h3>
@@ -46,11 +54,11 @@
                 </div>
 
                 <div class="model-group">
-                    <h3 class="model-name">GPT-4</h3>
+                    <h3 class="model-name">Grok</h3>
                     <div class="button-row">
-                        <button class="action-btn" data-model="gpt4" data-type="generation">Generation</button>
-                        <button class="action-btn" data-model="gpt4" data-type="tuning">Tuning</button>
-                        <button class="action-btn" data-model="gpt4" data-type="reflection">Reflection</button>
+                        <button class="action-btn" data-model="grok" data-type="generation">Generation</button>
+                        <button class="action-btn" data-model="grok" data-type="tuning">Tuning</button>
+                        <button class="action-btn" data-model="grok" data-type="reflection">Reflection</button>
                     </div>
                 </div>
             </div>
@@ -65,6 +73,11 @@
                 <div class="prompt-content" id="promptContent">
                     Select an item from the left panel to view details
                 </div>
+            </div>
+
+            <div class="rubric-section" id="rubricSection" style="display: none;">
+                <h3 class="section-label">Rubric</h3>
+                <div class="rubric-content" id="rubricContent">Here is my rubric. Critical thinking is a habit of mind characterized by the comprehensive exploration of issues, ideas, artifacts, and events before accepting or formulating an opinion or conclusion. <a href="src/ai_assessment/rubric/Critical_Thinking_VALUE_Rubric.pdf" target="_blank" style="color: var(--rami-highlight); text-decoration: underline;">Download PDF to view the entire rubric</a></div>
             </div>
 
             <div class="response-section">
@@ -89,13 +102,21 @@
     </div>
 
     <!-- Scripts - Load in order -->
+    <!-- Core Data & Utilities -->
     <script src="src/js/data.js"></script>
     <script src="src/js/parser.js"></script>
-    <script src="src/js/prompt.js"></script>
-    <script src="src/js/file.js"></script>
-    <script src="src/js/githubload.js"></script>
-    <script src="src/js/content.js"></script>
+    <script src="src/js/data-processor.js"></script>
+
+    <!-- UI Components -->
+    <script src="src/js/element.js"></script>
+    <script src="src/js/filter.js"></script>
     <script src="src/js/renderer.js"></script>
+
+    <!-- Data Loaders -->
+    <script src="src/js/github-loader.js"></script>
+    <script src="src/js/local-loader.js"></script>
+
+    <!-- Application Entry -->
     <script src="src/js/application.js"></script>
 </body>
 </html>

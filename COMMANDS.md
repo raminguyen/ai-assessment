@@ -53,8 +53,11 @@ python main.py score [grader] [rubric] [filename] [assignment]
 **Examples:**
 ```bash
 python main.py score claude critical_thinking a1_gen_chatgpt.json 1
+python main.py score grok critical_thinking a1_gen_chatgpt.json 1
+python main.py score gemini critical_thinking a1_gen_chatgpt.json 1
+
 python main.py score gemini critical_thinking a1_tune_chatgpt.json 1
-python main.py score grok critical_thinking a2_gen_claude.json 2
+python main.py score grok critical_thinking a2_gen_claude.json 1
 python main.py score chatgpt oral_communication a1_gen_gemini.json 1
 ```
 

@@ -1,27 +1,28 @@
-// Handle GitHub button click
 async function handleLoadFromGitHub() {
     showNotification('Loading from GitHub...');
     const count = await loadFromGitHub();
-
-    // After loading, re-setup buttons to handle the loaded data
     setupButtons();
-
     showNotification('Loaded ' + count + ' files from GitHub!');
 }
 
-// Copy text to clipboard
+async function handleLoadFromLocal() {
+    showNotification('Loading local files...');
+    const count = await loadFromLocal();
+    setupButtons();
+    showNotification('Loaded ' + count + ' local files!');
+}
+
 function copyText(text) {
     navigator.clipboard.writeText(text);
     showNotification('Copied!');
 }
 
-// Initialize app
 async function initApp() {
     await initRenderer();
     document.getElementById('githubBtn').addEventListener('click', handleLoadFromGitHub);
+    document.getElementById('localBtn').addEventListener('click', handleLoadFromLocal);
 }
 
-// Start when ready
 if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', initApp);
 } else {
