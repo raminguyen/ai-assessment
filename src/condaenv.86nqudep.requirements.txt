@@ -1,0 +1,7 @@
+openai
+google-genai
+anthropic
+xai-sdk
+python-dotenv
+python-docx
+strip-markdown
