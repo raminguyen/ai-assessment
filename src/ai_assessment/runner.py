@@ -46,16 +46,16 @@ class Runner:
     def score(self, grader, rubric, filename, assignment):
 
         grader_model = self.all_models[grader]
-        
+
         essay_text, writer_name, essay_type = Util.load_essay_from_data(filename, rubric=rubric)
 
         if Util.check_data_exists(assignment, 'score', grader, essay_type=essay_type, writer=writer_name, rubric=rubric):
             print('Already exists, skipping: ' + grader + ' scoring ' + essay_type + ' assignment ' + str(assignment))
             return
-        
+
         essay = Util.create_essay(assignment)
         essay.load_prompt(assignment)  # ← ADD THIS
-        
+
         rubric_obj = Rubric(rubric)
         essay.essay_text = essay_text
 
@@ -67,4 +67,43 @@ class Runner:
         data['essay_type'] = essay_type
 
         Util.save_individual_file(data, assignment, 'score', grader, essay_type=essay_type, rubric=rubric, writer=writer_name)
-        
+
+    def reflect(self, model, assignment, rubric):
+
+        reflection_model = self.all_models[model]
+
+        if Util.check_data_exists(assignment, 'reflection', model, rubric=rubric):
+            print('Already exists, skipping: ' + model + ' reflection assignment ' + str(assignment))
+            return
+
+        # Map model name for filenames
+        name_map = {
+            "gemini": "gemini",
+            "chatgpt": "chatgpt",
+            "claude": "claude",
+            "grok": "grok"
+        }
+        short_model = name_map.get(model, model)
+
+        # Load the original (generated) essay
+        gen_filename = "a" + str(assignment) + "_gen_" + short_model + ".json"
+        original_essay, _, _ = Util.load_essay_from_data(gen_filename, rubric=rubric)
+
+        # Load the tuned essay
+        tune_filename = "a" + str(assignment) + "_tune_" + short_model + ".json"
+        tuned_essay, _, _ = Util.load_essay_from_data(tune_filename, rubric=rubric)
+
+        # Create essay object and load prompts
+        essay = Util.create_essay(assignment, rubric_folder=rubric)
+        essay.load_prompt(assignment)
+
+        # Load rubric
+        rubric_obj = Rubric(rubric)
+
+        # Generate reflection
+        data = reflection_model.reflect(essay, original_essay, tuned_essay, rubric_obj)
+
+        data['rubric'] = rubric
+        data['folder'] = rubric
+
+        Util.save_individual_file(data, assignment, 'reflection', model, rubric=rubric)

@@ -105,17 +105,18 @@ class Util:
         print('Saved to: ' + filepath)
 
     def build_filename(assignment, command, short_model, essay_type=None, short_writer=None):
-        
+
         """Build filename based on command"""
         base = "a" + str(assignment)
         essay_abbr = "gen" if essay_type == "generate" else "tune"
-        
+
         filename_map = {
             'generate': base + "_gen_" + short_model + ".json",
             'tune': base + "_tune_" + short_model + ".json",
+            'reflection': base + "_reflection_" + short_model + ".json",
             'score': base + "_" + essay_abbr + "_" + short_writer + "_score_" + short_model + ".json" if essay_type and short_writer else None,
         }
-        
+
         return filename_map.get(command, base + "_" + short_model + ".json")
 
     @staticmethod

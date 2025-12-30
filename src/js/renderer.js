@@ -1,22 +1,25 @@
-// SIMPLE VERSION - Show essays on screen
+// New renderer for the three-column layout
 
-// Keep track of HTML elements
 let elements = {};
 let prompts = {};
 let gradePrompt = '';
-let rubrics = {};
+let currentSelection = null;
 
 // Start the renderer
 async function initRenderer() {
     findElements();
     await loadPrompts();
+    setupButtons();
 }
 
 // Find all HTML elements we need
 function findElements() {
     elements = {
-        essayList: document.getElementById('essayList'),
-        rightPanel: document.getElementById('rightPanel'),
+        dateDisplay: document.getElementById('dateDisplay'),
+        promptContent: document.getElementById('promptContent'),
+        responseContent: document.getElementById('responseContent'),
+        scoreBody: document.getElementById('scoreBody'),
+        githubBtn: document.getElementById('githubBtn')
     };
 }
 
@@ -50,263 +53,203 @@ async function loadPrompts() {
 // Default prompts if file not found
 function useDefaultPrompts() {
     prompts = {
-        'Assignment_1': "Let's write a 1000 word fully written college essa, plus at least 5 citations from peer-reviewed articles in the end of essay not embedded links, that answers this question: Consider the following problem: In the morning, when Professor Catlove opens a new can of cat food, his cats run into the kitchen purring and meowing and rubbing their backs against his legs. What examples, if any, of classical conditioning, operant conditioning, and social learning are at work in this brief scene? Note that both the cats and the professor might be exhibiting conditioned behavior here.",
+        'Assignment_1': "Let's write a 1000 word fully written college essay, plus at least 5 citations from peer-reviewed articles in the end of essay not embedded links, that answers this question: Consider the following problem: In the morning, when Professor Catlove opens a new can of cat food, his cats run into the kitchen purring and meowing and rubbing their backs against his legs. What examples, if any, of classical conditioning, operant conditioning, and social learning are at work in this brief scene? Note that both the cats and the professor might be exhibiting conditioned behavior here.",
         'Assignment_2': "Let's write a 1000 word fully written college essay, plus at least 5 citations from peer-reviewed articles, that answers this question. To what extent do the attached economic data support the hypothesis \"social service spending is inversely related to economic growth\"? Formulate a verbal argument analyzing whether the data do or do not support the hypothesis.",
         'Assignment_3': "Let's write a 1000 word fully written college essay, that includes a real estate investment market analysis in the Boston Metropolitan Area for 2024. Summarize the key findings, insights from the analysis, highlight the best real estate investment opportunities, and any significant patterns observed. Please include at least 5 citations from peer reviewed articles."
     };
     gradePrompt = "After grading the essay using the rubric, please explain how the essay was tuned to achieve a perfect score on the rubric. Add the total score at the end using this format: Total Score is [X]/[Y].";
 }
 
-// Get prompt for an essay
-function getPromptForEssay(essayName) {
-    return prompts[essayName] || '';
+// Setup button click handlers
+function setupButtons() {
+    const allButtons = document.querySelectorAll('.action-btn');
+    allButtons.forEach(button => {
+        button.addEventListener('click', function() {
+            handleButtonClick(this);
+        });
+    });
 }
 
-function getGradePrompt() {
-    return gradePrompt;
+// Handle button click
+function handleButtonClick(button) {
+    const model = button.getAttribute('data-model');
+    const type = button.getAttribute('data-type');
+
+    // Remove active class from all buttons
+    document.querySelectorAll('.action-btn').forEach(btn => {
+        btn.classList.remove('active');
+    });
+
+    // Add active class to clicked button
+    button.classList.add('active');
+
+    // Find the matching data
+    const item = findDataItem(model, type);
+
+    if (item) {
+        currentSelection = item;
+        displayContent(item);
+    } else {
+        showNoData();
+    }
 }
 
-// Show the essay list - NEW SIMPLE VERSION
-function displayEssayList() {
-    elements.essayList.innerHTML = '';
+// Find data item matching model and type
+function findDataItem(model, type) {
+    // Map button model names to data model names
+    const modelMap = {
+        'chatgpt': 'ChatGPT',
+        'gemini': 'Gemini',
+        'claude': 'Claude',
+        'gpt4': 'GPT-4'
+    };
 
-    // Get all data grouped by rubric
-    const rubricGroups = groupByRubric();
+    // Map button type to command
+    const typeMap = {
+        'generation': 'generate',
+        'tuning': 'tune',
+        'reflection': 'reflection',
+        'score': 'score'
+    };
 
-    if (Object.keys(rubricGroups).length === 0) {
-        showNoResults();
+    const modelName = modelMap[model];
+    const command = typeMap[type];
+
+    // Search through all data for matching item
+    const allItems = Object.values(getData());
+
+    // For now, filter by Assignment_1 (critical thinking)
+    // You can make this dynamic later
+    const matches = allItems.filter(item => {
+        return item.modelName === modelName &&
+               item.command === command &&
+               item.essayName === 'Assignment_1' &&
+               item.rubric === 'critical_thinking';
+    });
+
+    return matches.length > 0 ? matches[0] : null;
+}
+
+// Display content in center and right panels
+function displayContent(item) {
+    // Update date
+    const date = item.data.timestamp || new Date().toLocaleDateString();
+    elements.dateDisplay.textContent = 'Date: ' + date;
+
+    // Update prompt
+    const prompt = getPromptForEssay(item.essayName);
+    elements.promptContent.textContent = prompt || 'No prompt available';
+
+    // Update response
+    const responseText = item.data.result || item.data.essay || 'No content available';
+    const cleanText = removeMarkdown(responseText);
+    elements.responseContent.textContent = cleanText;
+
+    // Update scores
+    displayScores(item);
+}
+
+// Display scores in right panel
+function displayScores(item) {
+    elements.scoreBody.innerHTML = '';
+
+    // Get all scores for this essay
+    const scores = getScoresForEssay(item);
+
+    if (scores.length === 0) {
+        elements.scoreBody.innerHTML = '<p style="color: var(--rami-lightgrey); font-size: 0.85rem; text-align: center; padding: 2rem;">No scores available</p>';
         return;
     }
 
-    // Show each rubric and its experiments
-    Object.keys(rubricGroups).sort().forEach(rubricName => {
-        showRubricSection(rubricName, rubricGroups[rubricName]);
+    // Group scores by grader
+    scores.forEach(scoreItem => {
+        const graderName = getModelName(scoreItem.data.grader);
+        displayScoreForGrader(graderName, scoreItem);
     });
 }
 
-// Group all data by rubric first
-function groupByRubric() {
-    const rubricGroups = {};
+// Display score for one grader
+function displayScoreForGrader(graderName, scoreItem) {
+    // Model row
+    const modelRow = document.createElement('div');
+    modelRow.className = 'score-model-row';
 
-    Object.values(getData()).forEach(item => {
-        if (item.command === 'generate' || item.command === 'tune') {
-            const rubric = item.rubric;
-            if (!rubricGroups[rubric]) {
-                rubricGroups[rubric] = new Set();
-            }
-            rubricGroups[rubric].add(item.essayName);
-        }
-    });
+    const modelNameSpan = document.createElement('span');
+    modelNameSpan.className = 'score-model-name';
+    modelNameSpan.textContent = graderName;
 
-    // Convert sets to arrays
-    Object.keys(rubricGroups).forEach(rubric => {
-        rubricGroups[rubric] = Array.from(rubricGroups[rubric]).sort();
-    });
+    const totalSpan = document.createElement('span');
+    totalSpan.className = 'score-total';
 
-    return rubricGroups;
-}
-
-// Show a rubric section with all its experiments
-function showRubricSection(rubricName, experimentNames) {
-    // Create rubric container
-    const rubricDiv = document.createElement('div');
-    rubricDiv.className = 'rubric-section';
-    rubricDiv.style.marginBottom = '2rem';
-
-    // Add rubric header
-    const rubricHeader = document.createElement('div');
-    rubricHeader.className = 'rubric-section-header';
-    rubricHeader.textContent = formatRubricName(rubricName);
-    rubricDiv.appendChild(rubricHeader);
-
-    // Show each experiment in this rubric
-    experimentNames.forEach(experimentName => {
-        showExperiment(experimentName, rubricName, rubricDiv);
-    });
-
-    elements.essayList.appendChild(rubricDiv);
-}
-
-// Get list of unique experiments (Assignment_1, Assignment_2, etc.)
-function getExperiments() {
-    const experiments = new Set();
-    Object.values(getData()).forEach(item => {
-        experiments.add(item.essayName);
-    });
-    return Array.from(experiments).sort();
-}
-
-// Show one experiment section
-function showExperiment(experimentName, rubricFilter, parentContainer) {
-    // Create experiment container
-    const experimentDiv = document.createElement('div');
-    experimentDiv.className = 'experiment-section';
-
-    // Get all essays for this experiment and rubric
-    const essays = getEssaysForExperiment(experimentName, rubricFilter);
-
-    // Add experiment header
-    const header = document.createElement('div');
-    header.className = 'experiment-header';
-    header.textContent = experimentName;
-    experimentDiv.appendChild(header);
-
-    // Group by model and type (generate/tune)
-    const grouped = groupByModelAndType(essays);
-
-    // Show each model's essays with model header
-    Object.keys(grouped).sort().forEach(modelName => {
-        const modelData = grouped[modelName];
-
-        // Create model section
-        const modelSection = document.createElement('div');
-        modelSection.className = 'model-section';
-        modelSection.style.marginLeft = '1rem';
-
-        // Add model header
-        const modelHeader = document.createElement('div');
-        modelHeader.className = 'model-section-header';
-        modelHeader.textContent = modelName;
-        modelHeader.style.cssText = `
-            font-weight: 600;
-            color: var(--rami-white);
-            margin: 0.75rem 0 0.5rem 0;
-            font-size: 1rem;
-        `;
-        modelSection.appendChild(modelHeader);
-
-        // Create a container for badges in one line
-        const badgesContainer = document.createElement('div');
-        badgesContainer.style.cssText = `
-            display: flex;
-            gap: 0.5rem;
-            margin-left: 1rem;
-            margin-bottom: 0.5rem;
-        `;
-
-        // Add GENERATE badge if exists
-        if (modelData.generate.length > 0) {
-            const generateBadge = createEssayBadge('Generate', modelData.generate[0]);
-            badgesContainer.appendChild(generateBadge);
-        }
-
-        // Add TUNE badge if exists
-        if (modelData.tune.length > 0) {
-            const tuneBadge = createEssayBadge('Tune', modelData.tune[0]);
-            badgesContainer.appendChild(tuneBadge);
-        }
-
-        modelSection.appendChild(badgesContainer);
-        experimentDiv.appendChild(modelSection);
-    });
-
-    parentContainer.appendChild(experimentDiv);
-}
-
-// Get all essays for an experiment
-function getEssaysForExperiment(experimentName, rubricFilter) {
-    return Object.values(getData()).filter(item =>
-        item.essayName === experimentName &&
-        (item.command === 'generate' || item.command === 'tune') &&
-        (!rubricFilter || item.rubric === rubricFilter)
-    );
-}
-
-// Group essays by model and type
-function groupByModelAndType(essays) {
-    const grouped = {};
-
-    essays.forEach(item => {
-        const model = item.modelName;
-
-        if (!grouped[model]) {
-            grouped[model] = {
-                generate: [],
-                tune: []
-            };
-        }
-
-        if (item.command === 'generate') {
-            grouped[model].generate.push(item);
-        } else if (item.command === 'tune') {
-            grouped[model].tune.push(item);
-        }
-    });
-
-    return grouped;
-}
-
-// Create a badge for an essay type
-function createEssayBadge(type, item) {
-    const badge = document.createElement('span');
-    badge.className = 'model-badge';
-    badge.textContent = type;
-    badge.style.cursor = 'pointer';
-    badge.style.transition = 'all 0.3s ease';
-
-    // Click handler
-    badge.onclick = () => showEssayDetails(item, badge);
-
-    // Hover effect
-    badge.onmouseenter = function() {
-        this.style.backgroundColor = 'rgba(34, 204, 157, 0.3)';
-    };
-    badge.onmouseleave = function() {
-        this.style.backgroundColor = '#083e30';
-    };
-
-    return badge;
-}
-
-// Create a button for an essay
-function createEssayButton(type, modelName, item) {
-    const btn = document.createElement('div');
-    btn.className = 'essay-button';
-
-    // Create badge for model
-    const modelBadge = document.createElement('span');
-    modelBadge.className = 'model-badge';
-    modelBadge.textContent = modelName;
-
-    // Create badge for type
-    const typeBadge = document.createElement('span');
-    typeBadge.className = 'model-badge';
-    typeBadge.textContent = type;
-    typeBadge.style.marginLeft = '0.5rem';
-
-    btn.appendChild(modelBadge);
-    btn.appendChild(typeBadge);
-
-    // Click handler
-    btn.onclick = () => showEssayDetails(item, btn);
-
-    return btn;
-}
-
-// Show essay details in right panel
-function showEssayDetails(item, buttonElement) {
-    // Remove active class from all buttons and badges
-    document.querySelectorAll('.essay-button').forEach(btn =>
-        btn.classList.remove('active')
-    );
-    document.querySelectorAll('.model-badge').forEach(badge => {
-        badge.style.backgroundColor = '#083e30';
-    });
-
-    // Add active class/style to clicked element
-    if (buttonElement) {
-        if (buttonElement.classList.contains('essay-button')) {
-            buttonElement.classList.add('active');
-        } else if (buttonElement.classList.contains('model-badge')) {
-            buttonElement.style.backgroundColor = 'rgba(34, 204, 157, 0.5)';
-        }
+    // Extract total score from text
+    const scoreText = scoreItem.data.result || scoreItem.data.score || '';
+    const totalMatch = scoreText.match(/Total.*?(\d+)\s*\/\s*(\d+)/i);
+    if (totalMatch) {
+        totalSpan.textContent = 'Total ' + totalMatch[1] + '/' + totalMatch[2];
+    } else {
+        totalSpan.textContent = 'Total --';
     }
 
-    // Get scores for this essay
-    const scores = getScoresForEssay(item);
+    modelRow.appendChild(modelNameSpan);
+    modelRow.appendChild(totalSpan);
+    elements.scoreBody.appendChild(modelRow);
 
-    // Render in right panel
-    renderEssayDetails(item, scores);
+    // Parse and display rubric dimensions
+    const dimensions = parseRubricScores(scoreText);
+    dimensions.forEach(dim => {
+        const rubricItem = document.createElement('div');
+        rubricItem.className = 'score-rubric-item';
+
+        const dimensionSpan = document.createElement('span');
+        dimensionSpan.className = 'score-dimension';
+        dimensionSpan.textContent = dim.name;
+
+        const valueSpan = document.createElement('span');
+        valueSpan.className = 'score-value ' + getScoreClass(dim.level);
+        valueSpan.textContent = dim.level;
+
+        rubricItem.appendChild(dimensionSpan);
+        rubricItem.appendChild(valueSpan);
+        elements.scoreBody.appendChild(rubricItem);
+    });
+
+    // Add spacing between graders
+    const spacer = document.createElement('div');
+    spacer.style.height = '1.5rem';
+    elements.scoreBody.appendChild(spacer);
+}
+
+// Parse rubric scores from text
+function parseRubricScores(text) {
+    const dimensions = [
+        { name: 'Explanation of issue', level: '--' },
+        { name: 'Evidence', level: '--' },
+        { name: 'Influence of context and assumptions', level: '--' },
+        { name: 'Student\'s position', level: '--' },
+        { name: 'Conclusions and related outcomes', level: '--' }
+    ];
+
+    // Try to extract scores from text
+    // This is a simple parser - you may need to adjust based on your actual score format
+    dimensions.forEach(dim => {
+        const regex = new RegExp(dim.name + '.*?(Capstone 4|Milestone 3|Milestone 2|Benchmark 1)', 'i');
+        const match = text.match(regex);
+        if (match) {
+            dim.level = match[1];
+        }
+    });
+
+    return dimensions;
+}
+
+// Get CSS class for score level
+function getScoreClass(level) {
+    const levelLower = level.toLowerCase();
+    if (levelLower.includes('capstone') || levelLower.includes('4')) return 'capstone';
+    if (levelLower.includes('milestone 3') || levelLower.includes('3')) return 'milestone-3';
+    if (levelLower.includes('milestone 2') || levelLower.includes('2')) return 'milestone-2';
+    if (levelLower.includes('benchmark') || levelLower.includes('1')) return 'benchmark';
+    return '';
 }
 
 // Get all scores for an essay
@@ -326,444 +269,80 @@ function getScoresForEssay(item) {
     return scores;
 }
 
-// Render essay details in right panel
-function renderEssayDetails(item, scores) {
-    const panel = elements.rightPanel;
-    panel.innerHTML = '';
-
-    // Add header
-    const header = document.createElement('h2');
-    const commandText = item.command === 'generate' ? 'Generate an essay' : 'Tune an essay with rubric';
-    header.textContent = `${item.essayName}: ${commandText}`;
-    panel.appendChild(header);
-
-    // Add model info
-    const info = document.createElement('div');
-    info.className = 'content-info';
-    info.innerHTML = `
-        <p><strong>Model:</strong> ${item.modelName}</p>
-        <p><strong>Rubric:</strong> ${formatRubricName(item.rubric)}</p>
-        <p><strong>Time:</strong> ${item.data.timestamp || 'N/A'}</p>
-    `;
-    panel.appendChild(info);
-
-    // Add prompt
-    const prompt = getPromptForEssay(item.essayName);
-    if (prompt) {
-        const promptBox = document.createElement('div');
-        promptBox.className = 'content-box prompt-box';
-        promptBox.innerHTML = '<h3>Prompt</h3><div class="prompt-text">' + prompt + '</div>';
-        panel.appendChild(promptBox);
-    }
-
-    // Add rubric section with link
-    const rubricBox = document.createElement('div');
-    rubricBox.className = 'content-box';
-    rubricBox.innerHTML = '<h3>Rubric</h3><div class="rubric-link-text"><a href="https://chsu.edu/wp-content/uploads/CriticalThinking.pdf" target="_blank" style="color: var(--rami-lightgreen); text-decoration: underline;">Click to view rubric (Critical Thinking PDF)</a></div>';
-    panel.appendChild(rubricBox);
-
-    // Add response with toggle functionality
-    const responseBox = document.createElement('div');
-    responseBox.className = 'content-box';
-
-    const responseHeader = document.createElement('h3');
-    responseHeader.textContent = 'Click to view essay';
-    responseHeader.style.cursor = 'pointer';
-    responseHeader.style.userSelect = 'none';
-
-    const responseContent = document.createElement('div');
-    responseContent.className = 'response-content';
-    responseContent.style.display = 'none'; // Start collapsed
-
-    const responseText = item.data.result || item.data.essay || 'No content';
-    const cleanResponseText = removeMarkdown(responseText);
-    const escapedText = cleanResponseText.replace(/`/g, '\\`').replace(/\$/g, '\\$').replace(/'/g, "\\'");
-    responseContent.innerHTML = '<div class="essay-text">' + cleanResponseText + '</div>' +
-        '<button class="copy-btn" onclick="copyText(\'' + escapedText + '\')">Copy</button>';
-
-    // Toggle on header click
-    responseHeader.onclick = function() {
-        if (responseContent.style.display === 'none') {
-            responseContent.style.display = 'block';
-            responseHeader.textContent = 'Response ▼';
-        } else {
-            responseContent.style.display = 'none';
-            responseHeader.textContent = 'Click to view essay';
-        }
-    };
-
-    responseBox.appendChild(responseHeader);
-    responseBox.appendChild(responseContent);
-    panel.appendChild(responseBox);
-
-    // Add scores section with tabs
-    if (scores.length > 0) {
-        const scoresBox = document.createElement('div');
-        scoresBox.className = 'content-box scores-section';
-        scoresBox.innerHTML = '<h3>Scores</h3>';
-
-        // Create tabs container
-        const tabsContainer = document.createElement('div');
-        tabsContainer.className = 'score-tabs';
-
-        // Create content container
-        const contentContainer = document.createElement('div');
-        contentContainer.className = 'score-tab-content';
-        contentContainer.innerHTML = '<div class="score-placeholder"><p style="color: var(--rami-lightgreen); font-style: italic;">Click a tab to view score</p></div>';
-
-        // Separate AI and Human scores
-        const aiScores = [];
-        const humanScores = [];
-
-        scores.forEach(function(scoreItem) {
-            const graderModel = getModelName(scoreItem.data.grader);
-            if (graderModel.startsWith('Human')) {
-                humanScores.push(scoreItem);
-            } else {
-                aiScores.push(scoreItem);
-            }
-        });
-
-        // Add AI model tabs
-        aiScores.forEach(function(scoreItem) {
-            const graderModel = getModelName(scoreItem.data.grader);
-            const tab = document.createElement('button');
-            tab.className = 'score-tab';
-            tab.textContent = graderModel;
-            tab.onclick = function() { switchScoreTab(tab, scoreItem, contentContainer); };
-            tabsContainer.appendChild(tab);
-        });
-
-        // Add Human tabs dynamically
-        humanScores.forEach(function(scoreItem) {
-            const graderModel = getModelName(scoreItem.data.grader);
-            const tab = document.createElement('button');
-            tab.className = 'score-tab human-tab';
-            tab.textContent = graderModel;
-            tab.onclick = function() { switchScoreTab(tab, scoreItem, contentContainer); };
-            tabsContainer.appendChild(tab);
-        });
-
-        scoresBox.appendChild(tabsContainer);
-        scoresBox.appendChild(contentContainer);
-
-        panel.appendChild(scoresBox);
-    }
-
-    panel.scrollTop = 0;
+// Show no data message
+function showNoData() {
+    elements.dateDisplay.textContent = 'Date: --';
+    elements.promptContent.textContent = 'No data available for this selection';
+    elements.responseContent.textContent = 'Please select another option or load data from GitHub';
+    elements.scoreBody.innerHTML = '<p style="color: var(--rami-lightgrey); font-size: 0.85rem; text-align: center; padding: 2rem;">No scores available</p>';
 }
 
-// Switch between score tabs
-function switchScoreTab(tabButton, scoreItem, contentContainer) {
-    // Check if this tab is already active
-    const isActive = tabButton.classList.contains('active');
-
-    // Remove active class from all tabs
-    const allTabs = tabButton.parentElement.querySelectorAll('.score-tab');
-    allTabs.forEach(tab => tab.classList.remove('active'));
-
-    if (isActive) {
-        // If clicking the same tab, close it (show placeholder)
-        contentContainer.innerHTML = '<div class="score-placeholder"><p style="color: var(--rami-lightgreen); font-style: italic;">Click a tab to view score</p></div>';
-    } else {
-        // Add active class to clicked tab and show content
-        tabButton.classList.add('active');
-        showScoreContent(scoreItem, contentContainer);
-    }
+// Get prompt for an essay
+function getPromptForEssay(essayName) {
+    return prompts[essayName] || '';
 }
 
-// Show score content in the container
-function showScoreContent(scoreItem, contentContainer) {
-    contentContainer.innerHTML = '';
-
-    if (!scoreItem) {
-        // Show placeholder
-        contentContainer.innerHTML = `
-            <div class="score-placeholder">
-                <p style="color: var(--rami-lightgreen); font-style: italic;">No score data available</p>
-            </div>
-        `;
-        return;
-    }
-
-    // Create score content display
-    const scoreContent = document.createElement('div');
-    scoreContent.className = 'score-details';
-
-    const graderModel = getModelName(scoreItem.data.grader);
-    const fullGraderName = scoreItem.data.grader || graderModel;
-    const scoreText = scoreItem.data.result || scoreItem.data.score || 'No score available';
-    const cleanScoreText = removeMarkdown(scoreText);
-    const essayType = scoreItem.data.essay_type || 'generate';
-    const timestamp = scoreItem.data.timestamp || 'N/A';
-
-    // Add metadata
-    const metaDiv = document.createElement('div');
-    metaDiv.className = 'score-meta';
-    metaDiv.innerHTML = '<p><strong>Graded by:</strong> ' + fullGraderName + '</p>' +
-        '<p><strong>Essay Type:</strong> ' + essayType + '</p>' +
-        '<p><strong>Time:</strong> ' + timestamp + '</p>';
-    scoreContent.appendChild(metaDiv);
-
-    // Add grading prompt with toggle
-    const gradePromptText = getGradePrompt();
-    if (gradePromptText) {
-        const promptBox = document.createElement('div');
-        promptBox.className = 'content-box prompt-box';
-        promptBox.style.marginBottom = '1rem';
-
-        const promptHeader = document.createElement('h3');
-        promptHeader.textContent = 'Click to view grading prompt';
-        promptHeader.style.cursor = 'pointer';
-        promptHeader.style.userSelect = 'none';
-
-        const promptContent = document.createElement('div');
-        promptContent.className = 'prompt-content';
-        promptContent.style.display = 'none';
-        promptContent.innerHTML = '<div class="prompt-text">' + gradePromptText + '</div>';
-
-        // Toggle on header click
-        promptHeader.onclick = function() {
-            if (promptContent.style.display === 'none') {
-                promptContent.style.display = 'block';
-                promptHeader.textContent = 'Grading Prompt ▼';
-            } else {
-                promptContent.style.display = 'none';
-                promptHeader.textContent = 'Click to view grading prompt';
-            }
-        };
-
-        promptBox.appendChild(promptHeader);
-        promptBox.appendChild(promptContent);
-        scoreContent.appendChild(promptBox);
-    }
-
-    // Add score text
-    const scoreTextDiv = document.createElement('div');
-    scoreTextDiv.className = 'score-text';
-    scoreTextDiv.textContent = cleanScoreText;
-    scoreContent.appendChild(scoreTextDiv);
-
-    // Add copy button
-    const copyBtn = document.createElement('button');
-    copyBtn.className = 'copy-btn';
-    copyBtn.textContent = 'Copy Score';
-    copyBtn.onclick = function() { copyText(cleanScoreText); };
-    scoreContent.appendChild(copyBtn);
-
-    contentContainer.appendChild(scoreContent);
+function getGradePrompt() {
+    return gradePrompt;
 }
 
-// Get model for item
-function getModelForItem(item) {
-    if (item.command === 'score') {
-        return getModelName(item.data.writer);
-    }
-    return item.modelName;
-}
+// Remove markdown formatting from text
+function removeMarkdown(text) {
+    if (!text) return '';
 
-// Make empty buckets
-function makeEmptyBuckets() {
-    return {
-        generate: [],
-        tune: [],
-        generate_scores: [],
-        tune_scores: []
-    };
-}
-
-// Add item to correct bucket
-function addItemToBucket(buckets, item) {
-    if (item.command === 'generate') {
-        buckets.generate.push(item);
-    } else if (item.command === 'tune') {
-        buckets.tune.push(item);
-    } else if (item.command === 'score') {
-        const type = item.data.essay_type || 'generate';
-        if (type === 'generate') {
-            buckets.generate_scores.push(item);
-        } else {
-            buckets.tune_scores.push(item);
-        }
-    }
-}
-
-// Group essays by rubric/essay/model
-function groupEssays(filters) {
-    const groups = {};
-
-    // Look at each item
-    Object.values(getData()).forEach(item => {
-        const model = getModelForItem(item);
-
-        // Get the names we need
-        const rubricName = item.rubric;
-        const essayName = item.essayName;
-        const modelName = model;
-
-        // Create rubric if not exist
-        if (!groups[rubricName]) {
-            groups[rubricName] = {};
-        }
-
-        // Create essay if not exist
-        if (!groups[rubricName][essayName]) {
-            groups[rubricName][essayName] = {};
-        }
-
-        // Create model bucket if not exist
-        if (!groups[rubricName][essayName][modelName]) {
-            groups[rubricName][essayName][modelName] = makeEmptyBuckets();
-        }
-
-        // Get the bucket
-        const bucket = groups[rubricName][essayName][modelName];
-
-        // Put item in bucket
-        addItemToBucket(bucket, item);
-    });
-
-    return groups;
-}
-
-// Show summary at top
-function showSummary() {
-    const template = document.getElementById('summaryTemplate');
-    const summary = template.content.cloneNode(true);
-    summary.querySelector('.total-count').textContent = getTotalCount();
-    summary.querySelector('.rubrics-count').textContent = allRubrics.size;
-    summary.querySelector('.models-count').textContent = allModels.size;
-    elements.essayList.appendChild(summary);
-}
-
-// Show all groups
-function showGroups(groups) {
-    Object.keys(groups).sort().forEach(rubric => {
-        showRubricHeader(rubric);
-        showEssaysInRubric(groups[rubric]);
-    });
-}
-
-// Show rubric header
-function showRubricHeader(rubric) {
-    const header = document.createElement('div');
-    header.className = 'rubric-header';
-    const colors = getRubricColors(rubric);
-    header.style.background = colors.bgColor;
-    header.style.color = colors.color;
-    header.style.borderLeftColor = colors.color;
-    header.textContent = formatRubricName(rubric);
-    elements.essayList.appendChild(header);
-}
-
-// Show essays in rubric
-function showEssaysInRubric(essays) {
-    Object.keys(essays).sort().forEach(essayName => {
-        const item = document.createElement('div');
-        item.className = 'essay-item';
-
-        const header = document.createElement('div');
-        header.className = 'essay-header';
-        header.textContent = essayName;
-        item.appendChild(header);
-
-        const commands = document.createElement('div');
-        commands.className = 'essay-commands';
-
-        Object.keys(essays[essayName]).sort().forEach(model => {
-            showModelCommands(commands, model, essays[essayName][model]);
-        });
-
-        item.appendChild(commands);
-        elements.essayList.appendChild(item);
-    });
-}
-
-// Show commands for a model
-function showModelCommands(container, model, items) {
-    const header = document.createElement('div');
-    header.className = 'model-header';
-    header.textContent = ` ${model}`;
-    container.appendChild(header);
-
-    items.generate.forEach(item => {
-        container.appendChild(makeCommandButton('Generate', item.data));
-    });
-
-    items.generate_scores.forEach(item => {
-        const btn = makeCommandButton('Score', item.data);
-        btn.style.marginLeft = '1.5rem';
-        container.appendChild(btn);
-    });
-
-    items.tune.forEach(item => {
-        container.appendChild(makeCommandButton('Tune', item.data));
-    });
-
-    items.tune_scores.forEach(item => {
-        const btn = makeCommandButton('Score', item.data);
-        btn.style.marginLeft = '1.5rem';
-        container.appendChild(btn);
-    });
-}
-
-// Make a clickable command button
-function makeCommandButton(command, data) {
-    const btn = document.createElement('div');
-    btn.className = 'command-item';
-
-    let label = `    ${command}`;
-    if (command === 'Score') {
-        const type = data.essay_type || 'generate';
-        const grader = getModelName(data.grader);
-        label = `        ${type.charAt(0).toUpperCase() + type.slice(1)} Essay (by ${grader})`;
-    }
-
-    btn.textContent = label;
-    btn.onclick = (e) => showContent(e, command, data);
-    return btn;
-}
-
-// Show content when clicked
-function showContent(event, command, data) {
-    document.querySelectorAll('.command-item').forEach(item => item.classList.remove('active'));
-    event.target.classList.add('active');
-    renderContent(elements.rightPanel, command, data, gradePrompt);
-}
-
-// Show no results message
-function showNoResults() {
-    const listTemplate = document.getElementById('noResultsTemplate');
-    const panelTemplate = document.getElementById('noResultsPanelTemplate');
-    elements.essayList.appendChild(listTemplate.content.cloneNode(true));
-    elements.rightPanel.appendChild(panelTemplate.content.cloneNode(true));
-}
-
-// Create a prompt box from template
-function createPromptBox(title, text) {
-    const template = document.getElementById('promptBoxTemplate');
-    const box = template.content.cloneNode(true);
-    box.querySelector('.prompt-title').textContent = title;
-    box.querySelector('.prompt-text').textContent = text;
-    return box;
-}
-
-// Get colors for rubric
-function getRubricColors(rubric) {
-    const colors = {
-        critical_thinking: { color: '#ffffff', bgColor: 'rgba(3, 98, 76, 0.15)' },
-        oral_communication: { color: '#2CC295', bgColor: 'rgba(44, 194, 149, 0.15)' }
-    };
-    return colors[rubric] || { color: '#24ff02', bgColor: 'rgba(36, 255, 2, 0.15)' };
+    return text
+        // Remove headers (### Header -> Header)
+        .replace(/^#{1,6}\s+(.+)$/gm, '$1')
+        // Remove bold (**text** or __text__ -> text)
+        .replace(/(\*\*|__)(.*?)\1/g, '$2')
+        // Remove italic (*text* or _text_ -> text)
+        .replace(/(\*|_)(.*?)\1/g, '$2')
+        // Remove inline code (`code` -> code)
+        .replace(/`([^`]+)`/g, '$1')
+        // Remove links ([text](url) -> text)
+        .replace(/\[([^\]]+)\]\([^\)]+\)/g, '$1')
+        // Remove bullet points (- item -> item)
+        .replace(/^[\*\-\+]\s+/gm, '')
+        // Remove numbered lists (1. item -> item)
+        .replace(/^\d+\.\s+/gm, '')
+        // Remove blockquotes (> quote -> quote)
+        .replace(/^>\s+/gm, '')
+        // Remove horizontal rules (---, ***, ___ -> empty)
+        .replace(/^[\-\*\_]{3,}$/gm, '')
+        // Remove code blocks (```code``` -> code)
+        .replace(/```[\s\S]*?```/g, match => {
+            return match.replace(/```\w*\n?/g, '').trim();
+        })
+        // Clean up extra whitespace
+        .replace(/\n{3,}/g, '\n\n')
+        .trim();
 }
 
 // Show notification popup
 function showNotification(message) {
-    const template = document.getElementById('notificationTemplate');
-    const notif = template.content.cloneNode(true).querySelector('.notification');
+    // Create notification element
+    const notif = document.createElement('div');
+    notif.className = 'notification';
     notif.textContent = message;
+    notif.style.cssText = `
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        background: var(--rami-highlight);
+        color: var(--rami-dark);
+        padding: 1rem 1.5rem;
+        border-radius: 8px;
+        font-weight: 600;
+        z-index: 1000;
+        box-shadow: 0 4px 12px rgba(34, 204, 157, 0.5);
+        animation: slideIn 0.3s ease;
+    `;
+
     document.body.appendChild(notif);
+
     setTimeout(() => {
-        if (document.body.contains(notif)) document.body.removeChild(notif);
+        if (document.body.contains(notif)) {
+            document.body.removeChild(notif);
+        }
     }, 3000);
 }

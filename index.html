@@ -8,86 +8,87 @@
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <!-- Header -->
-    <header class="header">
-        <div class="header-container">
-            <h1>AI Essay Explorer</h1>
-            <p>Explore GenAI-generated essays and assessments</p>
-
-        </div>
-    </header>
-
     <!-- Main Container -->
     <div class="main-container">
         <!-- Left Panel -->
         <div class="left-panel">
-            <h2>Essays</h2>
-            
-            <button class="copy-btn" id="githubBtn" style="width: 100%; margin-top: 1rem; background: rgba(85, 255, 221, 0.2);">
-                Load from GitHub
-            </button>
+            <button class="load-btn" id="githubBtn">Load from GitHub</button>
 
-            <!-- Essay List -->
-            <div class="essay-list" id="essayList"></div>
+            <!-- E1: Critical Thinking -->
+            <div class="assignment-section">
+                <h2 class="assignment-title">A1: Critical Thinking</h2>
+
+                <div class="model-group">
+                    <h3 class="model-name">ChatGPT</h3>
+                    <div class="button-row">
+                        <button class="action-btn" data-model="chatgpt" data-type="generation">Generation</button>
+                        <button class="action-btn" data-model="chatgpt" data-type="tuning">Tuning</button>
+                        <button class="action-btn" data-model="chatgpt" data-type="reflection">Reflection</button>
+                    </div>
+                </div>
+
+                <div class="model-group">
+                    <h3 class="model-name">Gemini</h3>
+                    <div class="button-row">
+                        <button class="action-btn" data-model="gemini" data-type="generation">Generation</button>
+                        <button class="action-btn" data-model="gemini" data-type="tuning">Tuning</button>
+                        <button class="action-btn" data-model="gemini" data-type="reflection">Reflection</button>
+                    </div>
+                </div>
+
+                <div class="model-group">
+                    <h3 class="model-name">Claude</h3>
+                    <div class="button-row">
+                        <button class="action-btn" data-model="claude" data-type="generation">Generation</button>
+                        <button class="action-btn" data-model="claude" data-type="tuning">Tuning</button>
+                        <button class="action-btn" data-model="claude" data-type="reflection">Reflection</button>
+                    </div>
+                </div>
+
+                <div class="model-group">
+                    <h3 class="model-name">GPT-4</h3>
+                    <div class="button-row">
+                        <button class="action-btn" data-model="gpt4" data-type="generation">Generation</button>
+                        <button class="action-btn" data-model="gpt4" data-type="tuning">Tuning</button>
+                        <button class="action-btn" data-model="gpt4" data-type="reflection">Reflection</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Center Panel -->
+        <div class="center-panel">
+            <div class="date-display" id="dateDisplay">Date: --</div>
+
+            <div class="prompt-section">
+                <h3 class="section-label">Prompt</h3>
+                <div class="prompt-content" id="promptContent">
+                    Select an item from the left panel to view details
+                </div>
+            </div>
+
+            <div class="response-section">
+                <h3 class="section-label">Response</h3>
+                <div class="response-content" id="responseContent">
+                    Select an item to view the response
+                </div>
+            </div>
         </div>
 
         <!-- Right Panel -->
-        <div class="right-panel" id="rightPanel">
-            <div class="welcome-message">
-                <h2>Welcome!</h2>
-                <p>Load your JSON files from GitHub to get started.</p>
-                <div class="instructions">
-                    <h3>How to use:</h3>
-                    <ol>
-                        <li>Load files: Click "Load from GitHub" button</li>
-                        <li>View: Click any item in the left panel to see details</li>
-                        <li>Copy: Use the copy button to save content to clipboard</li>
-                    </ol>
+        <div class="right-panel">
+            <div class="score-table" id="scoreTable">
+                <div class="score-header">
+                    <span>Scores</span>
+                </div>
+                <div class="score-body" id="scoreBody">
+                    <!-- Scores will be populated here -->
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- Hidden Templates -->
-    <template id="summaryTemplate">
-        <div class="summary-box">
-            <strong>Total:</strong> <span class="total-count"></span> items |
-            <strong>Rubrics:</strong> <span class="rubrics-count"></span> |
-            <strong>Models:</strong> <span class="models-count"></span>
-        </div>
-    </template>
-
-    <template id="noResultsTemplate">
-        <div class="no-results">
-            <p>No essays found</p>
-        </div>
-    </template>
-
-    <template id="notificationTemplate">
-        <div class="notification"></div>
-    </template>
-
-    <template id="promptBoxTemplate">
-        <div class="content-box prompt-box">
-            <h3 class="prompt-title"></h3>
-            <div class="prompt-text"></div>
-        </div>
-    </template>
-
-    <template id="tipBoxTemplate">
-        <div class="content-box">
-            <h3>Tip</h3>
-            <p>Click on any item in the left panel to view its full content below.</p>
-        </div>
-        <hr style="border: 1px solid rgba(85, 255, 221, 0.2); margin: 2rem 0;">
-    </template>
-
-    <!-- Footer -->
-    <footer class="footer">
-        <p>Developed by Rami Huu Nguyen - Started Since December 2025</p>
-    </footer>
-
-     <!-- Scripts - Load in order -->
+    <!-- Scripts - Load in order -->
     <script src="src/js/data.js"></script>
     <script src="src/js/parser.js"></script>
     <script src="src/js/prompt.js"></script>
@@ -96,7 +97,5 @@
     <script src="src/js/content.js"></script>
     <script src="src/js/renderer.js"></script>
     <script src="src/js/application.js"></script>
-
-
 </body>
 </html>

@@ -24,6 +24,10 @@ def main():
     score.add_argument('filename', help='Individual file to read')
     score.add_argument('assignment', type=int)
 
+    reflect = subparsers.add_parser('reflection')
+    reflect.add_argument('model', choices=['chatgpt', 'gemini', 'claude', 'grok'])
+    reflect.add_argument('assignment', type=int)
+    reflect.add_argument('rubric', type=str)
 
     args = parser.parse_args()
 
@@ -34,9 +38,12 @@ def main():
 
     elif args.command == 'tune':
         runner.tune(args.model, args.assignment, args.rubric)
-        
+
     elif args.command == 'score':
         runner.score(args.grader, args.rubric, args.filename, args.assignment)
+
+    elif args.command == 'reflection':
+        runner.reflect(args.model, args.assignment, args.rubric)
 
 
 if __name__ == "__main__":

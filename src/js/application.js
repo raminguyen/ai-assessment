@@ -2,8 +2,11 @@
 async function handleLoadFromGitHub() {
     showNotification('Loading from GitHub...');
     const count = await loadFromGitHub();
-    displayEssayList();
-    showNotification('Loaded ' + count + ' files!');
+
+    // After loading, re-setup buttons to handle the loaded data
+    setupButtons();
+
+    showNotification('Loaded ' + count + ' files from GitHub!');
 }
 
 // Copy text to clipboard

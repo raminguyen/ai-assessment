@@ -60,13 +60,13 @@ class Model:
         print("Grading essay")
         start = time.time()
         result = self.api_call(essay.grade_prompt + rubric.text + essay.essay_text)
-        
+
         essay.grade_result = result
         essay.status = 3
         elapsed = time.time() - start
         print(f"Done in {elapsed/60:.2f} mins")
         time.sleep(5)
-        
+
         # Create and return data
         data = {
             "command": "score",
@@ -74,10 +74,44 @@ class Model:
             "writer": writer,
             "essay_type": essay_type,
             "essay_name": essay.name,
-            "folder": essay.rubric_folder,  # ← ADD THIS
+            "folder": essay.rubric_folder,  
             "result": result,
             "time_minutes": round(elapsed / 60, 2),
             "timestamp": datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         }
         return data
-    
+
+    def reflect(self, essay, original_essay, tuned_essay, rubric):
+
+        print("Generating reflection")
+        start = time.time()
+
+        # Build reflection prompt with placeholders replaced
+        reflection_prompt = essay.reflection_prompt
+        reflection_prompt = reflection_prompt.replace("{ASSIGNMENT_PROMPT}", essay.write_prompt)
+        reflection_prompt = reflection_prompt.replace("{ORIGINAL_ESSAY}", original_essay)
+        reflection_prompt = reflection_prompt.replace("{TUNED_ESSAY}", tuned_essay)
+
+        # Add rubric to the prompt
+        full_prompt = reflection_prompt + "\n\nRubric:\n" + rubric.text
+
+        result = self.api_call(full_prompt)
+
+        essay.reflection_result = result
+        essay.status = 4
+        elapsed = time.time() - start
+        print(f"Done in {elapsed/60:.2f} mins")
+        time.sleep(5)
+
+        # Create and return data
+        data = {
+            "command": "reflection",
+            "writer": self.name,
+            "essay_name": essay.name,
+            "folder": essay.rubric_folder,
+            "result": result,
+            "time_minutes": round(elapsed / 60, 2),
+            "timestamp": datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        }
+        return data
+
