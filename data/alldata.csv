@@ -27,33 +27,54 @@ In the scene, Professor Catlove opens a new can of cat food and his cats run in 
 critical_thinking,Assignment_1,tune,gpt-5.2-2025-12-11,,,,critical_thinking,0.85,2025-12-29 21:59:39,"### Learning in Professor Catlove’s Kitchen: Classical Conditioning, Operant Conditioning, and Social Learning (≤ 1000 words)
 
 In the scene, Professor Catlove opens a new can of cat food and his cats run in purring, meowing, and rubbing against his legs. Even though it seems simple, several learning processes could be operating at once. The important thing is to separate (1) *what triggers the behavior* (stimulus–response associations, typical of classical conditioning), (2) *what consequences m...",a1_tune_chatgpt.json
-critical_thinking,Assignment_2,generate,gpt-5.2-2025-12-11,,,,critical_thinking,0.54,2025-12-29 21:36:25,"I can do this, but I don’t yet have the “attached economic data.” Please upload the dataset (table, spreadsheet, or image) or paste the numbers and tell me: (1) which countries/region, (2) what years, (3) how “social service spending” is measured (e.g., % of GDP, per capita, real terms), and (4) how “economic growth” is measured (e.g., real GDP growth rate).
+critical_thinking,Assignment_2,generate,gpt-5.2-2025-12-11,,,,critical_thinking,0.91,2025-12-29 22:16:41,"## Do these data support the hypothesis that “social service spending is inversely related to economic growth”?
 
-In the meantime, here is a **five-page-style essay (≤1000 words)** written at a **first-semester undergrad level** that explains *how to j...",a2_gen_chatgpt.json
-critical_thinking,Assignment_2,reflection,,,gpt-5.2-2025-12-11,,critical_thinking,0.58,2025-12-29 21:37:53,"I changed the essay in ways that map directly onto each category in your critical-thinking rubric. The original version mostly *explained the topic* and offered general theory; the tuned version is structured to *perform the rubric moves*: define the issue precisely, evaluate evidence (not just cite it), surface assumptions/context, take a defensible position with limits, and draw implications tied to the evidence.
+### Introduction
 
-## 1) Explanation of issues (rubric: “stated clearly and described comprehensive...",a2_reflection_chatgpt.json
-critical_thinking,Assignment_2,score,,gemini-3-pro-preview,gpt-5.2-2025-12-11,tune,critical_thinking,0.43,2025-12-29 21:39:11,"I can do this, but I don’t yet have the “attached economic data.” Please upload/paste the dataset (table, spreadsheet, screenshot, or describe variables, years, countries/states, units). Without the actual data, I’d have to invent results, which wouldn’t “set them straight” or meet your rubric.
+The hypothesis says that when a country spends a larger share of its economy on social welfare, its economic growth rate should be lower (an inverse relationship). That idea is common in political debate: welfare spending is sometimes portrayed as a drag on growth because it requires higher taxes or might reduce incentives to work or invest. But modern economic resea...",a2_gen_chatgpt.json
+critical_thinking,Assignment_2,reflection,,,gpt-5.2-2025-12-11,,critical_thinking,0.28,2025-12-29 22:17:59,"I changed the essay in ways that line up directly with what the rubric rewards (clearer issue framing, more explicit use of evidence, more context/assumptions, a more qualified thesis, and clearer implications). Concretely:
 
-While you gather it, here’s a ready-to-fill **≤1000-word, ~5-page double-spaced essay template** that (a) matches your critical-thinking rubric and (b) uses **peer‑reviewed sources** to frame what the da...",a2_tune_chatgpt_score_gemini.json
-critical_thinking,Assignment_2,score,,grok-4-1-fast-reasoning,gpt-5.2-2025-12-11,generate,critical_thinking,0.07,2025-12-29 21:38:02,"I can do this, but I don’t yet have the “attached economic data.” Please upload the dataset (table, spreadsheet, or image) or paste the numbers and tell me: (1) which countries/region, (2) what years, (3) how “social service spending” is measured (e.g., % of GDP, per capita, real terms), and (4) how “economic growth” is measured (e.g., real GDP growth rate).
+1. **Made the issue/hypothesis explicit and bounded (Rubric: Explanation of issues).**  
+   - In the tuned version I restated the hypothesis in a precise “if X rises, Y falls” form and identified exactly what the variables are (**social spending as % of GDP** and **annual GD...",a2_reflection_chatgpt.json
+critical_thinking,Assignment_2,score,,gemini-3-pro-preview,gpt-5.2-2025-12-11,tune,critical_thinking,0.21,2025-12-29 22:19:01,"## Do the data support the hypothesis that social service spending is inversely related to economic growth?
 
-In the meantime, here is a **five-page-style essay (≤1000 words)** written at a **first-semester undergrad level** that explains *how to j...",a2_gen_chatgpt_score_grok.json
-critical_thinking,Assignment_2,score,,gemini-3-pro-preview,gpt-5.2-2025-12-11,generate,critical_thinking,0.25,2025-12-29 21:38:40,"I can do this, but I don’t yet have the “attached economic data.” Please upload the dataset (table, spreadsheet, or image) or paste the numbers and tell me: (1) which countries/region, (2) what years, (3) how “social service spending” is measured (e.g., % of GDP, per capita, real terms), and (4) how “economic growth” is measured (e.g., real GDP growth rate).
+### Introduction and hypothesis
+The hypothesis says: **as social service spending (as a % of GDP) rises, economic growth (annual GDP growth) falls**—an inverse relationship. The attached data cover ten OECD countries and five years (2000, 2005, 2010, 2016, 2019), with spending levels from about **19.5% to 31.5% of GDP** and GDP growth from about **0.09% to 5.75%**.
 
-In the meantime, here is a **five-page-style essay (≤1000 words)** written at a **first-semester undergrad level** that explains *how to j...",a2_gen_chatgpt_score_gemini.json
-critical_thinking,Assignment_2,score,,grok-4-1-fast-reasoning,gpt-5.2-2025-12-11,tune,critical_thinking,0.18,2025-12-29 21:38:19,"I can do this, but I don’t yet have the “attached economic data.” Please upload/paste the dataset (table, spreadsheet, screenshot, or describe variables, years, countries/states, units). Without the actual data, I’d have to invent results, which wouldn’t “set them straight” or meet your rubric.
+A key critical-thinkin...",a2_tune_chatgpt_score_gemini.json
+critical_thinking,Assignment_2,score,,grok-4-1-fast-reasoning,gpt-5.2-2025-12-11,generate,critical_thinking,0.08,2025-12-29 22:18:09,"## Do these data support the hypothesis that “social service spending is inversely related to economic growth”?
 
-While you gather it, here’s a ready-to-fill **≤1000-word, ~5-page double-spaced essay template** that (a) matches your critical-thinking rubric and (b) uses **peer‑reviewed sources** to frame what the da...",a2_tune_chatgpt_score_grok.json
-critical_thinking,Assignment_2,score,,claude-sonnet-4-5-20250929,gpt-5.2-2025-12-11,tune,critical_thinking,0.11,2025-12-29 21:39:41,"I can do this, but I don’t yet have the “attached economic data.” Please upload/paste the dataset (table, spreadsheet, screenshot, or describe variables, years, countries/states, units). Without the actual data, I’d have to invent results, which wouldn’t “set them straight” or meet your rubric.
+### Introduction
 
-While you gather it, here’s a ready-to-fill **≤1000-word, ~5-page double-spaced essay template** that (a) matches your critical-thinking rubric and (b) uses **peer‑reviewed sources** to frame what the da...",a2_tune_chatgpt_score_claude.json
-critical_thinking,Assignment_2,score,,claude-sonnet-4-5-20250929,gpt-5.2-2025-12-11,generate,critical_thinking,0.19,2025-12-29 21:39:28,"I can do this, but I don’t yet have the “attached economic data.” Please upload the dataset (table, spreadsheet, or image) or paste the numbers and tell me: (1) which countries/region, (2) what years, (3) how “social service spending” is measured (e.g., % of GDP, per capita, real terms), and (4) how “economic growth” is measured (e.g., real GDP growth rate).
+The hypothesis says that when a country spends a larger share of its economy on social welfare, its economic growth rate should be lower (an inverse relationship). That idea is common in political debate: welfare spending is sometimes portrayed as a drag on growth because it requires higher taxes or might reduce incentives to work or invest. But modern economic resea...",a2_gen_chatgpt_score_grok.json
+critical_thinking,Assignment_2,score,,gemini-3-pro-preview,gpt-5.2-2025-12-11,generate,critical_thinking,0.32,2025-12-29 22:18:43,"## Do these data support the hypothesis that “social service spending is inversely related to economic growth”?
 
-In the meantime, here is a **five-page-style essay (≤1000 words)** written at a **first-semester undergrad level** that explains *how to j...",a2_gen_chatgpt_score_claude.json
-critical_thinking,Assignment_2,tune,gpt-5.2-2025-12-11,,,,critical_thinking,0.68,2025-12-29 21:37:12,"I can do this, but I don’t yet have the “attached economic data.” Please upload/paste the dataset (table, spreadsheet, screenshot, or describe variables, years, countries/states, units). Without the actual data, I’d have to invent results, which wouldn’t “set them straight” or meet your rubric.
+### Introduction
 
-While you gather it, here’s a ready-to-fill **≤1000-word, ~5-page double-spaced essay template** that (a) matches your critical-thinking rubric and (b) uses **peer‑reviewed sources** to frame what the da...",a2_tune_chatgpt.json
+The hypothesis says that when a country spends a larger share of its economy on social welfare, its economic growth rate should be lower (an inverse relationship). That idea is common in political debate: welfare spending is sometimes portrayed as a drag on growth because it requires higher taxes or might reduce incentives to work or invest. But modern economic resea...",a2_gen_chatgpt_score_gemini.json
+critical_thinking,Assignment_2,score,,grok-4-1-fast-reasoning,gpt-5.2-2025-12-11,tune,critical_thinking,0.06,2025-12-29 22:18:18,"## Do the data support the hypothesis that social service spending is inversely related to economic growth?
+
+### Introduction and hypothesis
+The hypothesis says: **as social service spending (as a % of GDP) rises, economic growth (annual GDP growth) falls**—an inverse relationship. The attached data cover ten OECD countries and five years (2000, 2005, 2010, 2016, 2019), with spending levels from about **19.5% to 31.5% of GDP** and GDP growth from about **0.09% to 5.75%**.
+
+A key critical-thinkin...",a2_tune_chatgpt_score_grok.json
+critical_thinking,Assignment_2,score,,claude-sonnet-4-5-20250929,gpt-5.2-2025-12-11,tune,critical_thinking,0.25,2025-12-29 22:19:43,"## Do the data support the hypothesis that social service spending is inversely related to economic growth?
+
+### Introduction and hypothesis
+The hypothesis says: **as social service spending (as a % of GDP) rises, economic growth (annual GDP growth) falls**—an inverse relationship. The attached data cover ten OECD countries and five years (2000, 2005, 2010, 2016, 2019), with spending levels from about **19.5% to 31.5% of GDP** and GDP growth from about **0.09% to 5.75%**.
+
+A key critical-thinkin...",a2_tune_chatgpt_score_claude.json
+critical_thinking,Assignment_2,score,,claude-sonnet-4-5-20250929,gpt-5.2-2025-12-11,generate,critical_thinking,0.25,2025-12-29 22:19:22,"## Do these data support the hypothesis that “social service spending is inversely related to economic growth”?
+
+### Introduction
+
+The hypothesis says that when a country spends a larger share of its economy on social welfare, its economic growth rate should be lower (an inverse relationship). That idea is common in political debate: welfare spending is sometimes portrayed as a drag on growth because it requires higher taxes or might reduce incentives to work or invest. But modern economic resea...",a2_gen_chatgpt_score_claude.json
+critical_thinking,Assignment_2,tune,gpt-5.2-2025-12-11,,,,critical_thinking,0.82,2025-12-29 22:17:36,"## Do the data support the hypothesis that social service spending is inversely related to economic growth?
+
+### Introduction and hypothesis
+The hypothesis says: **as social service spending (as a % of GDP) rises, economic growth (annual GDP growth) falls**—an inverse relationship. The attached data cover ten OECD countries and five years (2000, 2005, 2010, 2016, 2019), with spending levels from about **19.5% to 31.5% of GDP** and GDP growth from about **0.09% to 5.75%**.
+
+A key critical-thinkin...",a2_tune_chatgpt.json
 critical_thinking,Assignment_3,generate,gpt-5.2-2025-12-11,,,,critical_thinking,0.51,2025-12-29 21:40:18,"## Boston Metropolitan Area Real Estate Investment Market Analysis (2024)  
 *(Undergrad, first-semester level; ~900–1,000 words)*
 

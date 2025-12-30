@@ -114,13 +114,22 @@ function createScoreHeader(graderName, scoreText) {
 function extractTotalScore(scoreText) {
     const patterns = [
         /Total:\s*\*\*(\d+)\*\*\s*\/\s*(\d+)/i,
+        /Total:?\s*\[(\d+)\]\s*\/\s*(\d+)/i,
+        /Total:?\s*\[(\d+)\]/i,
         /Total:?\s*(\d+)\s*\/\s*(\d+)/i,
         /Total.*?(\d+)\s*\/\s*(\d+)/i
     ];
 
     for (const pattern of patterns) {
         const match = scoreText.match(pattern);
-        if (match) return 'Total ' + match[1] + '/' + match[2];
+        if (match) {
+            // Handle both [20]/20 and [20] formats
+            if (match[2]) {
+                return 'Total ' + match[1] + '/' + match[2];
+            } else {
+                return 'Total ' + match[1] + '/20';
+            }
+        }
     }
 
     return 'Total --';
