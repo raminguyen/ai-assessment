@@ -71,6 +71,10 @@ function getGradePrompt() {
     return gradePrompt;
 }
 
+function getReflectionPrompt() {
+    return reflectionPrompt;
+}
+
 function showNoData() {
     elements.dateDisplay.textContent = 'Date: --';
     elements.promptContent.textContent = 'No data available for this selection';

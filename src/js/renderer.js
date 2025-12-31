@@ -1,6 +1,5 @@
 let currentSelection = null;
 
-// Initialize the renderer by loading prompts, rubrics, and setting up UI elements
 async function initRenderer() {
     findElements();
     await loadPrompts();
@@ -9,157 +8,299 @@ async function initRenderer() {
     setupFilterButtons();
 }
 
-// Setup action button click handlers
+// Make all buttons work
 function setupButtons() {
+    
     const allButtons = document.querySelectorAll('.action-btn');
-    allButtons.forEach(button => {
+
+    // Go through each button
+    for (let i = 0; i < allButtons.length; i++) {
+        const button = allButtons[i];
+
+        // Make a fresh copy of button
         const newButton = button.cloneNode(true);
         button.parentNode.replaceChild(newButton, button);
-        newButton.addEventListener('click', () => handleButtonClick(newButton));
-    });
+
+        newButton.addEventListener('click', function() {
+            handleButtonClick(newButton);
+        });
+    }
 }
 
-// Handle button click to load and display selected essay data
 function handleButtonClick(button) {
+    // Get info from button
     const model = button.getAttribute('data-model');
     const type = button.getAttribute('data-type');
+    
+    console.log('Button Clicked.');
+    console.log('Model:', model);
+    console.log('Type:', type);
+    console.log('Current Assignment:', getCurrentAssignment());
 
-    document.querySelectorAll('.action-btn').forEach(btn => btn.classList.remove('active'));
+    removeActiveFromAllButtons();
     button.classList.add('active');
 
     const item = findDataItem(model, type);
 
+    // Did we find it?
     if (item) {
         currentSelection = item;
-        console.log('Loaded:', item.fileName || 'unknown');
+        console.log('✓ File Loaded:', item.fileName || 'unknown');
+        console.log('Essay Name:', item.essayName);
+        console.log('Command:', item.command);
+
+        // Show it on screen
         displayContent(item);
     } else {
-        console.log('No data:', model, type);
+       
+        console.log('✗ No data found for:', model, type);
         showNoData();
     }
 }
 
-// Display essay content including prompt, response text, and rubric section
+function removeActiveFromAllButtons() {
+    const allButtons = document.querySelectorAll('.action-btn');
+
+    for (let i = 0; i < allButtons.length; i++) {
+        allButtons[i].classList.remove('active');
+    }
+}
+
+// Show everything on screen
 function displayContent(item) {
     const elements = getElements();
 
-    elements.dateDisplay.textContent = 'Date: ' + (item.data.timestamp || new Date().toLocaleDateString());
-    elements.promptContent.textContent = getPromptForEssay(item.essayName) || 'No prompt available';
-    elements.rubricSection.style.display = item.command === 'tune' ? 'block' : 'none';
-
-    const responseText = item.data.result || item.data.essay || 'No content available';
-    elements.responseContent.textContent = removeMarkdown(responseText);
-
+    displayDate(elements, item);
+    displayPrompt(elements, item);
+    displayRubricSection(elements, item);
+    displayResponseText(elements, item);
     displayScores(item);
 }
 
-// Display all scores for the selected essay
+// Show the date
+function displayDate(elements, item) {
+    let dateText = 'Date: ';
+
+ 
+    if (item.data.timestamp) {
+        dateText = dateText + item.data.timestamp;
+    } else {
+
+        const today = new Date();
+        dateText = dateText + today.toLocaleDateString();
+    }
+
+    elements.dateDisplay.textContent = dateText;
+}
+
+function displayPrompt(elements, item) {
+    let prompt = '';
+
+    if (item.command === 'reflection') {
+        prompt = getReflectionPrompt();
+    } else {
+        prompt = getPromptForEssay(item.essayName);
+    }
+
+    if (prompt) {
+        elements.promptContent.textContent = prompt;
+    } else {
+        elements.promptContent.textContent = 'No prompt available';
+    }
+}
+
+// Show or hide rubric
+function displayRubricSection(elements, item) {
+
+    if (item.command === 'tune') {
+        elements.rubricSection.style.display = 'block';
+    } else {
+        // No, hide rubric
+        elements.rubricSection.style.display = 'none';
+    }
+}
+
+function displayResponseText(elements, item) {
+    let responseText = '';
+
+    if (item.data.result) {
+        responseText = item.data.result;
+    } else if (item.data.essay) {
+        responseText = item.data.essay;
+    } else {
+        responseText = 'No content available';
+    }
+
+    // Clean the text
+    const cleanText = removeMarkdown(responseText);
+
+    elements.responseContent.textContent = cleanText;
+}
+
+// Show all scores
 function displayScores(item) {
     const elements = getElements();
+
     const scores = getScoresForEssay(item);
 
     console.log('Scores found:', scores.length);
-    scores.forEach(scoreItem => console.log('  -', scoreItem.fileName || 'unknown'));
+
+    for (let i = 0; i < scores.length; i++) {
+        const scoreItem = scores[i];
+        const fileName = scoreItem.fileName || 'unknown';
+        console.log('  -', fileName);
+    }
 
     if (scores.length === 0) {
-        elements.scoreBody.innerHTML = '<p style="color: var(--rami-lightgrey); font-size: 0.85rem; text-align: center; padding: 2rem;">No scores available</p>';
+        showNoScoresMessage(elements);
         return;
     }
 
     elements.scoreBody.innerHTML = '';
-    scores.forEach(scoreItem => {
+
+    // Show each score
+    for (let i = 0; i < scores.length; i++) {
+        const scoreItem = scores[i];
         const graderName = getModelName(scoreItem.data.grader);
         displayScoreForGrader(graderName, scoreItem);
-    });
+    }
 }
 
-// Display individual grader's score with rubric dimensions
+// Show "no scores" message
+function showNoScoresMessage(elements) {
+    const message = '<p style="color: var(--rami-lightgrey); font-size: 0.85rem; text-align: center; padding: 2rem;">No scores available</p>';
+    elements.scoreBody.innerHTML = message;
+}
+
+// Show one grader's score
 function displayScoreForGrader(graderName, scoreItem) {
     const elements = getElements();
-    const scoreText = scoreItem.data.result || scoreItem.data.score || '';
+
+    let scoreText = '';
+    if (scoreItem.data.result) {
+        scoreText = scoreItem.data.result;
+    } else if (scoreItem.data.score) {
+        scoreText = scoreItem.data.score;
+    }
 
     const modelRow = createScoreHeader(graderName, scoreText);
     elements.scoreBody.appendChild(modelRow);
 
     const dimensions = parseRubricScores(scoreText);
-    dimensions.forEach(dim => {
-        elements.scoreBody.appendChild(createDimensionRow(dim));
-    });
 
+    // Show each dimension
+    for (let i = 0; i < dimensions.length; i++) {
+        const dim = dimensions[i];
+        const dimRow = createDimensionRow(dim);
+        elements.scoreBody.appendChild(dimRow);
+    }
+
+    // Add space
     const spacer = document.createElement('div');
     spacer.style.height = '1.5rem';
     elements.scoreBody.appendChild(spacer);
 }
 
-// Create score header row with grader name and total score
+// Make header with name and total
 function createScoreHeader(graderName, scoreText) {
+    
     const modelRow = document.createElement('div');
     modelRow.className = 'score-model-row';
 
+    
     const modelNameSpan = document.createElement('span');
     modelNameSpan.className = 'score-model-name';
     modelNameSpan.textContent = graderName;
 
+    
     const totalSpan = document.createElement('span');
     totalSpan.className = 'score-total';
     totalSpan.textContent = extractTotalScore(scoreText);
 
+    
     modelRow.appendChild(modelNameSpan);
     modelRow.appendChild(totalSpan);
 
     return modelRow;
 }
 
-// Extract total score from score text using multiple regex patterns
+// Find total score in text
 function extractTotalScore(scoreText) {
     const patterns = [
-        /Total:\s*\*\*(\d+)\*\*\s*\/\s*(\d+)/i,
-        /Total:?\s*\[(\d+)\]\s*\/\s*(\d+)/i,
-        /Total:?\s*\[(\d+)\]/i,
-        /Total:?\s*(\d+)\s*\/\s*(\d+)/i,
-        /Total.*?(\d+)\s*\/\s*(\d+)/i
+        /Total:\s*\*\*(\d+)\*\*\s*\/\s*(\d+)/i,  // Total: **18**/20
+        /Total:?\s*\[(\d+)\]\s*\/\s*(\d+)/i,     // Total: [18]/20
+        /Total:?\s*\[(\d+)\]/i,                   // Total: [18]
+        /Total:?\s*(\d+)\s*\/\s*(\d+)/i,         // Total: 18/20
+        /Total.*?(\d+)\s*\/\s*(\d+)/i            // Total anything 18/20
     ];
 
-    for (const pattern of patterns) {
+    
+    for (let i = 0; i < patterns.length; i++) {
+        const pattern = patterns[i];
         const match = scoreText.match(pattern);
+
+        // Found it?
         if (match) {
-            // Handle both [20]/20 and [20] formats
+            // Has two numbers?
             if (match[2]) {
                 return 'Total ' + match[1] + '/' + match[2];
             } else {
+                // One number, add /20
                 return 'Total ' + match[1] + '/20';
             }
         }
     }
 
+    // Not found
     return 'Total --';
 }
 
-// Create dimension score row element
+// Make row for one dimension
 function createDimensionRow(dim) {
+    
     const rubricItem = document.createElement('div');
     rubricItem.className = 'score-rubric-item';
 
+    
     const dimensionSpan = document.createElement('span');
     dimensionSpan.textContent = dim.name;
 
+    
+    const scoreClass = getScoreClass(dim.level);
     const valueSpan = document.createElement('span');
-    valueSpan.className = 'score-value ' + getScoreClass(dim.level);
+    valueSpan.className = 'score-value ' + scoreClass;
     valueSpan.textContent = dim.level;
 
+    
     rubricItem.appendChild(dimensionSpan);
     rubricItem.appendChild(valueSpan);
 
     return rubricItem;
 }
 
-// Get all scores matching the current essay's criteria
+// Find scores for this essay
 function getScoresForEssay(item) {
-    return Object.values(getData()).filter(scoreItem => {
-        return scoreItem.command === 'score' &&
-               scoreItem.essayName === item.essayName &&
-               scoreItem.data.essay_type === item.command &&
-               getModelName(scoreItem.data.writer) === item.modelName &&
-               scoreItem.rubric === item.rubric;
-    });
+
+    const allData = getData();
+    const allItems = Object.values(allData);
+    const matchingScores = [];
+
+    // Check each one
+    for (let i = 0; i < allItems.length; i++) {
+        const scoreItem = allItems[i];
+
+        const isScoreCommand = scoreItem.command === 'score';
+        const sameEssayName = scoreItem.essayName === item.essayName;
+        const sameEssayType = scoreItem.data.essay_type === item.command;
+        const writerName = getModelName(scoreItem.data.writer);
+        const sameModel = writerName === item.modelName;
+        const sameRubric = scoreItem.rubric === item.rubric;
+
+        // Everything matches
+        if (isScoreCommand && sameEssayName && sameEssayType && sameModel && sameRubric) {
+            matchingScores.push(scoreItem);
+        }
+    }
+
+    return matchingScores;
 }

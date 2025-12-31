@@ -33,7 +33,7 @@ function formatRubricName(rubricName) {
         .map(word => word.charAt(0).toUpperCase() + word.slice(1))
         .join(' ');
 }
-
+// Parse rubric scores from text and extract dimension levels
 function parseRubricScores(text) {
     const dimensions = [
         { name: 'Explanation of issues', level: '--' },
@@ -71,7 +71,7 @@ function parseRubricScores(text) {
             return;
         }
 
-        // Try format: "Dimension... Capstone 4"
+        // Try format: "Dimension: Capstone 4" or "Milestone 3" etc
         regex = new RegExp(dim.name + '.*?(Capstone 4|Milestone 3|Milestone 2|Benchmark 1)', 'i');
         match = text.match(regex);
 
@@ -95,21 +95,34 @@ function getScoreClass(level) {
 }
 
 function removeMarkdown(text) {
+    
     if (!text) return '';
 
     return text
-        .replace(/^#{1,6}\s+(.+)$/gm, '$1')
-        .replace(/(\*\*|__)(.*?)\1/g, '$2')
-        .replace(/(\*|_)(.*?)\1/g, '$2')
-        .replace(/`([^`]+)`/g, '$1')
-        .replace(/\[([^\]]+)\]\([^\)]+\)/g, '$1')
-        .replace(/^[\*\-\+]\s+/gm, '')
-        .replace(/^\d+\.\s+/gm, '')
-        .replace(/^>\s+/gm, '')
-        .replace(/^[\-\*\_]{3,}$/gm, '')
-        .replace(/```[\s\S]*?```/g, match => {
+
+        .replace(/^#{1,6}\s+(.+)$/gm, '$1')         // Remove headers (#, ##, ###)
+
+        .replace(/(\*\*|__)(.*?)\1/g, '$2')         // Remove bold (**text** or __text__)
+
+        .replace(/(\*|_)(.*?)\1/g, '$2')            // Remove italic (*text* or _text_)
+
+        .replace(/`([^`]+)`/g, '$1')                // Remove inline code (`text`)
+
+        .replace(/\[([^\]]+)\]\([^\)]+\)/g, '$1')   // Remove links [text](url)
+
+        .replace(/^[\*\-\+]\s+/gm, '')              // Remove bullet points (*, -, +)
+
+        .replace(/^\d+\.\s+/gm, '')                 // Remove numbered lists (1., 2., etc)
+
+        .replace(/^>\s+/gm, '')                     // Remove blockquotes (>)
+
+        .replace(/^[\-\*\_]{3,}$/gm, '')            // Remove horizontal rules (---, ***, ___)
+
+        .replace(/```[\s\S]*?```/g, match => {      // Remove code blocks (```code```)
+
             return match.replace(/```\w*\n?/g, '').trim();
+            
         })
-        .replace(/\n{3,}/g, '\n\n')
+        .replace(/\n{3,}/g, '\n\n')                 // Replace 3+ newlines with 2
         .trim();
 }
