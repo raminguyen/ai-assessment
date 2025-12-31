@@ -19,10 +19,16 @@ async function loadFromGitHub() {
             const cacheBuster = '?t=' + Date.now();
             const fileResponse = await fetch(rawUrl + file.name + cacheBuster);
             const fileText = await fileResponse.text();
-            const data = JSON.parse(fileText);
 
-            processData(data, folder, file.name);
-            totalLoaded++;
+            try {
+                const data = JSON.parse(fileText);
+                processData(data, folder, file.name);
+                totalLoaded++;
+            } catch (error) {
+                console.error('JSON parse error in file:', file.name);
+                console.error('Error:', error.message);
+                throw error;
+            }
         }
     }
 
