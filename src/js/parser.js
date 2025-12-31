@@ -4,6 +4,9 @@ function parseEssayName(filename) {
     if (firstPart.startsWith('a')) {
         return firstPart;
     }
+    if (firstPart.startsWith('h')) {
+        return firstPart;
+    }
     return 'unknown';
 }
 
