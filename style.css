@@ -27,7 +27,7 @@ html, body {
 /* Main Container - Three Column Layout */
 .main-container {
     display: grid;
-    grid-template-columns: minmax(220px, 280px) 1fr minmax(280px, 350px);
+    grid-template-columns: minmax(450px, 550px) 1fr minmax(280px, 350px);
     height: 100vh;
     gap: 0;
 }
@@ -74,6 +74,7 @@ html, body {
 
 .assignment-filter {
     display: flex;
+    flex-direction: row;
     gap: 0.5rem;
     margin-bottom: 1.5rem;
 }
@@ -83,11 +84,11 @@ html, body {
     background-color: transparent;
     border: 2px solid var(--rami-accent);
     color: var(--rami-lightgreen);
-    padding: 0.6rem 1rem;
+    padding: 0.6rem 0.5rem;
     border-radius: 6px;
     font-family: 'Poppins', sans-serif;
     font-weight: 600;
-    font-size: 0.9rem;
+    font-size: 0.75rem;
     cursor: pointer;
     transition: all 0.3s ease;
 }
@@ -362,13 +363,13 @@ html, body {
 /* Responsive */
 @media (max-width: 1400px) {
     .main-container {
-        grid-template-columns: minmax(200px, 250px) 1fr minmax(260px, 300px);
+        grid-template-columns: minmax(400px, 450px) 1fr minmax(260px, 300px);
     }
 }
 
 @media (max-width: 1024px) {
     .main-container {
-        grid-template-columns: 200px 1fr 250px;
+        grid-template-columns: 260px 1fr 250px;
     }
 
     .action-btn {
