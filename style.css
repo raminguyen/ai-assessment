@@ -208,6 +208,11 @@ html, body {
     word-wrap: break-word;
 }
 
+.expand-text {
+    color: var(--rami-highlight);
+    cursor: pointer;
+}
+
 .rubric-section {
     margin-bottom: 2rem;
     background: linear-gradient(90deg, rgba(34, 204, 157, 0.15) 0%, rgba(34, 204, 157, 0.05) 100%);
