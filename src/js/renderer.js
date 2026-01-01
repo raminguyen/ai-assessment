@@ -199,6 +199,7 @@ function displayRubricSection(elements, item) {
 
     if (item.command === 'tune') {
         elements.rubricSection.style.display = 'block';
+        elements.rubricContent.innerHTML = 'Critical thinking is a habit of mind characterized by the comprehensive exploration of issues, ideas, artifacts, and events before accepting or formulating an opinion or conclusion. <a href="src/ai_assessment/rubric/Critical_Thinking_VALUE_Rubric.pdf" target="_blank" style="color: var(--rami-highlight); text-decoration: underline;">Download PDF to view the entire rubric</a>';
     } else {
         // No, hide rubric
         elements.rubricSection.style.display = 'none';
