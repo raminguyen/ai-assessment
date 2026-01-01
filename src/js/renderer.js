@@ -99,6 +99,7 @@ function displayPrompt(elements, item) {
 
     if (item.command === 'reflection') {
         prompt = buildReflectionPrompt(item);
+        prompt = prompt.replace('You are an undergrad student in the first semester.\n\n', '');
     } else if (item.command === 'tune') {
         prompt = buildTuningPrompt(item);
     } else {
