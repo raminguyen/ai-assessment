@@ -1,4 +1,5 @@
 let currentSelection = null;
+let promptExpanded = false;
 
 async function initRenderer() {
     findElements();
@@ -97,16 +98,100 @@ function displayPrompt(elements, item) {
     let prompt = '';
 
     if (item.command === 'reflection') {
-        prompt = getReflectionPrompt();
+        prompt = buildReflectionPrompt(item);
+    } else if (item.command === 'tune') {
+        prompt = buildTuningPrompt(item);
     } else {
         prompt = getPromptForEssay(item.essayName);
     }
 
+    prompt = removeMarkdown(prompt);
+
     if (prompt) {
-        elements.promptContent.textContent = prompt;
+        displayPromptWithExpand(elements, prompt, item.command);
     } else {
         elements.promptContent.textContent = 'No prompt available';
     }
+}
+
+function displayPromptWithExpand(elements, prompt, commandType) {
+    const maxLength = 1000;
+    const isLong = prompt.length > maxLength;
+
+    if (!isLong) {
+        elements.promptContent.textContent = prompt;
+        return;
+    }
+
+    const short = prompt.substring(0, maxLength);
+    const expandHtml = '... <span class="expand-text">(click to expand)</span>';
+
+    elements.promptContent.innerHTML = promptExpanded ? prompt : (short + expandHtml);
+    elements.promptContent.style.cursor = 'pointer';
+    elements.promptContent.onclick = () => togglePrompt(elements, prompt, short, expandHtml);
+}
+
+function togglePrompt(elements, fullText, shortText, expandHtml) {
+    promptExpanded = !promptExpanded;
+    elements.promptContent.innerHTML = promptExpanded ? fullText : (shortText + expandHtml);
+}
+
+function buildReflectionPrompt(item) {
+    let template = getReflectionPrompt();
+    const assignmentPrompt = getPromptForEssay(item.essayName);
+    const originalEssay = getOriginalEssay(item);
+    const tunedEssay = getTunedEssay(item);
+
+    template = template.replace('{ASSIGNMENT_PROMPT}', assignmentPrompt);
+    template = template.replace('{ORIGINAL_ESSAY}', originalEssay);
+    template = template.replace('{TUNED_ESSAY}', tunedEssay);
+
+    return template;
+}
+
+function buildTuningPrompt(item) {
+    let template = getTuningPrompt();
+    const assignmentPrompt = getPromptForEssay(item.essayName);
+
+    template = template.replace('{ASSIGNMENT_PROMPT}', assignmentPrompt);
+
+    return template;
+}
+
+function getOriginalEssay(item) {
+    const allData = getData();
+    const allItems = Object.values(allData);
+
+    for (let i = 0; i < allItems.length; i++) {
+        const dataItem = allItems[i];
+
+        if (dataItem.modelName === item.modelName &&
+            dataItem.essayName === item.essayName &&
+            dataItem.command === 'generate' &&
+            dataItem.rubric === item.rubric) {
+            console.log('Original file:', dataItem.fileName);
+            return dataItem.data.result || dataItem.data.essay || '';
+        }
+    }
+    return '';
+}
+
+function getTunedEssay(item) {
+    const allData = getData();
+    const allItems = Object.values(allData);
+
+    for (let i = 0; i < allItems.length; i++) {
+        const dataItem = allItems[i];
+
+        if (dataItem.modelName === item.modelName &&
+            dataItem.essayName === item.essayName &&
+            dataItem.command === 'tune' &&
+            dataItem.rubric === item.rubric) {
+            console.log('Tuned file:', dataItem.fileName);
+            return dataItem.data.result || dataItem.data.essay || '';
+        }
+    }
+    return '';
 }
 
 // Show or hide rubric
