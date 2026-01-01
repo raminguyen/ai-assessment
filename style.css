@@ -297,7 +297,22 @@ html, body {
 .score-total {
     font-size: 0.95rem;
     font-weight: 600;
+}
+
+.score-total.capstone {
     color: var(--color-green);
+}
+
+.score-total.milestone-3 {
+    color: var(--color-yellow);
+}
+
+.score-total.milestone-2 {
+    color: var(--color-orange);
+}
+
+.score-total.benchmark {
+    color: var(--color-red);
 }
 
 .score-rubric-item {

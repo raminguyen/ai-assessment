@@ -299,14 +299,24 @@ function createScoreHeader(graderName, scoreText) {
 
     
     const totalSpan = document.createElement('span');
-    totalSpan.className = 'score-total';
-    totalSpan.textContent = extractTotalScore(scoreText);
+    const totalText = extractTotalScore(scoreText);
+    const totalValue = parseInt(totalText.match(/\d+/));
+    const totalColorClass = getTotalScoreClass(totalValue);
 
-    
+    totalSpan.className = 'score-total ' + totalColorClass;
+    totalSpan.textContent = totalText;
+
     modelRow.appendChild(modelNameSpan);
     modelRow.appendChild(totalSpan);
 
     return modelRow;
+}
+
+function getTotalScoreClass(score) {
+    if (score >= 16) return 'capstone';
+    if (score >= 12) return 'milestone-3';
+    if (score >= 8) return 'milestone-2';
+    return 'benchmark';
 }
 
 // Find total score in text
