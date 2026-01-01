@@ -3,6 +3,7 @@ let prompts = {};
 let rubrics = {};
 let reflectionPrompt = '';
 let gradePrompt = '';
+let tuningPrompt = '';
 
 function getElements() {
     return elements;
@@ -44,6 +45,7 @@ async function loadPrompts() {
 
     gradePrompt = data.grade_prompt || '';
     reflectionPrompt = data.reflection_prompt || '';
+    tuningPrompt = data.tuning_prompt || '';
 }
 
 async function loadRubrics() {
@@ -73,6 +75,10 @@ function getGradePrompt() {
 
 function getReflectionPrompt() {
     return reflectionPrompt;
+}
+
+function getTuningPrompt() {
+    return tuningPrompt;
 }
 
 function showNoData() {
