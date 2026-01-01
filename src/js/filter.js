@@ -1,4 +1,5 @@
 let currentAssignment = 'a1';
+let currentActiveButton = null;
 
 function getCurrentAssignment() {
     return currentAssignment;
@@ -20,6 +21,8 @@ function setupFilterButtons() {
 function handleFilterClick(button) {
     const assignment = button.getAttribute('data-assignment');
 
+    currentActiveButton = document.querySelector('.action-btn.active');
+
     document.querySelectorAll('.filter-btn').forEach(btn => {
         btn.classList.remove('active');
     });
@@ -28,11 +31,32 @@ function handleFilterClick(button) {
     currentAssignment = assignment;
     console.log('Filter:', assignment);
 
+    restoreSimilarSelection();
+}
+
+function restoreSimilarSelection() {
     document.querySelectorAll('.action-btn').forEach(btn => {
         btn.classList.remove('active');
     });
 
-    showNoData();
+    if (!currentActiveButton) {
+        showNoData();
+        return;
+    }
+
+    const model = currentActiveButton.getAttribute('data-model');
+    const type = currentActiveButton.getAttribute('data-type');
+
+    const matchingButton = document.querySelector(
+        `.action-btn[data-model="${model}"][data-type="${type}"]`
+    );
+
+    if (matchingButton) {
+        matchingButton.classList.add('active');
+        matchingButton.click();
+    } else {
+        showNoData();
+    }
 }
 
 function findDataItem(model, type) {
