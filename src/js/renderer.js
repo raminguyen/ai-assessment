@@ -101,11 +101,8 @@ function displayPrompt(elements, item) {
         prompt = buildReflectionPrompt(item);
     } else if (item.command === 'tune') {
         prompt = buildTuningPrompt(item);
-        prompt = prompt.replace('You are an undergrad student in the first semester.\n\n', '');
     } else {
         prompt = getPromptForEssay(item.essayName);
-        prompt = prompt.replace('You are an undergrad student in the first semester.\n\n', '');
-        prompt = prompt.replace('You are an undergrad student in the first semester. ', '');
     }
 
     prompt = removeMarkdown(prompt);
