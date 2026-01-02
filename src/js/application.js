@@ -3,6 +3,17 @@ async function handleLoadFromGitHub() {
     const count = await loadFromGitHub();
     setupButtons();
     showNotification('Loaded ' + count + ' files from GitHub!');
+
+    // Auto-select default
+    autoSelectDefault();
+}
+
+function autoSelectDefault() {
+    // Find ChatGPT Generation button
+    const defaultButton = document.querySelector('[data-model="chatgpt"][data-type="generation"]');
+    if (defaultButton) {
+        defaultButton.click();
+    }
 }
 
 function copyText(text) {
