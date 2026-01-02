@@ -125,12 +125,10 @@ class Model:
         print("Reflection prompt:", reflection_prompt)
 
         # Save prompt
-        with open('reflection_prompt.txt', 'w') as f:
-            f.write("=" * 10 + "\nREFLECTION PROMPT\n" + "=" * 10 + "\n\n")
-            f.write(reflection_prompt)
+        # with open('reflection_prompt.txt', 'w') as f:
+        #     f.write("=" * 10 + "\nREFLECTION PROMPT\n" + "=" * 10 + "\n\n")
+        #     f.write(reflection_prompt)
 
-        import sys
-        sys.exit()
 
         result = self.api_call(reflection_prompt)
 
