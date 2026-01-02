@@ -14,6 +14,30 @@
         <div class="left-panel">
             <button class="load-btn" id="githubBtn">Load from GitHub</button>
 
+            <!-- Homepage Dropdown Navigation -->
+            <div style="margin-bottom: 1rem;">
+                <div class="dropdown" style="position: relative;">
+                    
+    <div id="dropdownContent" class="dropdown-content" style="display:none; position:absolute; left:0; top:100%; background: #333; min-width:160px; z-index:1000; border-radius:8px;">
+        <a href="index.html" style="display:block; padding:0.5rem 1rem; color:#fff; text-decoration:none;">Home</a>
+        <a href="work.html" style="display:block; padding:0.5rem 1rem; color:#fff; text-decoration:none;">Work</a>
+    </div>
+</div>
+<script>
+function toggleDropdown() {
+    var dropdown = document.getElementById('dropdownContent');
+    dropdown.style.display = dropdown.style.display === 'block' ? 'none' : 'block';
+}
+document.addEventListener('click', function(event) {
+    var dropdown = document.getElementById('dropdownContent');
+    var button = event.target.closest('.load-btn-secondary');
+    if (!button && dropdown && event.target.closest('.dropdown') === null) {
+        dropdown.style.display = 'none';
+    }
+});
+</script>
+            </div>
+
             <!-- Assignment Filter -->
             <div class="assignment-filter">
                 <button class="filter-btn active" data-assignment="a1"> Catlove Case Study</button>
