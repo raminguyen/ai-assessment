@@ -2,7 +2,7 @@
   
   "test_prompt": "write 5 words only",
 
-  "grade_prompt": "You are a {PROFESSOR_TYPE} professor. Score this essay using the rubric. Return only:\n\nExplanation of issues: [score]\nEvidence: [score]\nInfluence of context and assumptions: [score]\nStudent's position: [score]\nConclusions and related outcomes: [score]\nTotal: [sum]/20",
+  "grade_prompt": "You are a {PROFESSOR_TYPE} professor. Score this essay using the rubric:\n\n{rubric}\n\nReturn only:\n\nExplanation of issues: [score]\nEvidence: [score]\nInfluence of context and assumptions: [score]\nStudent's position: [score]\nConclusions and related outcomes: [score]\nTotal: [sum]/20\n\nEssay:\n\n",
 
   "reflection_prompt": "You are an undergrad student in first semester and you wrote an essay for the following prompt.\n\n{ASSIGNMENT_PROMPT}\n\nOriginal Essay: {original essay}\n\nThen, you tuned the essay for the attached {rubric}. What did you change?\n\nTuned Essay: {tuned essay}",
 
@@ -12,5 +12,5 @@
 
   "assignment_3_prompt": "You are an undergrad student in the first semester. Perform a real estate investment market analysis in the Boston Metropolitan Area for 2024. Summarize the key findings, insights from the analysis, highlight the best real estate investment opportunities, and any significant patterns observed. Write a five-page essay (1000 words or less) to set them straight and include at least 5 citations from peer-reviewed articles.",
 
-  "tuning_prompt": "{ASSIGNMENT_PROMPT}\n\nNow, please tune the essay based on the attached {rubric}."
+  "tuning_prompt": "{ASSIGNMENT_PROMPT}\n\nNow, please tune the essay based on the attached rubric: {rubric}"
 }
