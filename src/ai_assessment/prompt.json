@@ -4,7 +4,7 @@
 
   "grade_prompt": "You are a {PROFESSOR_TYPE} professor. Score this essay using the rubric. Return only:\n\nExplanation of issues: [score]\nEvidence: [score]\nInfluence of context and assumptions: [score]\nStudent's position: [score]\nConclusions and related outcomes: [score]\nTotal: [sum]/20",
 
-  "reflection_prompt": "{ASSIGNMENT_PROMPT}\n\nOriginal Essay:\n{ORIGINAL_ESSAY}\n\nTuned Essay:\n{TUNED_ESSAY}\n\nWhat did you change?",
+  "reflection_prompt": "You are an undergrad student in first semester and you wrote an essay for the following prompt.\n\n{ASSIGNMENT_PROMPT}\n\nOriginal Essay:\n{ORIGINAL_ESSAY}\n\nTuned Essay:\n{TUNED_ESSAY}\n\nWhat did you change?",
 
   "assignment_1_prompt": "You are an undergrad student in the first semester.\n\nConsider the following problem: In the morning, when Professor Catlove opens a new can of cat food, his cats run into the kitchen purring and meowing and rubbing their backs against his legs. What examples, if any, of classical conditioning, operant conditioning, and social learning are at work in this brief scene? Note that both the cats and the professor might be exhibiting conditioned behavior here.\n\nYou and some fellow classmates have been discussing this problem over coffee, and you are convinced that the other members of your group are confused about the concepts. Write a five-page essay (1000 words or less) to set them straight and include at least 5 citations from peer-reviewed articles.",
 

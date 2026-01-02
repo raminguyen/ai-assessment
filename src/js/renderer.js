@@ -99,11 +99,13 @@ function displayPrompt(elements, item) {
 
     if (item.command === 'reflection') {
         prompt = buildReflectionPrompt(item);
-        prompt = prompt.replace('You are an undergrad student in the first semester.\n\n', '');
     } else if (item.command === 'tune') {
         prompt = buildTuningPrompt(item);
+        prompt = prompt.replace('You are an undergrad student in the first semester.\n\n', '');
     } else {
         prompt = getPromptForEssay(item.essayName);
+        prompt = prompt.replace('You are an undergrad student in the first semester.\n\n', '');
+        prompt = prompt.replace('You are an undergrad student in the first semester. ', '');
     }
 
     prompt = removeMarkdown(prompt);
@@ -139,9 +141,12 @@ function togglePrompt(elements, fullText, shortText, expandHtml) {
 
 function buildReflectionPrompt(item) {
     let template = getReflectionPrompt();
-    const assignmentPrompt = getPromptForEssay(item.essayName);
+    let assignmentPrompt = getPromptForEssay(item.essayName);
     const originalEssay = getOriginalEssay(item);
     const tunedEssay = getTunedEssay(item);
+
+    assignmentPrompt = assignmentPrompt.replace('You are an undergrad student in the first semester.\n\n', '');
+    assignmentPrompt = assignmentPrompt.replace('You are an undergrad student in the first semester. ', '');
 
     template = template.replace('{ASSIGNMENT_PROMPT}', assignmentPrompt);
     template = template.replace('{ORIGINAL_ESSAY}', originalEssay);
