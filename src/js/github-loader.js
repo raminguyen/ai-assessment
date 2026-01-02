@@ -1,6 +1,6 @@
 // Load data files from GitHub
 async function loadFromGitHub() {
-    const folders = ['critical_thinking', 'oral_communication'];
+    const folders = ['critical_thinking'];
     let totalLoaded = 0;
 
     for (const folder of folders) {
