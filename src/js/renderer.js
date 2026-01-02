@@ -99,8 +99,12 @@ function displayPrompt(elements, item) {
 
     if (item.command === 'reflection') {
         prompt = buildReflectionPrompt(item);
+        displayReflectionPrompt(elements, prompt, item);
+        return;
     } else if (item.command === 'tune') {
         prompt = buildTuningPrompt(item);
+        displayTuningPrompt(elements, prompt);
+        return;
     } else {
         prompt = getPromptForEssay(item.essayName);
     }
@@ -136,18 +140,81 @@ function togglePrompt(elements, fullText, shortText, expandHtml) {
     elements.promptContent.innerHTML = promptExpanded ? fullText : (shortText + expandHtml);
 }
 
+function displayReflectionPrompt(elements, prompt, item) {
+    // Get essays
+    const originalEssay = getOriginalEssay(item);
+    const tunedEssay = getTunedEssay(item);
+
+    // Get file names
+    const originalFile = getOriginalEssayFile(item);
+    const tunedFile = getTunedEssayFile(item);
+
+    console.log('Original essay file:', originalFile);
+    console.log('Tuned essay file:', tunedFile);
+    console.log('Rubric link: src/ai_assessment/rubric/Critical_Thinking_VALUE_Rubric.pdf');
+
+    // Remove markdown
+    prompt = removeMarkdown(prompt);
+    const cleanOriginalEssay = removeMarkdown(originalEssay);
+    const cleanTunedEssay = removeMarkdown(tunedEssay);
+
+    // Make {rubric} link to PDF
+    prompt = prompt.replace('{rubric}', '<a href="src/ai_assessment/rubric/Critical_Thinking_VALUE_Rubric.pdf" target="_blank" style="color: var(--rami-highlight); text-decoration: underline;">{rubric}</a>');
+
+    // Make {original essay} and {tuned essay} clickable
+    prompt = prompt.replace('{original essay}', '<span class="expand-text" style="cursor: pointer; color: var(--rami-highlight); text-decoration: underline;" data-essay="original" data-expanded="false">{original essay}</span><div class="essay-content" data-essay-content="original" style="display: none; margin-top: 1rem; padding: 1rem; background: rgba(255,255,255,0.05); border-radius: 8px; white-space: pre-wrap;"></div>');
+    prompt = prompt.replace('{tuned essay}', '<span class="expand-text" style="cursor: pointer; color: var(--rami-highlight); text-decoration: underline;" data-essay="tuned" data-expanded="false">{tuned essay}</span><div class="essay-content" data-essay-content="tuned" style="display: none; margin-top: 1rem; padding: 1rem; background: rgba(255,255,255,0.05); border-radius: 8px; white-space: pre-wrap;"></div>');
+
+    elements.promptContent.innerHTML = prompt;
+
+    // Put cleaned essays in hidden divs
+    const originalContent = elements.promptContent.querySelector('[data-essay-content="original"]');
+    const tunedContent = elements.promptContent.querySelector('[data-essay-content="tuned"]');
+    if (originalContent) originalContent.textContent = cleanOriginalEssay;
+    if (tunedContent) tunedContent.textContent = cleanTunedEssay;
+
+    // Add click to expand/collapse
+    const essayLinks = elements.promptContent.querySelectorAll('span[data-essay]');
+    for (let i = 0; i < essayLinks.length; i++) {
+        const link = essayLinks[i];
+        link.addEventListener('click', function() {
+            const essayType = link.getAttribute('data-essay');
+            const isExpanded = link.getAttribute('data-expanded') === 'true';
+            const contentDiv = elements.promptContent.querySelector('[data-essay-content="' + essayType + '"]');
+
+            console.log('Clicked:', essayType, 'Expanded:', isExpanded);
+
+            if (isExpanded) {
+                contentDiv.style.display = 'none';
+                link.setAttribute('data-expanded', 'false');
+            } else {
+                contentDiv.style.display = 'block';
+                link.setAttribute('data-expanded', 'true');
+            }
+        });
+    }
+}
+
+function displayTuningPrompt(elements, prompt) {
+    console.log('Rubric link: src/ai_assessment/rubric/Critical_Thinking_VALUE_Rubric.pdf');
+
+    // Remove markdown
+    prompt = removeMarkdown(prompt);
+
+    // Make {rubric} link to PDF
+    prompt = prompt.replace('{rubric}', '<a href="src/ai_assessment/rubric/Critical_Thinking_VALUE_Rubric.pdf" target="_blank" style="color: var(--rami-highlight); text-decoration: underline;">{rubric}</a>');
+
+    elements.promptContent.innerHTML = prompt;
+}
+
 function buildReflectionPrompt(item) {
     let template = getReflectionPrompt();
     let assignmentPrompt = getPromptForEssay(item.essayName);
-    const originalEssay = getOriginalEssay(item);
-    const tunedEssay = getTunedEssay(item);
 
     assignmentPrompt = assignmentPrompt.replace('You are an undergrad student in the first semester.\n\n', '');
     assignmentPrompt = assignmentPrompt.replace('You are an undergrad student in the first semester. ', '');
 
     template = template.replace('{ASSIGNMENT_PROMPT}', assignmentPrompt);
-    template = template.replace('{ORIGINAL_ESSAY}', originalEssay);
-    template = template.replace('{TUNED_ESSAY}', tunedEssay);
 
     return template;
 }
@@ -172,11 +239,29 @@ function getOriginalEssay(item) {
             dataItem.essayName === item.essayName &&
             dataItem.command === 'generate' &&
             dataItem.rubric === item.rubric) {
-            console.log('Original file:', dataItem.fileName);
+            console.log('Loading original essay from:', dataItem.fileName);
             return dataItem.data.result || dataItem.data.essay || '';
         }
     }
+    console.log('Original essay not found');
     return '';
+}
+
+function getOriginalEssayFile(item) {
+    const allData = getData();
+    const allItems = Object.values(allData);
+
+    for (let i = 0; i < allItems.length; i++) {
+        const dataItem = allItems[i];
+
+        if (dataItem.modelName === item.modelName &&
+            dataItem.essayName === item.essayName &&
+            dataItem.command === 'generate' &&
+            dataItem.rubric === item.rubric) {
+            return dataItem.fileName || 'unknown';
+        }
+    }
+    return 'not found';
 }
 
 function getTunedEssay(item) {
@@ -190,23 +275,35 @@ function getTunedEssay(item) {
             dataItem.essayName === item.essayName &&
             dataItem.command === 'tune' &&
             dataItem.rubric === item.rubric) {
-            console.log('Tuned file:', dataItem.fileName);
+            console.log('Loading tuned essay from:', dataItem.fileName);
             return dataItem.data.result || dataItem.data.essay || '';
         }
     }
+    console.log('Tuned essay not found');
     return '';
+}
+
+function getTunedEssayFile(item) {
+    const allData = getData();
+    const allItems = Object.values(allData);
+
+    for (let i = 0; i < allItems.length; i++) {
+        const dataItem = allItems[i];
+
+        if (dataItem.modelName === item.modelName &&
+            dataItem.essayName === item.essayName &&
+            dataItem.command === 'tune' &&
+            dataItem.rubric === item.rubric) {
+            return dataItem.fileName || 'unknown';
+        }
+    }
+    return 'not found';
 }
 
 // Show or hide rubric
 function displayRubricSection(elements, item) {
-
-    if (item.command === 'tune') {
-        elements.rubricSection.style.display = 'block';
-        elements.rubricContent.innerHTML = 'Critical thinking is a habit of mind characterized by the comprehensive exploration of issues, ideas, artifacts, and events before accepting or formulating an opinion or conclusion. <a href="src/ai_assessment/rubric/Critical_Thinking_VALUE_Rubric.pdf" target="_blank" style="color: var(--rami-highlight); text-decoration: underline;">Download PDF to view the entire rubric</a>';
-    } else {
-        // No, hide rubric
-        elements.rubricSection.style.display = 'none';
-    }
+    // Hide rubric section since it's now in the prompt
+    elements.rubricSection.style.display = 'none';
 }
 
 function displayResponseText(elements, item) {
