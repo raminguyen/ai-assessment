@@ -2,16 +2,15 @@ Rubric,Essay Name,Command,Model,Grader,Writer,Essay Type,Folder,Time (mins),Time
 critical_thinking,Assignment_1,generate,gpt-5.2-2025-12-11,,,,critical_thinking,0.95,2025-12-29 19:32:46,"## Conditioning and Learning in Catlove’s Kitchen: Classical, Operant, and Social Learning (≤1000 words)
 
 In the scene where Professor Catlove opens a can of cat food and the cats rush in, vocalize, and rub against his legs, several learning processes can be operating at once. The confusion usually comes from treating “conditioning” as a single thing. In reality, **classical conditioning** (Pavlovian learning), **operant conditioning** (consequence-based learning), and **social learning** (learn...",a1_gen_chatgpt.json
-critical_thinking,Assignment_1,reflection,,,gpt-5.2-2025-12-11,,critical_thinking,0.52,2025-12-29 22:00:33,"I changed the essay in ways that line up with what your rubric is actually rewarding (clear issue framing, evaluated evidence, context/assumptions, an explicit position with limits, and a logically prioritized conclusion). Concretely, here’s what I did:
-
-## 1) Made the “issue/problem” clearer and more bounded (Rubric: Explanation of issues)
-- **Added an explicit organizing claim up front**: I clearly separated the three learning mechanisms into *(1) triggers/cues (classical), (2) consequences (o...",a1_reflection_chatgpt.json
-critical_thinking,Assignment_1,score,,claude-sonnet-4-5-20250929,gpt-5.2-2025-12-11,tune,critical_thinking,0.05,2025-12-29 22:01:21,"### Learning in Professor Catlove’s Kitchen: Classical Conditioning, Operant Conditioning, and Social Learning (≤ 1000 words)
+critical_thinking,Assignment_1,score,,claude-sonnet-4-5-20250929,gpt-5.2-2025-12-11,tune,critical_thinking,0.27,2026-01-02 16:02:27,"### Learning in Professor Catlove’s Kitchen: Classical Conditioning, Operant Conditioning, and Social Learning (≤ 1000 words)
 
 In the scene, Professor Catlove opens a new can of cat food and his cats run in purring, meowing, and rubbing against his legs. Even though it seems simple, several learning processes could be operating at once. The important thing is to separate (1) *what triggers the behavior* (stimulus–response associations, typical of classical conditioning), (2) *what consequences m...",a1_tune_chatgpt_score_claude.json
 critical_thinking,Assignment_1,score,,claude-sonnet-4-5-20250929,gpt-5.2-2025-12-11,generate,critical_thinking,0.19,2025-12-29 20:36:23,"## Conditioning and Learning in Catlove’s Kitchen: Classical, Operant, and Social Learning (≤1000 words)
 
 In the scene where Professor Catlove opens a can of cat food and the cats rush in, vocalize, and rub against his legs, several learning processes can be operating at once. The confusion usually comes from treating “conditioning” as a single thing. In reality, **classical conditioning** (Pavlovian learning), **operant conditioning** (consequence-based learning), and **social learning** (learn...",a1_gen_chatgpt_score_claude.json
+critical_thinking,Assignment_1,score,,human-reviewer-2,gpt-5.2-2025-12-11,tune,critical_thinking,18.2,2025-12-30 10:42:18,"### Learning in Professor Catlove’s Kitchen: Classical Conditioning, Operant Conditioning, and Social Learning (≤ 1000 words)
+
+In the scene, Professor Catlove opens a new can of cat food and his cats run in purring, meowing, and rubbing against his legs. Even though it seems simple, several learning processes could be operating at once. The important thing is to separate (1) *what triggers the behavior* (stimulus–response associations, typical of classical conditioning), (2) *what consequences m...",a1_tune_chatgpt_score_human2.json
 critical_thinking,Assignment_1,score,,gemini-3-pro-preview,gpt-5.2-2025-12-11,tune,critical_thinking,0.35,2025-12-29 22:01:12,"### Learning in Professor Catlove’s Kitchen: Classical Conditioning, Operant Conditioning, and Social Learning (≤ 1000 words)
 
 In the scene, Professor Catlove opens a new can of cat food and his cats run in purring, meowing, and rubbing against his legs. Even though it seems simple, several learning processes could be operating at once. The important thing is to separate (1) *what triggers the behavior* (stimulus–response associations, typical of classical conditioning), (2) *what consequences m...",a1_tune_chatgpt_score_gemini.json
@@ -21,6 +20,9 @@ In the scene where Professor Catlove opens a can of cat food and the cats rush i
 critical_thinking,Assignment_1,score,,gemini-3-pro-preview,gpt-5.2-2025-12-11,generate,critical_thinking,0.22,2025-12-29 20:35:37,"## Conditioning and Learning in Catlove’s Kitchen: Classical, Operant, and Social Learning (≤1000 words)
 
 In the scene where Professor Catlove opens a can of cat food and the cats rush in, vocalize, and rub against his legs, several learning processes can be operating at once. The confusion usually comes from treating “conditioning” as a single thing. In reality, **classical conditioning** (Pavlovian learning), **operant conditioning** (consequence-based learning), and **social learning** (learn...",a1_gen_chatgpt_score_gemini.json
+critical_thinking,Assignment_1,score,,human-reviewer-1,gpt-5.2-2025-12-11,generate,critical_thinking,15.5,2025-12-30 09:15:42,"## Conditioning and Learning in Catlove’s Kitchen: Classical, Operant, and Social Learning (≤1000 words)
+
+In the scene where Professor Catlove opens a can of cat food and the cats rush in, vocalize, and rub against his legs, several learning processes can be operating at once. The confusion usually comes from treating “conditioning” as a single thing. In reality, **classical conditioning** (Pavlovian learning), **operant conditioning** (consequence-based learning), and **social learning** (learn...",a1_gen_chatgpt_score_human1.json
 critical_thinking,Assignment_1,score,,grok-4-1-fast-reasoning,gpt-5.2-2025-12-11,tune,critical_thinking,0.08,2025-12-29 22:00:44,"### Learning in Professor Catlove’s Kitchen: Classical Conditioning, Operant Conditioning, and Social Learning (≤ 1000 words)
 
 In the scene, Professor Catlove opens a new can of cat food and his cats run in purring, meowing, and rubbing against his legs. Even though it seems simple, several learning processes could be operating at once. The important thing is to separate (1) *what triggers the behavior* (stimulus–response associations, typical of classical conditioning), (2) *what consequences m...",a1_tune_chatgpt_score_grok.json
@@ -32,10 +34,6 @@ critical_thinking,Assignment_2,generate,gpt-5.2-2025-12-11,,,,critical_thinking,
 ### Introduction
 
 The hypothesis says that when a country spends a larger share of its economy on social welfare, its economic growth rate should be lower (an inverse relationship). That idea is common in political debate: welfare spending is sometimes portrayed as a drag on growth because it requires higher taxes or might reduce incentives to work or invest. But modern economic resea...",a2_gen_chatgpt.json
-critical_thinking,Assignment_2,reflection,,,gpt-5.2-2025-12-11,,critical_thinking,0.28,2025-12-29 22:17:59,"I changed the essay in ways that line up directly with what the rubric rewards (clearer issue framing, more explicit use of evidence, more context/assumptions, a more qualified thesis, and clearer implications). Concretely:
-
-1. **Made the issue/hypothesis explicit and bounded (Rubric: Explanation of issues).**  
-   - In the tuned version I restated the hypothesis in a precise “if X rises, Y falls” form and identified exactly what the variables are (**social spending as % of GDP** and **annual GD...",a2_reflection_chatgpt.json
 critical_thinking,Assignment_2,score,,gemini-3-pro-preview,gpt-5.2-2025-12-11,tune,critical_thinking,0.21,2025-12-29 22:19:01,"## Do the data support the hypothesis that social service spending is inversely related to economic growth?
 
 ### Introduction and hypothesis
