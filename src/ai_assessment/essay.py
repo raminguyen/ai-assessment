@@ -28,6 +28,7 @@ class Essay:
         self.write_prompt = data[f"assignment_{assignment_num}_prompt"]
         self.grade_prompt = data["grade_prompt"]
         self.reflection_prompt = data["reflection_prompt"]
+        self.tuning_prompt = data["tuning_prompt"]
 
         # Replace the professor type placeholder
         professor_type = professor_types.get(assignment_num, "Psychology")
