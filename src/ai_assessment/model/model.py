@@ -10,8 +10,15 @@ class Model:
     def generate(self, essay, rubric_folder=None):
 
         print("Generating an essay")
+        print("Generation prompt:", essay.write_prompt)
+
+        # Save prompt
+        # with open('generation_prompt.txt', 'w') as f:
+        #     f.write("=" * 10 + "\nGENERATION PROMPT\n" + "=" * 10 + "\n\n")
+        #     f.write(essay.write_prompt)
+        
         start = time.time()
-  
+
         result = self.api_call(essay.write_prompt)
         
         essay.essay_text = result
@@ -35,8 +42,19 @@ class Model:
     def tune(self, essay, rubric):
 
         print("Tuning with rubric")
+        # Use template
+        tuning_prompt = essay.tuning_prompt
+        tuning_prompt = tuning_prompt.replace("{ASSIGNMENT_PROMPT}", essay.write_prompt)
+        tuning_prompt = tuning_prompt.replace("{rubric}", rubric.text)
+        print("Tuning prompt:", tuning_prompt)
+
+        # Save prompt
+        # with open('tuning_prompt.txt', 'w') as f:
+        #     f.write("=" * 10 + "\nTUNING PROMPT\n" + "=" * 10 + "\n\n")
+        #     f.write(tuning_prompt)
+
         start = time.time()
-        result = self.api_call(rubric.text + essay.write_prompt)
+        result = self.api_call(tuning_prompt)
         
         essay.essay_text = result
         essay.status = 2
@@ -58,8 +76,17 @@ class Model:
     def score(self, essay, rubric, writer=None, essay_type=None):
 
         print("Grading essay")
+        # Use template
+        score_prompt = essay.grade_prompt.replace("{rubric}", rubric.text) + essay.essay_text
+        print("Score prompt:", score_prompt)
+
+        # Save prompt
+        # with open('score_prompt.txt', 'w') as f:
+        #     f.write("=" * 10 + "\nSCORE PROMPT\n" + "=" * 10 + "\n\n")
+        #     f.write(score_prompt)
+
         start = time.time()
-        result = self.api_call(essay.grade_prompt + rubric.text + essay.essay_text)
+        result = self.api_call(score_prompt)
 
         essay.grade_result = result
         essay.status = 3
@@ -86,16 +113,26 @@ class Model:
         print("Generating reflection")
         start = time.time()
 
-        # Build reflection prompt with placeholders replaced
+        # Use template
         reflection_prompt = essay.reflection_prompt
-        reflection_prompt = reflection_prompt.replace("{ASSIGNMENT_PROMPT}", essay.write_prompt)
-        reflection_prompt = reflection_prompt.replace("{ORIGINAL_ESSAY}", original_essay)
-        reflection_prompt = reflection_prompt.replace("{TUNED_ESSAY}", tuned_essay)
+        # Remove intro from assignment prompt
+        assignment_prompt = essay.write_prompt.replace('You are an undergrad student in the first semester.\n\n', '')
+        assignment_prompt = assignment_prompt.replace('You are an undergrad student in the first semester. ', '')
+        reflection_prompt = reflection_prompt.replace("{ASSIGNMENT_PROMPT}", assignment_prompt)
+        reflection_prompt = reflection_prompt.replace("{original essay}", original_essay)
+        reflection_prompt = reflection_prompt.replace("{tuned essay}", tuned_essay)
+        reflection_prompt = reflection_prompt.replace("{rubric}", rubric.text)
+        print("Reflection prompt:", reflection_prompt)
 
-        # Add rubric to the prompt
-        full_prompt = reflection_prompt + "\n\nRubric:\n" + rubric.text
+        # Save prompt
+        with open('reflection_prompt.txt', 'w') as f:
+            f.write("=" * 10 + "\nREFLECTION PROMPT\n" + "=" * 10 + "\n\n")
+            f.write(reflection_prompt)
 
-        result = self.api_call(full_prompt)
+        import sys
+        sys.exit()
+
+        result = self.api_call(reflection_prompt)
 
         essay.reflection_result = result
         essay.status = 4
