@@ -119,20 +119,7 @@ function displayPrompt(elements, item) {
 }
 
 function displayPromptWithExpand(elements, prompt, commandType) {
-    const maxLength = 1000;
-    const isLong = prompt.length > maxLength;
-
-    if (!isLong) {
-        elements.promptContent.textContent = prompt;
-        return;
-    }
-
-    const short = prompt.substring(0, maxLength);
-    const expandHtml = '... <span class="expand-text">(click to expand)</span>';
-
-    elements.promptContent.innerHTML = promptExpanded ? prompt : (short + expandHtml);
-    elements.promptContent.style.cursor = 'pointer';
-    elements.promptContent.onclick = () => togglePrompt(elements, prompt, short, expandHtml);
+    elements.promptContent.textContent = prompt;
 }
 
 function togglePrompt(elements, fullText, shortText, expandHtml) {
