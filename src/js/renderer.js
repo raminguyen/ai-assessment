@@ -169,7 +169,12 @@ function displayReflectionPrompt(elements, prompt, item) {
             const isExpanded = link.getAttribute('data-expanded') === 'true';
             const contentDiv = elements.promptContent.querySelector('[data-essay-content="' + essayType + '"]');
 
-            console.log('Clicked:', essayType, 'Expanded:', isExpanded);
+            if (essayType === 'original') {
+                console.log('Clicked: original essay from file:', originalFile);
+            } else if (essayType === 'tuned') {
+                console.log('Clicked: tuned essay from file:', tunedFile);
+            }
+            console.log('Expanded:', isExpanded);
 
             if (isExpanded) {
                 contentDiv.style.display = 'none';
