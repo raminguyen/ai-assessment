@@ -22,14 +22,21 @@ html, body {
     font-family: 'Poppins', sans-serif;
     color: var(--rami-white);
     overflow: hidden;
+    display: flex;
+    flex-direction: column;
+}
+
+body {
+    height: 100vh;
 }
 
 /* Main Container - Three Column Layout */
 .main-container {
     display: grid;
     grid-template-columns: minmax(450px, 550px) 1fr minmax(280px, 350px);
-    height: 100vh;
+    flex: 1;
     gap: 0;
+    overflow: hidden;
 }
 
 /* Left Panel */
@@ -455,4 +462,38 @@ html, body {
         font-size: 0.75rem;
         padding-left: 20px;
     }
+}
+
+/* Footer */
+.footer {
+    background-color: var(--rami-dark);
+    color: var(--rami-lightgrey);
+    padding: 1rem 2rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 0.85rem;
+}
+
+.footer-left {
+    font-weight: 500;
+}
+
+.footer-right {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.footer-right a {
+    color: var(--rami--accent);
+    text-decoration: none;
+}
+
+.footer-right a:hover {
+    text-decoration: underline;
+}
+
+.footer-spacer {
+    width: 1rem;
 }
