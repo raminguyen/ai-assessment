@@ -120,6 +120,7 @@ function displayPrompt(elements, item) {
 
 function displayPromptWithExpand(elements, prompt, commandType) {
     elements.promptContent.textContent = prompt;
+    elements.promptContent.style.whiteSpace = 'pre-wrap';
 }
 
 function togglePrompt(elements, fullText, shortText, expandHtml) {
