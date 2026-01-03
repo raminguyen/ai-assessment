@@ -327,8 +327,9 @@ function displayScores(item) {
 
     for (let i = 0; i < scores.length; i++) {
         const scoreItem = scores[i];
+        const graderName = getModelName(scoreItem.data.grader);
         const fileName = scoreItem.fileName || 'unknown';
-        console.log('  -', fileName);
+        console.log('  - Grader:', graderName, '- File:', fileName);
     }
 
     if (scores.length === 0) {
@@ -343,6 +344,17 @@ function displayScores(item) {
         const scoreItem = scores[i];
         const graderName = getModelName(scoreItem.data.grader);
         displayScoreForGrader(graderName, scoreItem);
+    }
+
+    // Auto-open first score detail if available
+    if (scores.length > 0 && !window.scoreDetailOpened) {
+        window.scoreDetailOpened = true;
+        setTimeout(function() {
+            const firstModelName = elements.scoreBody.querySelector('.score-model-name');
+            if (firstModelName) {
+                firstModelName.click();
+            }
+        }, 100);
     }
 }
 
@@ -503,13 +515,15 @@ function getScoresForEssay(item) {
 
 // Show detailed score information in modal
 function showScoreDetail(scoreItem) {
-    console.log('Score data file:', scoreItem.fileName);
-    console.log('Score item data:', scoreItem.data);
-    console.log('Loading prompt from: src/ai_assessment/prompt.json');
+    const graderName = getModelName(scoreItem.data.grader);
+    console.log('Score response from grader:', graderName, '- File:', scoreItem.fileName);
 
     const modal = document.getElementById('scoreModal');
     const modalBody = document.getElementById('scoreModalBody');
+    const modalTitle = document.querySelector('.modal-title');
     const closeBtn = document.querySelector('.modal-close');
+
+    modalTitle.textContent = graderName + ' Score Details';
 
     const gradePrompt = getGradePrompt();
     const rubricText = getRubricForItem(scoreItem);
@@ -523,17 +537,17 @@ function showScoreDetail(scoreItem) {
     const cleanEssay = removeMarkdown(essayText);
     const cleanResponse = removeMarkdown(scoreResponse);
 
-    const rubricPdfLink = '<a href="src/ai_assessment/rubric/Critical_Thinking_VALUE_Rubric.pdf" target="_blank" style="color: var(--rami-highlight); text-decoration: underline;">rubric</a>';
-
     let promptText = gradePrompt.replace('{PROFESSOR_TYPE}', professorType);
-    promptText = promptText.replace('{rubric}', rubricPdfLink);
     promptText = removeMarkdown(promptText);
     promptText = promptText.replace(/Essay:\s*$/i, '');
+
+    const rubricLink = '<a href="src/ai_assessment/rubric/Critical_Thinking_VALUE_Rubric.pdf" target="_blank" style="color: var(--rami-highlight); text-decoration: underline;">rubric</a>';
+    promptText = promptText.replace('{rubric}', rubricLink);
 
     let html = '<div class="score-detail-section" style="white-space: pre-wrap;">';
     html += '<strong>Prompt:</strong>\n\n';
     html += promptText + '\n\n';
-    html += '<span class="expand-link" style="cursor: pointer; color: var(--rami-highlight); text-decoration: underline;" data-content="essay"><strong>Essay:</strong></span>\n';
+    html += '<span class="expand-link" style="cursor: pointer; color: var(--rami-highlight); text-decoration: underline;" data-content="essay"><strong>Essay</strong></span>\n';
     html += '<div class="essay-expanded" style="display: none; margin-top: 0.5rem; padding: 1rem; background: rgba(255,255,255,0.05); border-radius: 8px; white-space: pre-wrap;"></div>';
     html += '\n<strong>Response:</strong>\n\n';
     html += cleanResponse;

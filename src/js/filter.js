@@ -31,6 +31,9 @@ function handleFilterClick(button) {
     currentAssignment = assignment;
     console.log('Filter:', assignment);
 
+    // Reset score detail flag when switching assignments
+    window.scoreDetailOpened = false;
+
     restoreSimilarSelection();
 }
 
