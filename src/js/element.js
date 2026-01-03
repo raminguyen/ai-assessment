@@ -81,6 +81,10 @@ function getTuningPrompt() {
     return tuningPrompt;
 }
 
+function getRubrics() {
+    return rubrics;
+}
+
 function showNoData() {
     elements.dateDisplay.textContent = 'Date: --';
     elements.promptContent.textContent = 'No data available for this selection';
