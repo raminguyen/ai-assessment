@@ -530,11 +530,11 @@ body {
     overflow-y: auto;
     flex: 1;
     padding-right: 0.5rem;
-    font-size: 0.75rem;
+    font-size: 0.9rem;
 }
 
 .score-detail-section {
-    margin-bottom: 0.85rem;
+    margin-bottom: 0.9rem;
 }
 
 .score-detail-title {
