@@ -101,7 +101,9 @@ class Model:
             "writer": writer,
             "essay_type": essay_type,
             "essay_name": essay.name,
-            "folder": essay.rubric_folder,  
+            "folder": essay.rubric_folder,
+            "rubric": essay.rubric_folder,
+            "scored_essay_text": essay.essay_text,
             "result": result,
             "time_minutes": round(elapsed / 60, 2),
             "timestamp": datetime.now().strftime("%Y-%m-%d %H:%M:%S")
