@@ -137,6 +137,7 @@ function displayReflectionPrompt(elements, prompt, item) {
     const originalFile = getOriginalEssayFile(item);
     const tunedFile = getTunedEssayFile(item);
 
+    console.log('Reflection data file:', item.fileName);
     console.log('Original essay file:', originalFile);
     console.log('Tuned essay file:', tunedFile);
     console.log('Rubric link: src/ai_assessment/rubric/Critical_Thinking_VALUE_Rubric.pdf');
@@ -362,7 +363,7 @@ function displayScoreForGrader(graderName, scoreItem) {
         scoreText = scoreItem.data.score;
     }
 
-    const modelRow = createScoreHeader(graderName, scoreText);
+    const modelRow = createScoreHeader(graderName, scoreText, scoreItem);
     elements.scoreBody.appendChild(modelRow);
 
     const dimensions = parseRubricScores(scoreText);
@@ -381,15 +382,21 @@ function displayScoreForGrader(graderName, scoreItem) {
 }
 
 // Make header with name and total
-function createScoreHeader(graderName, scoreText) {
-    
+function createScoreHeader(graderName, scoreText, scoreItem) {
+
     const modelRow = document.createElement('div');
     modelRow.className = 'score-model-row';
 
-    
+
     const modelNameSpan = document.createElement('span');
     modelNameSpan.className = 'score-model-name';
     modelNameSpan.textContent = graderName;
+    modelNameSpan.style.cursor = 'pointer';
+    modelNameSpan.style.textDecoration = 'underline';
+
+    modelNameSpan.addEventListener('click', function() {
+        showScoreDetail(scoreItem);
+    });
 
     
     const totalSpan = document.createElement('span');
@@ -492,4 +499,147 @@ function getScoresForEssay(item) {
     }
 
     return matchingScores;
+}
+
+// Show detailed score information in modal
+function showScoreDetail(scoreItem) {
+    console.log('Score data file:', scoreItem.fileName);
+    console.log('Score item data:', scoreItem.data);
+    console.log('Loading prompt from: src/ai_assessment/prompt.json');
+
+    const modal = document.getElementById('scoreModal');
+    const modalBody = document.getElementById('scoreModalBody');
+    const closeBtn = document.querySelector('.modal-close');
+
+    const gradePrompt = getGradePrompt();
+    const rubricText = getRubricForItem(scoreItem);
+    const professorType = getProfessorTypeByAssignment(scoreItem);
+    const essayText = scoreItem.data.scored_essay_text || '';
+    const essayFile = getEssayFileForScore(scoreItem);
+    const scoreResponse = scoreItem.data.result || scoreItem.data.score || '';
+
+    console.log('Scored essay from file:', essayFile);
+
+    const cleanEssay = removeMarkdown(essayText);
+    const cleanResponse = removeMarkdown(scoreResponse);
+
+    const rubricPdfLink = '<a href="src/ai_assessment/rubric/Critical_Thinking_VALUE_Rubric.pdf" target="_blank" style="color: var(--rami-highlight); text-decoration: underline;">rubric</a>';
+
+    let promptText = gradePrompt.replace('{PROFESSOR_TYPE}', professorType);
+    promptText = promptText.replace('{rubric}', rubricPdfLink);
+    promptText = removeMarkdown(promptText);
+    promptText = promptText.replace(/Essay:\s*$/i, '');
+
+    let html = '<div class="score-detail-section" style="white-space: pre-wrap;">';
+    html += '<strong>Prompt:</strong>\n\n';
+    html += promptText + '\n\n';
+    html += '<span class="expand-link" style="cursor: pointer; color: var(--rami-highlight); text-decoration: underline;" data-content="essay"><strong>Essay:</strong></span>\n';
+    html += '<div class="essay-expanded" style="display: none; margin-top: 0.5rem; padding: 1rem; background: rgba(255,255,255,0.05); border-radius: 8px; white-space: pre-wrap;"></div>';
+    html += '\n<strong>Response:</strong>\n\n';
+    html += cleanResponse;
+    html += '</div>';
+
+    modalBody.innerHTML = html;
+
+    const essayDiv = modalBody.querySelector('.essay-expanded');
+    essayDiv.textContent = cleanEssay;
+
+    const expandLinks = modalBody.querySelectorAll('.expand-link');
+    for (let i = 0; i < expandLinks.length; i++) {
+        const link = expandLinks[i];
+        link.addEventListener('click', function() {
+            const contentType = link.getAttribute('data-content');
+            if (contentType === 'essay') {
+                const isVisible = essayDiv.style.display === 'block';
+                essayDiv.style.display = isVisible ? 'none' : 'block';
+                console.log('Essay file clicked:', essayFile);
+            }
+        });
+    }
+
+    modal.style.display = 'flex';
+
+    closeBtn.onclick = function() {
+        modal.style.display = 'none';
+    };
+
+    makeDraggable(document.getElementById('modalContent'), document.getElementById('modalHeader'));
+}
+
+function makeDraggable(element, dragHandle) {
+    let pos1 = 0, pos2 = 0, pos3 = 0, pos4 = 0;
+
+    dragHandle.onmousedown = dragMouseDown;
+
+    function dragMouseDown(e) {
+        e.preventDefault();
+        pos3 = e.clientX;
+        pos4 = e.clientY;
+        document.onmouseup = closeDragElement;
+        document.onmousemove = elementDrag;
+    }
+
+    function elementDrag(e) {
+        e.preventDefault();
+        pos1 = pos3 - e.clientX;
+        pos2 = pos4 - e.clientY;
+        pos3 = e.clientX;
+        pos4 = e.clientY;
+        element.style.top = (element.offsetTop - pos2) + 'px';
+        element.style.left = (element.offsetLeft - pos1) + 'px';
+    }
+
+    function closeDragElement() {
+        document.onmouseup = null;
+        document.onmousemove = null;
+    }
+}
+
+function getRubricForItem(scoreItem) {
+    const rubricName = scoreItem.rubric || scoreItem.data.rubric || scoreItem.data.folder;
+    const rubrics = getRubrics();
+
+    console.log('Looking for rubric:', rubricName);
+    console.log('Available rubrics:', Object.keys(rubrics));
+
+    if (rubrics[rubricName]) {
+        return rubrics[rubricName];
+    }
+
+    console.warn('Rubric not found for:', rubricName);
+    return 'Rubric not loaded. Please check rubric files.';
+}
+
+function getEssayFileForScore(scoreItem) {
+    const allData = getData();
+    const allItems = Object.values(allData);
+
+    const writerName = getModelName(scoreItem.data.writer);
+    const essayType = scoreItem.data.essay_type;
+
+    for (let i = 0; i < allItems.length; i++) {
+        const dataItem = allItems[i];
+
+        if (dataItem.modelName === writerName &&
+            dataItem.essayName === scoreItem.essayName &&
+            dataItem.command === essayType &&
+            dataItem.rubric === scoreItem.rubric) {
+            return dataItem.fileName || 'unknown';
+        }
+    }
+    return 'not found';
+}
+
+function getProfessorTypeByAssignment(scoreItem) {
+    const essayName = scoreItem.essayName || scoreItem.data.essay_name || '';
+
+    if (essayName.includes('Assignment_1') || essayName.includes('a1')) {
+        return 'Psychology';
+    } else if (essayName.includes('Assignment_2') || essayName.includes('a2')) {
+        return 'Economics';
+    } else if (essayName.includes('Assignment_3') || essayName.includes('a3')) {
+        return 'Data Science';
+    }
+
+    return 'Psychology';
 }
