@@ -18,11 +18,13 @@ class Essay:
         with open(file_path, 'r') as f:
             data = json.load(f)
 
+        print(f"Loading prompts from: {file_path}")
+
         # Map assignment number to professor type
         professor_types = {
             1: "Psychology",
             2: "Economics",
-            3: "Business Analytics"
+            3: "Data Science"
         }
 
         self.write_prompt = data[f"assignment_{assignment_num}_prompt"]
