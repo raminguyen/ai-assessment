@@ -347,16 +347,15 @@ function displayScores(item) {
     }
 
     // Auto-open first score detail if available
-    if (scores.length > 0 && !window.scoreDetailOpened) {
-        window.scoreDetailOpened = true;
-        setTimeout(function() {
-            const firstModelName = elements.scoreBody.querySelector('.score-model-name');
-            if (firstModelName) {
-                firstModelName.click();
-            }
-        }, 100);
-    }
-}
+    // if (scores.length > 0 && !window.scoreDetailOpened) {
+    //     window.scoreDetailOpened = true;
+    //     setTimeout(function() {
+    //         const firstModelName = elements.scoreBody.querySelector('.score-model-name');
+    //         if (firstModelName) {
+    //             firstModelName.click();
+    //         }
+    //     }, 100);
+    // }
 
 // Show "no scores" message
 function showNoScoresMessage(elements) {
@@ -513,7 +512,7 @@ function getScoresForEssay(item) {
     return matchingScores;
 }
 
-// Show detailed score information in modal
+// Show detailed score
 function showScoreDetail(scoreItem) {
     const graderName = getModelName(scoreItem.data.grader);
     console.log('Score response from grader:', graderName, '- File:', scoreItem.fileName);
