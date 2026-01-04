@@ -47,8 +47,8 @@ function parseRubricScores(text) {
     ];
 
     dimensions.forEach(dim => {
-        // Try format: "Dimension: **4**"
-        let regex = new RegExp(dim.name + ':\\s*\\*\\*(\\d+)\\*\\*', 'i');
+        // Table with bold
+        let regex = new RegExp('\\|\\s*\\*\\*' + dim.name + '\\*\\*\\s*\\|\\s*(\\d+)\\s*\\|', 'i');
         let match = text.match(regex);
 
         if (match) {
@@ -56,7 +56,25 @@ function parseRubricScores(text) {
             return;
         }
 
-        // Try format: "Dimension: [4]"
+        // Table without bold
+        regex = new RegExp('\\|\\s*' + dim.name + '\\s*\\|\\s*(\\d+)\\s*\\|', 'i');
+        match = text.match(regex);
+
+        if (match) {
+            dim.level = match[1];
+            return;
+        }
+
+        // Colon with bold
+        regex = new RegExp(dim.name + ':\\s*\\*\\*(\\d+)\\*\\*', 'i');
+        match = text.match(regex);
+
+        if (match) {
+            dim.level = match[1];
+            return;
+        }
+
+        // Colon with brackets
         regex = new RegExp(dim.name + ':\\s*\\[(\\d+)\\]', 'i');
         match = text.match(regex);
 
@@ -65,7 +83,7 @@ function parseRubricScores(text) {
             return;
         }
 
-        // Try format: "Dimension: 4"
+        // Simple colon format
         regex = new RegExp(dim.name + ':\\s*(\\d+)', 'i');
         match = text.match(regex);
 
@@ -74,7 +92,26 @@ function parseRubricScores(text) {
             return;
         }
 
-        // Try format: "Dimension: Capstone 4" or "Milestone 3" etc
+        // Flexible with bold
+        const dimNameEscaped = dim.name.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+        regex = new RegExp(dimNameEscaped + '.*?:\\s*\\*\\*(\\d+)\\*\\*', 'i');
+        match = text.match(regex);
+
+        if (match) {
+            dim.level = match[1];
+            return;
+        }
+
+        // Flexible without bold
+        regex = new RegExp(dimNameEscaped + '.*?:\\s*(\\d+)', 'i');
+        match = text.match(regex);
+
+        if (match) {
+            dim.level = match[1];
+            return;
+        }
+
+        // Named levels
         regex = new RegExp(dim.name + '.*?(Capstone 4|Milestone 3|Milestone 2|Benchmark 1)', 'i');
         match = text.match(regex);
 
