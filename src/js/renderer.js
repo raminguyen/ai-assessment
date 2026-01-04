@@ -357,6 +357,8 @@ function displayScores(item) {
     //     }, 100);
     // }
 
+}
+
 // Show "no scores" message
 function showNoScoresMessage(elements) {
     const message = '<p style="color: var(--rami-lightgrey); font-size: 0.85rem; text-align: center; padding: 2rem;">No scores available</p>';
