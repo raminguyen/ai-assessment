@@ -13,6 +13,7 @@
         <!-- Left Panel -->
         <div class="left-panel">
             <button class="load-btn" id="githubBtn">Load from GitHub</button>
+            <button class="load-btn" id="localBtn">Load from Local Files</button>
 
             <!-- Homepage Dropdown Navigation -->
             <div style="margin-bottom: 1rem;">
@@ -150,19 +151,20 @@ document.addEventListener('click', function(event) {
 
     <!-- Scripts - Load in order -->
     <!-- Core Data & Utilities -->
-    <script src="src/js/data.js"></script>
-    <script src="src/js/parser.js"></script>
-    <script src="src/js/data-processor.js"></script>
+    <script src="src/js/data.js?v=9"></script>
+    <script src="src/js/parser.js?v=9"></script>
+    <script src="src/js/data-processor.js?v=9"></script>
 
     <!-- UI Components -->
-    <script src="src/js/element.js"></script>
-    <script src="src/js/filter.js"></script>
-    <script src="src/js/renderer.js"></script>
+    <script src="src/js/element.js?v=9"></script>
+    <script src="src/js/filter.js?v=9"></script>
+    <script src="src/js/renderer.js?v=9"></script>
 
     <!-- Data Loaders -->
-    <script src="src/js/github-loader.js"></script>
+    <script src="src/js/github-loader.js?v=9"></script>
+    <script src="src/js/local-loader.js?v=9"></script>
 
     <!-- Application Entry -->
-    <script src="src/js/application.js"></script>
+    <script src="src/js/application.js?v=9"></script>
 </body>
 </html>
