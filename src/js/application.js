@@ -8,8 +8,17 @@ async function handleLoadFromGitHub() {
     autoSelectDefault();
 }
 
+async function handleLoadFromLocal() {
+    showNotification('Loading from local files.');
+    const count = await loadFromLocal();
+    setupButtons();
+    showNotification('Loaded ' + count + ' files from local directory!');
+
+    // Auto-select default
+    autoSelectDefault();
+}
+
 function autoSelectDefault() {
-    // Find ChatGPT Generation button
     const defaultButton = document.querySelector('[data-model="chatgpt"][data-type="generation"]');
     if (defaultButton) {
         defaultButton.click();
@@ -24,6 +33,9 @@ function copyText(text) {
 async function initApp() {
     await initRenderer();
     document.getElementById('githubBtn').addEventListener('click', handleLoadFromGitHub);
+    document.getElementById('localBtn').addEventListener('click', handleLoadFromLocal);
+
+    await handleLoadFromLocal();
 }
 
 if (document.readyState === 'loading') {
