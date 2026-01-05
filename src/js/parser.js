@@ -36,87 +36,130 @@ function formatRubricName(rubricName) {
         .map(word => word.charAt(0).toUpperCase() + word.slice(1))
         .join(' ');
 }
-// Parse rubric scores from text and extract dimension levels
+// Parse rubric scores from text
 function parseRubricScores(text) {
     const dimensions = [
-        { name: 'Explanation of issues', level: '--' },
-        { name: 'Evidence', level: '--' },
-        { name: 'Influence of context and assumptions', level: '--' },
-        { name: 'Student\'s position', level: '--' },
-        { name: 'Conclusions and related outcomes', level: '--' }
+        { name: 'Explanation of issues', level: '--', alt: [] },
+        { name: 'Evidence', level: '--', alt: ['Evidence (selecting and using information)'] },
+        { name: 'Influence of context and assumptions', level: '--', alt: [] },
+        { name: 'Student\'s position', level: '--', alt: ['Student\'s position (perspective/thesis)'] },
+        { name: 'Conclusions and related outcomes', level: '--', alt: ['Conclusions/outcomes'] }
     ];
 
     dimensions.forEach(dim => {
-        // Table with bold
-        let regex = new RegExp('\\|\\s*\\*\\*' + dim.name + '\\*\\*\\s*\\|\\s*(\\d+)\\s*\\|', 'i');
-        let match = text.match(regex);
+        const namesToTry = [dim.name].concat(dim.alt || []);
 
-        if (match) {
-            dim.level = match[1];
-            return;
-        }
+        for (const dimName of namesToTry) {
 
-        // Table without bold
-        regex = new RegExp('\\|\\s*' + dim.name + '\\s*\\|\\s*(\\d+)\\s*\\|', 'i');
-        match = text.match(regex);
+            const dimNameEscaped = dimName
+                .replace(/[.*+?^${}()|[\]\\]/g, '\\$&') // Escape regex special characters
+                .replace(/'/g, '[\'\u2019]'); // Handle straight and curly apostrophes
 
-        if (match) {
-            dim.level = match[1];
-            return;
-        }
+            let regex = new RegExp('^\\s*-\\s*\\*\\*' + dimNameEscaped + ':\\*\\*\\s*(\\d+)', 'im'); // Format: - **Dimension:** 3
+            let match = text.match(regex);
 
-        // Colon with bold
-        regex = new RegExp(dim.name + ':\\s*\\*\\*(\\d+)\\*\\*', 'i');
-        match = text.match(regex);
+            if (match) {
+                dim.level = match[1];
+                return;
+            }
 
-        if (match) {
-            dim.level = match[1];
-            return;
-        }
+            regex = new RegExp('\\*\\*' + dimNameEscaped + ':\\*\\*\\s*(\\d+)', 'i'); // Format: **Dimension:** 3
+            match = text.match(regex);
 
-        // Colon with brackets
-        regex = new RegExp(dim.name + ':\\s*\\[(\\d+)\\]', 'i');
-        match = text.match(regex);
+            if (match) {
+                dim.level = match[1];
+                return;
+            }
 
-        if (match) {
-            dim.level = match[1];
-            return;
-        }
+            regex = new RegExp('\\|\\s*\\*\\*' + dimNameEscaped + '\\*\\*\\s*\\|\\s*\\*\\*(\\d+)\\*\\*\\s*\\|', 'i'); // Format: | **Dimension** | **3** |
+            match = text.match(regex);
 
-        // Simple colon format
-        regex = new RegExp(dim.name + ':\\s*(\\d+)', 'i');
-        match = text.match(regex);
+            if (match) {
+                dim.level = match[1];
+                return;
+            }
 
-        if (match) {
-            dim.level = match[1];
-            return;
-        }
+            regex = new RegExp('\\|\\s*\\*\\*' + dimNameEscaped + '\\*\\*\\s*\\|\\s*(\\d+)\\s*\\|', 'i'); // Format: | **Dimension** | 3 |
+            match = text.match(regex);
 
-        // Flexible with bold
-        const dimNameEscaped = dim.name.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-        regex = new RegExp(dimNameEscaped + '.*?:\\s*\\*\\*(\\d+)\\*\\*', 'i');
-        match = text.match(regex);
+            if (match) {
+                dim.level = match[1];
+                return;
+            }
 
-        if (match) {
-            dim.level = match[1];
-            return;
-        }
 
-        // Flexible without bold
-        regex = new RegExp(dimNameEscaped + '.*?:\\s*(\\d+)', 'i');
-        match = text.match(regex);
+            regex = new RegExp('\\|\\s*' + dimNameEscaped + '\\s*\\|\\s*(\\d+)\\s*\\|', 'i'); // Format: | Dimension | 3 |
+            match = text.match(regex);
 
-        if (match) {
-            dim.level = match[1];
-            return;
-        }
+            if (match) {
+                dim.level = match[1];
+                return;
+            }
 
-        // Named levels
-        regex = new RegExp(dim.name + '.*?(Capstone 4|Milestone 3|Milestone 2|Benchmark 1)', 'i');
-        match = text.match(regex);
 
-        if (match) {
-            dim.level = match[1];
+            regex = new RegExp('\\*\\*' + dimNameEscaped + ':\\*\\*\\s*\\*\\*(\\d+)', 'i'); // Format: **Dimension:** **3
+            match = text.match(regex);
+
+            if (match) {
+                dim.level = match[1];
+                return;
+            }
+
+            regex = new RegExp(dimNameEscaped + ':\\s*\\*\\*(\\d+)\\*\\*', 'i'); // Format: Dimension: **3**
+            match = text.match(regex);
+
+            if (match) {
+                dim.level = match[1];
+                return;
+            }
+
+            regex = new RegExp(dimNameEscaped + ':\\s*\\[(\\d+)\\]', 'i'); // Format: Dimension: [3]
+            match = text.match(regex);
+
+            if (match) {
+                dim.level = match[1];
+                return;
+            }
+
+            regex = new RegExp(dimNameEscaped + ':\\s*(\\d+)', 'i'); // Format: Dimension: 3
+            match = text.match(regex);
+
+            if (match) {
+                dim.level = match[1];
+                return;
+            }
+
+            regex = new RegExp('\\*\\*' + dimNameEscaped + ':\\s*(\\d+)\\*\\*', 'i'); // Format: **Dimension: 3**
+            match = text.match(regex);
+
+            if (match) {
+                dim.level = match[1];
+                return;
+            }
+
+            regex = new RegExp(dimNameEscaped + '.*?:\\s*\\*\\*(\\d+)\\*\\*', 'i'); // Flexible: text before colon
+            match = text.match(regex);
+
+            if (match) {
+                dim.level = match[1];
+                return;
+            }
+
+            regex = new RegExp(dimNameEscaped + '.*?:\\s*(\\d+)', 'i'); // Catch-all: any colon format
+            match = text.match(regex);
+
+            if (match) {
+                dim.level = match[1];
+                return;
+            }
+
+            regex = new RegExp(dimNameEscaped + '.*?(Capstone 4|Milestone 3|Milestone 2|Benchmark 1)', 'i'); // Named levels: Capstone, Milestone, Benchmark 
+            match = text.match(regex);
+
+            if (match) {
+                dim.level = match[1];
+                return;
+            }
         }
     });
 
