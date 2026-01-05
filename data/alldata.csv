@@ -151,3 +151,40 @@ critical_thinking,Assignment_2,tune,gpt-5.2-2025-12-11,,,,critical_thinking,0.79
 The hypothesis says that **higher social welfare spending (as a share of GDP) goes with lower economic growth**. “Inversely related” implies a **negative relationship**: when spending is high, growth should generally be low, and when spending is low, growth should generally be high.
 
 The attached data give sn...",a2_tune_chatgpt.json
+critical_thinking,Assignment_3,generate,gpt-5.2-2025-12-11,,,,critical_thinking,0.85,2026-01-04 20:50:14,"## Boston Metro Real Estate Investment Market Analysis (2024) — Undergrad (First-Semester) Essay (≤1000 words)
+
+### Introduction  
+The Boston Metropolitan Area in 2024 remained one of the most “expensive-but-resilient” housing markets in the U.S. Even with high interest rates and affordability pressure, Boston’s housing demand stayed strong because it has durable job engines (education, hospitals, biotech, tech), limited land, and zoning constraints that restrict new supply. For real estate inve...",a3_gen_chatgpt.json
+critical_thinking,Assignment_3,reflection,,,gpt-5.2-2025-12-11,,critical_thinking,0.41,2026-01-04 20:51:58,"I changed the essay in five main ways to match the **critical thinking rubric** (issue clarity, evidence use, assumptions/context, a defensible position, and logically prioritized conclusions). Here’s what was different—specifically.
+
+## 1) I reframed the “issue” to be a real investment problem (not a market description)
+**Original:** The essay mostly opened with “Boston is expensive but resilient,” then moved into conditions/opportunities.  
+**Tuned:** I stated the *actual* decision problem an ...",a3_reflection_chatgpt.json
+critical_thinking,Assignment_3,score,,grok-4-1-fast-reasoning,gpt-5.2-2025-12-11,tune,critical_thinking,0.08,2026-01-04 20:52:22,"## Boston Metro Real Estate Investment Market Analysis (2024): Opportunities, Risks, and What Actually Matters
+
+### 1) Issue statement and why it is hard (but worth analyzing)
+The problem investors face in the Boston Metropolitan Area in 2024 is not simply “Is housing expensive?”—it is whether buying (or building, renovating, or repositioning) real estate can still produce acceptable risk-adjusted returns in a market with (1) very high prices, (2) higher-for-longer interest rates, (3) uneven pos...",a3_tune_chatgpt_score_grok.json
+critical_thinking,Assignment_3,score,,claude-sonnet-4-5-20250929,gpt-5.2-2025-12-11,generate,critical_thinking,0.58,2026-01-04 20:54:02,"## Boston Metro Real Estate Investment Market Analysis (2024) — Undergrad (First-Semester) Essay (≤1000 words)
+
+### Introduction  
+The Boston Metropolitan Area in 2024 remained one of the most “expensive-but-resilient” housing markets in the U.S. Even with high interest rates and affordability pressure, Boston’s housing demand stayed strong because it has durable job engines (education, hospitals, biotech, tech), limited land, and zoning constraints that restrict new supply. For real estate inve...",a3_gen_chatgpt_score_claude.json
+critical_thinking,Assignment_3,score,,claude-sonnet-4-5-20250929,gpt-5.2-2025-12-11,tune,critical_thinking,0.52,2026-01-04 20:54:39,"## Boston Metro Real Estate Investment Market Analysis (2024): Opportunities, Risks, and What Actually Matters
+
+### 1) Issue statement and why it is hard (but worth analyzing)
+The problem investors face in the Boston Metropolitan Area in 2024 is not simply “Is housing expensive?”—it is whether buying (or building, renovating, or repositioning) real estate can still produce acceptable risk-adjusted returns in a market with (1) very high prices, (2) higher-for-longer interest rates, (3) uneven pos...",a3_tune_chatgpt_score_claude.json
+critical_thinking,Assignment_3,score,,gemini-3-pro-preview,gpt-5.2-2025-12-11,generate,critical_thinking,0.45,2026-01-04 20:52:54,"## Boston Metro Real Estate Investment Market Analysis (2024) — Undergrad (First-Semester) Essay (≤1000 words)
+
+### Introduction  
+The Boston Metropolitan Area in 2024 remained one of the most “expensive-but-resilient” housing markets in the U.S. Even with high interest rates and affordability pressure, Boston’s housing demand stayed strong because it has durable job engines (education, hospitals, biotech, tech), limited land, and zoning constraints that restrict new supply. For real estate inve...",a3_gen_chatgpt_score_gemini.json
+critical_thinking,Assignment_3,score,,grok-4-1-fast-reasoning,gpt-5.2-2025-12-11,generate,critical_thinking,0.12,2026-01-04 20:52:11,"## Boston Metro Real Estate Investment Market Analysis (2024) — Undergrad (First-Semester) Essay (≤1000 words)
+
+### Introduction  
+The Boston Metropolitan Area in 2024 remained one of the most “expensive-but-resilient” housing markets in the U.S. Even with high interest rates and affordability pressure, Boston’s housing demand stayed strong because it has durable job engines (education, hospitals, biotech, tech), limited land, and zoning constraints that restrict new supply. For real estate inve...",a3_gen_chatgpt_score_grok.json
+critical_thinking,Assignment_3,score,,gemini-3-pro-preview,gpt-5.2-2025-12-11,tune,critical_thinking,0.36,2026-01-04 20:53:22,"## Boston Metro Real Estate Investment Market Analysis (2024): Opportunities, Risks, and What Actually Matters
+
+### 1) Issue statement and why it is hard (but worth analyzing)
+The problem investors face in the Boston Metropolitan Area in 2024 is not simply “Is housing expensive?”—it is whether buying (or building, renovating, or repositioning) real estate can still produce acceptable risk-adjusted returns in a market with (1) very high prices, (2) higher-for-longer interest rates, (3) uneven pos...",a3_tune_chatgpt_score_gemini.json
+critical_thinking,Assignment_3,tune,gpt-5.2-2025-12-11,,,,critical_thinking,1.14,2026-01-04 20:51:28,"## Boston Metro Real Estate Investment Market Analysis (2024): Opportunities, Risks, and What Actually Matters
+
+### 1) Issue statement and why it is hard (but worth analyzing)
+The problem investors face in the Boston Metropolitan Area in 2024 is not simply “Is housing expensive?”—it is whether buying (or building, renovating, or repositioning) real estate can still produce acceptable risk-adjusted returns in a market with (1) very high prices, (2) higher-for-longer interest rates, (3) uneven pos...",a3_tune_chatgpt.json
