@@ -33,10 +33,9 @@ for GRADER in "${GRADERS[@]}"; do
     python main.py score $GRADER $RUBRIC a${ASSIGNMENT}_tune_${WRITER}.json $ASSIGNMENT
 done
 
-echo "Step 4: Export to CSV and DOCX"
+echo "Step 4: Export to CSV"
 
 cd ../tools
 python table.py
-python converttodoc.py
 
 echo "Done!"

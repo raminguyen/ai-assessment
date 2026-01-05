@@ -55,7 +55,7 @@ function parseRubricScores(text) {
                 .replace(/[.*+?^${}()|[\]\\]/g, '\\$&') // Escape regex special characters
                 .replace(/'/g, '[\'\u2019]'); // Handle straight and curly apostrophes
 
-            let regex = new RegExp('^\\s*-\\s*\\*\\*' + dimNameEscaped + ':\\*\\*\\s*(\\d+)', 'im'); // Format: - **Dimension:** 3
+            let regex = new RegExp('^\\s*-\\s*\\*\\*' + dimNameEscaped + ':\\*\\*\\s*(\\d+(?:\\.\\d+)?)', 'im'); // Format: - **Dimension:** 3 or 3.5
             let match = text.match(regex);
 
             if (match) {
@@ -63,7 +63,7 @@ function parseRubricScores(text) {
                 return;
             }
 
-            regex = new RegExp('\\*\\*' + dimNameEscaped + ':\\*\\*\\s*(\\d+)', 'i'); // Format: **Dimension:** 3
+            regex = new RegExp('###\\s*\\d+\\.\\s*' + dimNameEscaped + ':[^\\n]*?\\*\\*(\\d+(?:\\.\\d+)?)', 'i'); // Format: ### 1. Dimension: **3.5/4
             match = text.match(regex);
 
             if (match) {
@@ -71,7 +71,7 @@ function parseRubricScores(text) {
                 return;
             }
 
-            regex = new RegExp('\\|\\s*\\*\\*' + dimNameEscaped + '\\*\\*\\s*\\|\\s*\\*\\*(\\d+)\\*\\*\\s*\\|', 'i'); // Format: | **Dimension** | **3** |
+            regex = new RegExp(dimNameEscaped + '[^\\n]*?\\n[\\s\\S]{0,500}?\\*\\*Score:\\s*(\\d+(?:\\.\\d+)?)\\s*\\([^)]+\\)\\*\\*', 'i'); // Format: **Score: 4 (Capstone)**
             match = text.match(regex);
 
             if (match) {
@@ -79,7 +79,47 @@ function parseRubricScores(text) {
                 return;
             }
 
-            regex = new RegExp('\\|\\s*\\*\\*' + dimNameEscaped + '\\*\\*\\s*\\|\\s*(\\d+)\\s*\\|', 'i'); // Format: | **Dimension** | 3 |
+            regex = new RegExp(dimNameEscaped + '[^\\n]*?\\n[\\s\\S]{0,500}?\\*\\*Score:\\*\\*\\s*(\\d+(?:\\.\\d+)?)', 'i'); // Format: **Score:** 3.5
+            match = text.match(regex);
+
+            if (match) {
+                dim.level = match[1];
+                return;
+            }
+
+            regex = new RegExp('\\*\\*' + dimNameEscaped + ':\\*\\*\\s*(\\d+(?:\\.\\d+)?)/\\d+', 'i'); // Format: **Dimension:** 3.5/4
+            match = text.match(regex);
+
+            if (match) {
+                dim.level = match[1];
+                return;
+            }
+
+            regex = new RegExp('\\*\\*' + dimNameEscaped + ':\\*\\*\\s*(\\d+(?:\\.\\d+)?)', 'i'); // Format: **Dimension:** 3 or 3.5
+            match = text.match(regex);
+
+            if (match) {
+                dim.level = match[1];
+                return;
+            }
+
+            regex = new RegExp('\\|\\s*\\*\\*' + dimNameEscaped + '\\*\\*\\s*\\|\\s*(\\d+(?:\\.\\d+)?)\\s*\\([^)]+\\)\\s*\\|', 'i'); // Format: | **Dimension** | 4 (Capstone) |
+            match = text.match(regex);
+
+            if (match) {
+                dim.level = match[1];
+                return;
+            }
+
+            regex = new RegExp('\\|\\s*\\*\\*' + dimNameEscaped + '\\*\\*\\s*\\|\\s*\\*\\*(\\d+(?:\\.\\d+)?)\\*\\*\\s*\\|', 'i'); // Format: | **Dimension** | **3** | or **3.5** |
+            match = text.match(regex);
+
+            if (match) {
+                dim.level = match[1];
+                return;
+            }
+
+            regex = new RegExp('\\|\\s*\\*\\*' + dimNameEscaped + '\\*\\*\\s*\\|\\s*(\\d+(?:\\.\\d+)?)\\s*\\|', 'i'); // Format: | **Dimension** | 3 | or 3.5 |
             match = text.match(regex);
 
             if (match) {
@@ -88,7 +128,7 @@ function parseRubricScores(text) {
             }
 
 
-            regex = new RegExp('\\|\\s*' + dimNameEscaped + '\\s*\\|\\s*(\\d+)\\s*\\|', 'i'); // Format: | Dimension | 3 |
+            regex = new RegExp('\\|\\s*' + dimNameEscaped + '\\s*\\|\\s*(\\d+(?:\\.\\d+)?)\\s*\\|', 'i'); // Format: | Dimension | 3 | or 3.5 |
             match = text.match(regex);
 
             if (match) {
@@ -97,7 +137,7 @@ function parseRubricScores(text) {
             }
 
 
-            regex = new RegExp('\\*\\*' + dimNameEscaped + ':\\*\\*\\s*\\*\\*(\\d+)', 'i'); // Format: **Dimension:** **3
+            regex = new RegExp('\\*\\*' + dimNameEscaped + ':\\*\\*\\s*\\*\\*(\\d+(?:\\.\\d+)?)', 'i'); // Format: **Dimension:** **3 or **3.5
             match = text.match(regex);
 
             if (match) {
@@ -105,7 +145,7 @@ function parseRubricScores(text) {
                 return;
             }
 
-            regex = new RegExp(dimNameEscaped + ':\\s*\\*\\*(\\d+)\\*\\*', 'i'); // Format: Dimension: **3**
+            regex = new RegExp(dimNameEscaped + ':\\s*\\*\\*(\\d+(?:\\.\\d+)?)\\*\\*', 'i'); // Format: Dimension: **3** or **3.5**
             match = text.match(regex);
 
             if (match) {
@@ -113,7 +153,7 @@ function parseRubricScores(text) {
                 return;
             }
 
-            regex = new RegExp(dimNameEscaped + ':\\s*\\[(\\d+)\\]', 'i'); // Format: Dimension: [3]
+            regex = new RegExp(dimNameEscaped + ':\\s*\\[(\\d+(?:\\.\\d+)?)\\]', 'i'); // Format: Dimension: [3] or [3.5]
             match = text.match(regex);
 
             if (match) {
@@ -121,7 +161,7 @@ function parseRubricScores(text) {
                 return;
             }
 
-            regex = new RegExp(dimNameEscaped + ':\\s*(\\d+)', 'i'); // Format: Dimension: 3
+            regex = new RegExp(dimNameEscaped + ':\\s*(\\d+(?:\\.\\d+)?)', 'i'); // Format: Dimension: 3 or 3.5
             match = text.match(regex);
 
             if (match) {
@@ -129,7 +169,7 @@ function parseRubricScores(text) {
                 return;
             }
 
-            regex = new RegExp('\\*\\*' + dimNameEscaped + ':\\s*(\\d+)\\*\\*', 'i'); // Format: **Dimension: 3**
+            regex = new RegExp('\\*\\*' + dimNameEscaped + ':\\s*(\\d+(?:\\.\\d+)?)\\*\\*', 'i'); // Format: **Dimension: 3** or **Dimension: 3.5**
             match = text.match(regex);
 
             if (match) {
@@ -137,7 +177,7 @@ function parseRubricScores(text) {
                 return;
             }
 
-            regex = new RegExp(dimNameEscaped + '.*?:\\s*\\*\\*(\\d+)\\*\\*', 'i'); // Flexible: text before colon
+            regex = new RegExp(dimNameEscaped + '.*?:\\s*\\*\\*(\\d+(?:\\.\\d+)?)\\*\\*', 'i'); // Flexible: any text then bold score
             match = text.match(regex);
 
             if (match) {
@@ -145,7 +185,7 @@ function parseRubricScores(text) {
                 return;
             }
 
-            regex = new RegExp(dimNameEscaped + '.*?:\\s*(\\d+)', 'i'); // Catch-all: any colon format
+            regex = new RegExp(dimNameEscaped + '.*?:\\s*(\\d+(?:\\.\\d+)?)', 'i'); // Catch-all: any colon with decimal
             match = text.match(regex);
 
             if (match) {
@@ -168,11 +208,22 @@ function parseRubricScores(text) {
 
 function getScoreClass(level) {
     const levelStr = String(level).toLowerCase();
+    const numericLevel = parseFloat(level);
 
-    if (levelStr === '4' || levelStr.includes('capstone')) return 'capstone';
-    if (levelStr === '3' || levelStr.includes('milestone 3')) return 'milestone-3';
-    if (levelStr === '2' || levelStr.includes('milestone 2')) return 'milestone-2';
-    if (levelStr === '1' || levelStr.includes('benchmark')) return 'benchmark';
+    // Handle decimal scores by rounding down to integer
+    if (!isNaN(numericLevel)) {
+        const intLevel = Math.floor(numericLevel);
+        if (intLevel === 4) return 'capstone';
+        if (intLevel === 3) return 'milestone-3';
+        if (intLevel === 2) return 'milestone-2';
+        if (intLevel === 1) return 'benchmark';
+    }
+
+    // Handle named levels
+    if (levelStr.includes('capstone')) return 'capstone';
+    if (levelStr.includes('milestone 3')) return 'milestone-3';
+    if (levelStr.includes('milestone 2')) return 'milestone-2';
+    if (levelStr.includes('benchmark')) return 'benchmark';
 
     return '';
 }

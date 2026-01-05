@@ -378,7 +378,7 @@ function createScoreHeader(graderName, scoreText, scoreItem, dimensions) {
         let sum = 0;
         let count = 0;
         dimensions.forEach(function(dim) {
-            const score = parseInt(dim.level);
+            const score = parseFloat(dim.level);
             if (!isNaN(score)) {
                 sum += score;
                 count++;
