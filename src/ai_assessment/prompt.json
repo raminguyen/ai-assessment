@@ -2,7 +2,7 @@
   
   "test_prompt": "write 5 words only",
 
-  "grade_prompt": "You are a professor of {PROFESSOR_TYPE}. Score this essay using the {rubric}:\n\n, and return numerical scores for the categories.",
+  "grade_prompt": "You are a professor of {PROFESSOR_TYPE}. Please score this student essay based on the attached {rubric} and return numerical scores for the categories.",
 
   "reflection_prompt": "You are an undergrad student in first semester and you wrote an essay for the following prompt.\n\n{ASSIGNMENT_PROMPT}\n\nOriginal Essay: {original essay}\n\nThen, you tuned the essay for the attached {rubric}. What did you change?\n\nTuned Essay: {tuned essay}",
 
