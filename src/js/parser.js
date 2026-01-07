@@ -266,6 +266,13 @@ function parseRubricScores(text) {
                 return;
         }
 
+            regex = new RegExp('\\*?\\s*\\*\\*' + dimNameEscaped + '(?:\\s*\\([^)]+\\))?:?\\*\\*\\s*[:\\-]?\\s*\\*\\*(\\d+(?:\\.\\d+)?)\\*\\*', 'i'); // * **Student's position (perspective, thesis/hypothesis):** **4**
+            match = text.match(regex);
+
+            if (match) {
+                dim.level = match[1];
+                return;
+            }
             
 
 
