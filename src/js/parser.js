@@ -194,14 +194,6 @@ function parseRubricScores(text) {
                 return;
             }
 
-            regex = new RegExp(dimNameEscaped + '.*?(Capstone 4|Milestone 3|Milestone 2|Benchmark 1)', 'i'); // Named levels: Capstone, Milestone, Benchmark 
-            match = text.match(regex);
-
-            if (match) {
-                dim.level = match[1];
-                return;
-            }
-
             // | Dimension | 3 |
             regex = new RegExp('\\|\\s*' + dimNameEscaped + '\\s*\\|\\s*(\\d+(?:\\.\\d+)?)\\s*\\|', 'i'); // Dimension | 3 |
             match = text.match(regex);
@@ -273,9 +265,16 @@ function parseRubricScores(text) {
                 dim.level = match[1];
                 return;
             }
-            
 
 
+            regex = new RegExp('###\\s*\\d+\\.\\s*' + dimNameEscaped + '(?:\\s*\\(.*?\\))?:\\s*\\*\\*(\\d+(?:\\.\\d+)?)', 'i'); // 2. Evidence (Selecting and using information): **4 (Capstone)**
+            match = text.match(regex);
+
+            if (match) {
+                dim.level = match[1];
+                return; 
+            }
+                    
 
         }
     });
