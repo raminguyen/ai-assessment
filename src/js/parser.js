@@ -53,7 +53,8 @@ function parseRubricScores(text) {
 
             const dimNameEscaped = dimName
                 .replace(/[.*+?^${}()|[\]\\]/g, '\\$&') // Escape regex special characters
-                .replace(/'/g, '[\'\u2019]'); // Handle straight and curly apostrophes
+                .replace(/'/g, '[\'\u2019]') // Handle straight and curly apostrophes
+                .replace(/\b(and|&)\b/gi, '(?:and|&)') // Handle "and" vs "&" interchangeably
 
             let regex = new RegExp('^\\s*-\\s*\\*\\*' + dimNameEscaped + ':\\*\\*\\s*(\\d+(?:\\.\\d+)?)', 'im'); // Format: - **Dimension:** 3 or 3.5
             let match = text.match(regex);
@@ -200,6 +201,75 @@ function parseRubricScores(text) {
                 dim.level = match[1];
                 return;
             }
+
+            // | Dimension | 3 |
+            regex = new RegExp('\\|\\s*' + dimNameEscaped + '\\s*\\|\\s*(\\d+(?:\\.\\d+)?)\\s*\\|', 'i'); // Dimension | 3 |
+            match = text.match(regex);
+
+            if (match) {
+                dim.level = match[1];
+                return;
+            }
+
+            regex = new RegExp('###\\s*\\d+[).]?\\s*' + dimNameEscaped + '\\s*[\\u2014\\u2013\\-]\\s*\\*\\*(\\d+(?:\\.\\d+)?)\\b', 'i'); // 1) Explanation of issues — **3 (Milestone)**
+            match = text.match(regex);
+
+            if (match) {
+                dim.level = match[1];
+                return;
+            }
+            
+            regex = new RegExp('\\*\\*' + dimNameEscaped + ':\\*\\*\\s*\\*\\*(\\d+(?:\\.\\d+)?)', 'i'); // **Dimension:** **3**
+            match = text.match(regex);
+
+            if (match) {
+                dim.level = match[1];
+                return;
+            }
+
+            regex = new RegExp('\\|\\s*\\*\\*' + dimNameEscaped + '\\*\\*\\s*\\|\\s*(\\d+(?:\\.\\d+)?)\\s*\\|', 'i'); // Bold Table Rows: | **Explanation of Issues** | 4 | Capstone |
+            match = text.match(regex);
+
+            if (match) {
+                dim.level = match[1];
+                return;
+            }
+
+            regex = new RegExp('\\|\\s*\\*\\*' + dimNameEscaped + '\\*\\*\\s*\\|\\s*\\*\\*(\\d+(?:\\.\\d+)?)(?:\\s*\\([^)]+\\))?\\*\\*\\s*\\|', 'i'); // Bold Table Rows with Bold Scores: | **Explanation of issues** | **4 (Capstone)** |
+            match = text.match(regex);
+
+            if (match) {
+                dim.level = match[1];
+                return;
+            }
+
+            regex = new RegExp('\\|\\s*\\*\\*' + dimNameEscaped + '\\*\\*\\s*\\|\\s*\\*\\*(\\d+(?:\\.\\d+)?)(?:\\s*\\([^)]+\\))?\\*\\*\\s*\\|', 'i'); // Bold Table Rows with Score and Label: | **Explanation of issues** | **3 (Milestone)** |
+            match = text.match(regex);
+            if (match) {
+                dim.level = match[1];
+                return;
+            }
+
+            regex = new RegExp('\\|\\s*\\*\\*' + dimNameEscaped + '\\*\\*\\s*\\|\\s*\\*\\*(\\d+(?:\\.\\d+)?)(?:\\s*\\([^)]+\\))?\\*\\*\\s*\\|', 'i'); // | **Influence of context & assumptions** | **2 (Milestone)** |
+            match = text.match(regex);
+
+            if (match) {
+                dim.level = match[1];
+                return;
+            }
+
+            flexibleRegex = new RegExp('\\|?\\s*\\*?\\*?' + dimNameEscaped + '(?:\\s*\\([^)]+\\))?\\*?\\*?\\s*\\|?\\s*[\\u2014\\u2013\\-:]?\\s*\\|?\\s*\\*\\*(\\d+(?:\\.\\d+)?)(?:\\s*\\([^)]+\\))?\\*\\*', 'i');
+            match = text.match(flexibleRegex);
+
+            if (match) {
+                dim.level = match[1];
+                return;
+        }
+
+            
+
+
+
         }
     });
 

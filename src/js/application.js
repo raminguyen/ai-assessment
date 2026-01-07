@@ -8,7 +8,7 @@ async function handleLoadFromGitHub() {
     autoSelectDefault();
 }
 
-async function handleLoadFromLocal() {
+/* async function handleLoadFromLocal() {
     showNotification('Loading from local files.');
     const count = await loadFromLocal();
     setupButtons();
@@ -17,6 +17,8 @@ async function handleLoadFromLocal() {
     // Auto-select default
     autoSelectDefault();
 }
+
+*/
 
 function autoSelectDefault() {
     const defaultButton = document.querySelector('[data-model="chatgpt"][data-type="generation"]');
@@ -33,9 +35,9 @@ function copyText(text) {
 async function initApp() {
     await initRenderer();
     document.getElementById('githubBtn').addEventListener('click', handleLoadFromGitHub);
-    document.getElementById('localBtn').addEventListener('click', handleLoadFromLocal);
+    //document.getElementById('localBtn').addEventListener('click', handleLoadFromLocal);
 
-    await handleLoadFromLocal();
+    //await handleLoadFromLocal();
 }
 
 if (document.readyState === 'loading') {

@@ -1,4 +1,5 @@
-async function loadFromLocal() {
+/*
+//async function loadFromLocal() {
     const folders = ['critical_thinking'];
     const basePath = 'data/';
     let totalLoaded = 0;
@@ -68,3 +69,5 @@ async function loadFromLocal() {
 
     return totalLoaded;
 }
+
+*/
