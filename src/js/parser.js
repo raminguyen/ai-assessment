@@ -258,8 +258,8 @@ function parseRubricScores(text) {
                 return;
             }
 
-            flexibleRegex = new RegExp('\\|?\\s*\\*?\\*?' + dimNameEscaped + '(?:\\s*\\([^)]+\\))?\\*?\\*?\\s*\\|?\\s*[\\u2014\\u2013\\-:]?\\s*\\|?\\s*\\*\\*(\\d+(?:\\.\\d+)?)(?:\\s*\\([^)]+\\))?\\*\\*', 'i');
-            match = text.match(flexibleRegex);
+            regex = new RegExp('\\|?\\s*\\*?\\*?' + dimNameEscaped + '(?:\\s*\\([^)]+\\))?\\*?\\*?\\s*\\|?\\s*[\\u2014\\u2013\\-:]?\\s*\\|?\\s*\\*\\*(\\d+(?:\\.\\d+)?)(?:\\s*\\([^)]+\\))?\\*\\*', 'i'); // "Student's position" even if it has "(perspective...)" after it
+            match = text.match(regex);
 
             if (match) {
                 dim.level = match[1];
