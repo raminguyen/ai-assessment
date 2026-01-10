@@ -2,11 +2,8 @@ let currentSelection = null;
 let promptExpanded = false;
 let currentTestNumber = '1'; // Default to '1'
 
-async function initRenderer() {
-    const testMatch = document.title.match(/Test(\\d+)/);
-    if (testMatch) {
-        currentTestNumber = testMatch[1];
-    }
+async function initRenderer(testNum = '1') {
+    currentTestNumber = testNum;
     console.log('Current Test Number:', currentTestNumber);
 
     findElements();
@@ -110,7 +107,7 @@ function displayPrompt(elements, item) {
         if (item.data && item.data.prompt) {
             prompt = item.data.prompt;
         } else {
-            prompt = getPromptForEssay(item.essayName);
+            prompt = getPromptForEssay(item.essayName, item.testNumber);
         }
     }
 
@@ -205,7 +202,7 @@ function buildReflectionPrompt(item) {
 
 function buildTuningPrompt(item) {
     let template = getTuningPrompt();
-    const assignmentPrompt = getPromptForEssay(item.essayName);
+    const assignmentPrompt = getPromptForEssay(item.essayName, item.testNumber);
 
     template = template.replace('{ASSIGNMENT_PROMPT}', assignmentPrompt);
 

@@ -33,6 +33,7 @@ class Model:
             "model": self.name,
             "essay_name": essay.name,
             "folder": essay.rubric_folder,
+            "prompt": essay.write_prompt,
             "result": result,
             "time_minutes": round(essay.time / 60, 2),
             "timestamp": datetime.now().strftime("%Y-%m-%d %H:%M:%S")

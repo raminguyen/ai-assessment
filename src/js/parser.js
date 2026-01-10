@@ -194,7 +194,7 @@ function parseRubricScores(text) {
                 return;
             }
 
-            // | Dimension | 3 |
+
             regex = new RegExp('\\|\\s*' + dimNameEscaped + '\\s*\\|\\s*(\\d+(?:\\.\\d+)?)\\s*\\|', 'i'); // Dimension | 3 |
             match = text.match(regex);
 

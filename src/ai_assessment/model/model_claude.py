@@ -15,7 +15,8 @@ class ModelClaude(Model):
     def api_call(self, prompt):
         message = self.client.messages.create(
             model=self.name,
-            max_tokens=1500,
+            max_tokens=2048,
             messages=[{"role": "user", "content": prompt}]
         )
         return message.content[0].text
+    

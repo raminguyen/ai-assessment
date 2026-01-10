@@ -3,9 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AI Essay Explorer - Rami's Research Tool</title>
+    <title>A1 Test1 - Catlove Case Study</title>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="../style.css">
 </head>
 <body>
     <!-- Main Container -->
@@ -151,22 +151,63 @@ document.addEventListener('click', function(event) {
 
     <!-- Scripts - Load in order -->
     <!-- Core Data & Utilities -->
-    <script src="src/js/data.js?v=9"></script>
-    <script src="src/js/parser.js?v=14"></script>
-    <script src="src/js/data-processor.js?v=9"></script>
-
-    
+    <script src="../src/js/data.js?v=9"></script>
+    <script src="../src/js/parser.js?v=14"></script>
+    <script src="../src/js/data-processor.js?v=9"></script>
+    <script src="../src/js/prompt.js?v=9"></script>
+    <script src="../src/js/content.js?v=9"></script>
 
     <!-- UI Components -->
-    <script src="src/js/element.js?v=9"></script>
-    <script src="src/js/filter.js?v=9"></script>
-    <script src="src/js/renderer.js?v=11"></script>
+    <script src="../src/js/element.js?v=9"></script>
+    <script src="../src/js/filter.js?v=9"></script>
+    <script src="../src/js/renderer.js?v=11"></script>
 
     <!-- Data Loaders -->
-    <script src="src/js/github-loader.js?v=9"></script>
-    <script src="src/js/local-loader.js?v=9"></script>
+    <script src="test-loader.js?v=1"></script>
+    <script src="test-local-loader.js?v=1"></script>
 
-    <!-- Application Entry -->
-    <script src="src/js/application.js?v=9"></script>
+    <!-- Test Application -->
+    <script>
+        async function handleLoadFromGitHub() {
+            showNotification('Loading test data...');
+            let count = 0;
+
+            try {
+                // Try GitHub first
+                count = await loadFromTestFolder();
+            } catch (error) {
+                console.log('GitHub load failed, trying local:', error);
+                // Fall back to local
+                count = await loadFromTestFolderLocal();
+            }
+
+            setupButtons();
+            showNotification('Loaded ' + count + ' test files!');
+            autoSelectDefault();
+        }
+
+        function autoSelectDefault() {
+            const defaultButton = document.querySelector('[data-model="chatgpt"][data-type="generation"]');
+            if (defaultButton) {
+                defaultButton.click();
+            }
+        }
+
+        function copyText(text) {
+            navigator.clipboard.writeText(text);
+            showNotification('Copied!');
+        }
+
+        async function initApp() {
+            await initRenderer('1');
+            document.getElementById('githubBtn').addEventListener('click', handleLoadFromGitHub);
+        }
+
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', initApp);
+        } else {
+            initApp();
+        }
+    </script>
 </body>
 </html>

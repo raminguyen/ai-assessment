@@ -35,11 +35,14 @@ async function loadPrompts() {
     prompts = {};
 
     for (const key in data) {
-        if (key.startsWith('assignment_') && key.endsWith('_prompt')) {
-            const match = key.match(/assignment_(\d+)_prompt/);
-            if (match) {
-                prompts['Assignment_' + match[1]] = data[key];
+        if (key.endsWith('_prompt')) {
+            if (key.startsWith('assignment_')) {
+                const match = key.match(/assignment_(\d+)_prompt/);
+                if (match) {
+                    prompts['Assignment_' + match[1]] = data[key];
+                }
             }
+            prompts[key] = data[key];
         }
     }
 
@@ -65,7 +68,13 @@ async function loadRubrics() {
     }
 }
 
-function getPromptForEssay(essayName) {
+function getPromptForEssay(essayName, testNumber = null) {
+    if (testNumber) {
+        const testPromptKey = `${essayName.toLowerCase().replace('assignment_', 'a')}_test_${testNumber}_prompt`;
+        if (prompts[testPromptKey]) {
+            return prompts[testPromptKey];
+        }
+    }
     return prompts[essayName] || '';
 }
 
