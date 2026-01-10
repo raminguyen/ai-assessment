@@ -66,7 +66,7 @@ function restoreSimilarSelection() {
     }
 }
 
-function findDataItem(model, type) {
+function findDataItem(model, type, currentTestNumber = '1') {
     const modelMap = {
         'chatgpt': 'ChatGPT',
         'gemini': 'Gemini',
@@ -98,7 +98,8 @@ function findDataItem(model, type) {
         return item.modelName === modelName &&
                item.command === command &&
                item.essayName === essayName &&
-               item.rubric === 'critical_thinking';
+               item.rubric === 'critical_thinking' &&
+               item.testNumber === currentTestNumber;
     });
 
     return matches.length > 0 ? matches[0] : null;

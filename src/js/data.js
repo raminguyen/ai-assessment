@@ -4,12 +4,15 @@ let allRubrics = new Set();
 
 function addData(essayName, modelName, command, rubric, data, fileName) {
     let uniqueName;
+    const testMatch = fileName.match(/_test(\\d+)/);
+    const testNumber = testMatch ? testMatch[1] : '1'; // Default to '1' if not found
+
     if (command === 'score') {
         const essayType = data.essay_type || 'unknown';
         const grader = data.grader || 'unknown';
-        uniqueName = essayName + '_' + modelName + '_' + command + '_' + essayType + '_' + grader + '_' + rubric;
+        uniqueName = essayName + '_' + modelName + '_' + command + '_' + essayType + '_' + grader + '_' + rubric + '_test' + testNumber;
     } else {
-        uniqueName = essayName + '_' + modelName + '_' + command + '_' + rubric;
+        uniqueName = essayName + '_' + modelName + '_' + command + '_' + rubric + '_test' + testNumber;
     }
 
     allData[uniqueName] = {
@@ -18,7 +21,8 @@ function addData(essayName, modelName, command, rubric, data, fileName) {
         command: command,
         rubric: rubric,
         data: data,
-        fileName: fileName
+        fileName: fileName,
+        testNumber: testNumber
     };
 
     allModels.add(modelName);

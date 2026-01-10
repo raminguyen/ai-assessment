@@ -1,7 +1,14 @@
 let currentSelection = null;
 let promptExpanded = false;
+let currentTestNumber = '1'; // Default to '1'
 
 async function initRenderer() {
+    const testMatch = document.title.match(/Test(\\d+)/);
+    if (testMatch) {
+        currentTestNumber = testMatch[1];
+    }
+    console.log('Current Test Number:', currentTestNumber);
+
     findElements();
     await loadPrompts();
     await loadRubrics();
@@ -41,7 +48,7 @@ function handleButtonClick(button) {
     removeActiveFromAllButtons();
     button.classList.add('active');
 
-    const item = findDataItem(model, type);
+    const item = findDataItem(model, type, currentTestNumber);
 
     if (item) {
         currentSelection = item;
@@ -99,7 +106,12 @@ function displayPrompt(elements, item) {
         displayTuningPrompt(elements, prompt);
         return;
     } else {
-        prompt = getPromptForEssay(item.essayName);
+        // Try to get prompt from data first, fallback to getPromptForEssay
+        if (item.data && item.data.prompt) {
+            prompt = item.data.prompt;
+        } else {
+            prompt = getPromptForEssay(item.essayName);
+        }
     }
 
     prompt = removeMarkdown(prompt);
@@ -132,10 +144,6 @@ function displayReflectionPrompt(elements, prompt, item) {
     console.log('Original essay file:', originalFile);
     console.log('Tuned essay file:', tunedFile);
     console.log('Rubric link: src/ai_assessment/rubric/Critical_Thinking_VALUE_Rubric.pdf');
-
-    prompt = removeMarkdown(prompt);
-    const cleanOriginalEssay = removeMarkdown(originalEssay);
-    const cleanTunedEssay = removeMarkdown(tunedEssay);
 
     prompt = prompt.replace('{rubric}', '<a href="src/ai_assessment/rubric/Critical_Thinking_VALUE_Rubric.pdf" target="_blank" style="color: var(--rami-highlight); text-decoration: underline;">{rubric}</a>');
 
@@ -178,8 +186,6 @@ function displayReflectionPrompt(elements, prompt, item) {
 function displayTuningPrompt(elements, prompt) {
     console.log('Rubric link: src/ai_assessment/rubric/Critical_Thinking_VALUE_Rubric.pdf');
 
-    prompt = removeMarkdown(prompt);
-
     prompt = prompt.replace('{rubric}', '<a href="src/ai_assessment/rubric/Critical_Thinking_VALUE_Rubric.pdf" target="_blank" style="color: var(--rami-highlight); text-decoration: underline;">{rubric}</a>');
 
     elements.promptContent.innerHTML = prompt;
@@ -216,7 +222,8 @@ function getOriginalEssay(item) {
         if (dataItem.modelName === item.modelName &&
             dataItem.essayName === item.essayName &&
             dataItem.command === 'generate' &&
-            dataItem.rubric === item.rubric) {
+            dataItem.rubric === item.rubric &&
+            dataItem.testNumber === item.testNumber) { // Add testNumber filter
             console.log('Loading original essay from:', dataItem.fileName);
             return dataItem.data.result || dataItem.data.essay || '';
         }
@@ -235,7 +242,8 @@ function getOriginalEssayFile(item) {
         if (dataItem.modelName === item.modelName &&
             dataItem.essayName === item.essayName &&
             dataItem.command === 'generate' &&
-            dataItem.rubric === item.rubric) {
+            dataItem.rubric === item.rubric &&
+            dataItem.testNumber === item.testNumber) { // Add testNumber filter
             return dataItem.fileName || 'unknown';
         }
     }
@@ -252,7 +260,8 @@ function getTunedEssay(item) {
         if (dataItem.modelName === item.modelName &&
             dataItem.essayName === item.essayName &&
             dataItem.command === 'tune' &&
-            dataItem.rubric === item.rubric) {
+            dataItem.rubric === item.rubric &&
+            dataItem.testNumber === item.testNumber) { // Add testNumber filter
             console.log('Loading tuned essay from:', dataItem.fileName);
             return dataItem.data.result || dataItem.data.essay || '';
         }
@@ -271,7 +280,8 @@ function getTunedEssayFile(item) {
         if (dataItem.modelName === item.modelName &&
             dataItem.essayName === item.essayName &&
             dataItem.command === 'tune' &&
-            dataItem.rubric === item.rubric) {
+            dataItem.rubric === item.rubric &&
+            dataItem.testNumber === item.testNumber) { // Add testNumber filter
             return dataItem.fileName || 'unknown';
         }
     }
@@ -474,8 +484,9 @@ function getScoresForEssay(item) {
         const writerName = getModelName(scoreItem.data.writer);
         const sameModel = writerName === item.modelName;
         const sameRubric = scoreItem.rubric === item.rubric;
+        const sameTestNumber = scoreItem.testNumber === item.testNumber; // Add testNumber filter
 
-        if (isScoreCommand && sameEssayName && sameEssayType && sameModel && sameRubric) {
+        if (isScoreCommand && sameEssayName && sameEssayType && sameModel && sameRubric && sameTestNumber) {
             matchingScores.push(scoreItem);
         }
     }
@@ -613,7 +624,8 @@ function getEssayFileForScore(scoreItem) {
         if (dataItem.modelName === writerName &&
             dataItem.essayName === scoreItem.essayName &&
             dataItem.command === essayType &&
-            dataItem.rubric === scoreItem.rubric) {
+            dataItem.rubric === scoreItem.rubric &&
+            dataItem.testNumber === scoreItem.testNumber) { // Add testNumber filter
             return dataItem.fileName || 'unknown';
         }
     }
