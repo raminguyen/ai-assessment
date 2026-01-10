@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>A1 Test2 - Catlove Case Study</title>
+    <title> Test 0</title>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="../style.css">
 </head>
@@ -13,7 +13,6 @@
         <!-- Left Panel -->
         <div class="left-panel">
             <button class="load-btn" id="githubBtn">Load from GitHub</button>
-            <!-- <button class="load-btn" id="localBtn">Load from Local Files</button> -->
 
             <!-- Homepage Dropdown Navigation -->
             <div style="margin-bottom: 1rem;">
@@ -152,10 +151,10 @@ document.addEventListener('click', function(event) {
     <!-- Scripts - Load in order -->
     <!-- Core Data & Utilities -->
     <script src="../src/js/data.js?v=9"></script>
+    <script src="../src/js/content.js?v=9"></script>
     <script src="../src/js/parser.js?v=14"></script>
     <script src="../src/js/data-processor.js?v=9"></script>
     <script src="../src/js/prompt.js?v=9"></script>
-    <script src="../src/js/content.js?v=9"></script>
 
     <!-- UI Components -->
     <script src="../src/js/element.js?v=9"></script>
@@ -164,21 +163,19 @@ document.addEventListener('click', function(event) {
 
     <!-- Data Loaders -->
     <script src="test-loader.js?v=1"></script>
-    <script src="test-local-loader.js?v=1"></script>
 
     <!-- Test Application -->
     <script>
-        async function handleLoadFromGitHub() {
+        async function handleLoadFromGitHub(testNumber) {
             showNotification('Loading test data...');
             let count = 0;
 
             try {
                 // Try GitHub first
-                count = await loadFromTestFolder();
+                count = await loadFromTestFolder(testNumber);
             } catch (error) {
-                console.log('GitHub load failed, trying local:', error);
-                // Fall back to local
-                count = await loadFromTestFolderLocal();
+                console.log('GitHub load failed:', error);
+                showNotification('Failed to load test data from GitHub!');
             }
 
             setupButtons();
@@ -199,8 +196,8 @@ document.addEventListener('click', function(event) {
         }
 
         async function initApp() {
-            await initRenderer('2');
-            document.getElementById('githubBtn').addEventListener('click', handleLoadFromGitHub);
+            await initRenderer('0');
+            document.getElementById('githubBtn').addEventListener('click', () => handleLoadFromGitHub('0'));
         }
 
         if (document.readyState === 'loading') {

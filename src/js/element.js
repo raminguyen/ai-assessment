@@ -86,8 +86,11 @@ function getReflectionPrompt() {
     return reflectionPrompt;
 }
 
-function getTuningPrompt() {
-    return tuningPrompt;
+function getTuningPrompt(testNumber = null) {
+    if (testNumber !== null && prompts['tuning_prompt_' + testNumber]) {
+        return prompts['tuning_prompt_' + testNumber];
+    }
+    return tuningPrompt; // fallback to default
 }
 
 function getRubrics() {

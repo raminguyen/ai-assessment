@@ -304,35 +304,4 @@ function getScoreClass(level) {
     return '';
 }
 
-function removeMarkdown(text) {
-    
-    if (!text) return '';
 
-    return text
-
-        .replace(/^#{1,6}\s+(.+)$/gm, '$1')         // Remove headers (#, ##, ###)
-
-        .replace(/(\*\*|__)(.*?)\1/g, '$2')         // Remove bold (**text** or __text__)
-
-        .replace(/(\*|_)(.*?)\1/g, '$2')            // Remove italic (*text* or _text_)
-
-        .replace(/`([^`]+)`/g, '$1')                // Remove inline code (`text`)
-
-        .replace(/\[([^\]]+)\]\([^\)]+\)/g, '$1')   // Remove links [text](url)
-
-        .replace(/^[\*\-\+]\s+/gm, '')              // Remove bullet points (*, -, +)
-
-        .replace(/^\d+\.\s+/gm, '')                 // Remove numbered lists (1., 2., etc)
-
-        .replace(/^>\s+/gm, '')                     // Remove blockquotes (>)
-
-        .replace(/^[\-\*\_]{3,}$/gm, '')            // Remove horizontal rules (---, ***, ___)
-
-        .replace(/```[\s\S]*?```/g, match => {      // Remove code blocks (```code```)
-
-            return match.replace(/```\w*\n?/g, '').trim();
-            
-        })
-        .replace(/\n{3,}/g, '\n\n')                 // Replace 3+ newlines with 2
-        .trim();
-}

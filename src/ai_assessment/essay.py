@@ -48,11 +48,15 @@ class Essay:
         print(f"Loading test prompts from: {file_path}")
 
         # Load prompt in format: a1_test_1_prompt, a2_test_2_prompt, etc.
-        prompt_key = f"a{assignment_num}_test_{test_num}_prompt"
-        self.write_prompt = data[prompt_key]
+        if test_num == 0:
+           self.write_prompt = data[f"assignment_{assignment_num}_prompt"]
+        else:
+            prompt_key = f"a{assignment_num}_test_{test_num}_prompt"
+            self.write_prompt = data[prompt_key]
+
         self.grade_prompt = data["grade_prompt"]
         self.reflection_prompt = data["reflection_prompt"]
-        self.tuning_prompt = data["tuning_prompt"]
+        self.tuning_prompt = data.get("tuning_prompt", data["tuning_prompt_0"])
 
         # Map assignment number to professor type
         professor_types = {

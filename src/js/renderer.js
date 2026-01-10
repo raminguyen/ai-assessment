@@ -48,6 +48,7 @@ function handleButtonClick(button) {
     const item = findDataItem(model, type, currentTestNumber);
 
     if (item) {
+        console.log('--- Item found in findDataItem ---', item); // Add this
         currentSelection = item;
         console.log('✓ File Loaded:', item.fileName || 'unknown');
         console.log('Essay Name:', item.essayName);
@@ -92,121 +93,237 @@ function displayDate(elements, item) {
 }
 
 function displayPrompt(elements, item) {
+
     let prompt = '';
 
+
+
     if (item.command === 'reflection') {
+
         prompt = buildReflectionPrompt(item);
+
         displayReflectionPrompt(elements, prompt, item);
+
         return;
+
     } else if (item.command === 'tune') {
+
         prompt = buildTuningPrompt(item);
+
         displayTuningPrompt(elements, prompt);
+
         return;
+
     } else {
+
         // Try to get prompt from data first, fallback to getPromptForEssay
+
         if (item.data && item.data.prompt) {
+
             prompt = item.data.prompt;
+
         } else {
+
             prompt = getPromptForEssay(item.essayName, item.testNumber);
+
         }
+
     }
+
+
 
     prompt = removeMarkdown(prompt);
 
+
+
     if (prompt) {
+
         displayPromptWithExpand(elements, prompt, item.command);
+
     } else {
+
         elements.promptContent.textContent = 'No prompt available';
+
     }
+
 }
+
+
 
 function displayPromptWithExpand(elements, prompt, commandType) {
+
     elements.promptContent.textContent = prompt;
+
     elements.promptContent.style.whiteSpace = 'pre-wrap';
+
 }
+
+
 
 function togglePrompt(elements, fullText, shortText, expandHtml) {
+
     promptExpanded = !promptExpanded;
+
     elements.promptContent.innerHTML = promptExpanded ? fullText : (shortText + expandHtml);
+
 }
+
+
 
 function displayReflectionPrompt(elements, prompt, item) {
+
     const originalEssay = getOriginalEssay(item);
+
     const tunedEssay = getTunedEssay(item);
 
+
+
     const originalFile = getOriginalEssayFile(item);
+
     const tunedFile = getTunedEssayFile(item);
 
+
+
     console.log('Reflection data file:', item.fileName);
+
     console.log('Original essay file:', originalFile);
+
     console.log('Tuned essay file:', tunedFile);
+
     console.log('Rubric link: src/ai_assessment/rubric/Critical_Thinking_VALUE_Rubric.pdf');
 
+
+
     prompt = prompt.replace('{rubric}', '<a href="src/ai_assessment/rubric/Critical_Thinking_VALUE_Rubric.pdf" target="_blank" style="color: var(--rami-highlight); text-decoration: underline;">{rubric}</a>');
+
+
 
     prompt = prompt.replace('{original essay}', '<span class="expand-text" style="cursor: pointer; color: var(--rami-highlight); text-decoration: underline;" data-essay="original" data-expanded="false">{original essay}</span><div class="essay-content" data-essay-content="original" style="display: none; margin-top: 1rem; padding: 1rem; background: rgba(255,255,255,0.05); border-radius: 8px; white-space: pre-wrap;"></div>');
+
     prompt = prompt.replace('{tuned essay}', '<span class="expand-text" style="cursor: pointer; color: var(--rami-highlight); text-decoration: underline;" data-essay="tuned" data-expanded="false">{tuned essay}</span><div class="essay-content" data-essay-content="tuned" style="display: none; margin-top: 1rem; padding: 1rem; background: rgba(255,255,255,0.05); border-radius: 8px; white-space: pre-wrap;"></div>');
+
+
 
     elements.promptContent.innerHTML = prompt;
 
+
+
     const originalContent = elements.promptContent.querySelector('[data-essay-content="original"]');
+
     const tunedContent = elements.promptContent.querySelector('[data-essay-content="tuned"]');
+
     if (originalContent) originalContent.textContent = cleanOriginalEssay;
+
     if (tunedContent) tunedContent.textContent = cleanTunedEssay;
 
+
+
     const essayLinks = elements.promptContent.querySelectorAll('span[data-essay]');
+
     for (let i = 0; i < essayLinks.length; i++) {
+
         const link = essayLinks[i];
+
         link.addEventListener('click', function() {
+
             const essayType = link.getAttribute('data-essay');
+
             const isExpanded = link.getAttribute('data-expanded') === 'true';
+
             const contentDiv = elements.promptContent.querySelector('[data-essay-content="' + essayType + '"]');
 
+
+
             if (essayType === 'original') {
+
                 console.log('Clicked: original essay from file:', originalFile);
+
             } else if (essayType === 'tuned') {
+
                 console.log('Clicked: tuned essay from file:', tunedFile);
+
             }
+
             console.log('Expanded:', isExpanded);
 
+
+
             if (isExpanded) {
+
                 contentDiv.style.display = 'none';
+
                 link.setAttribute('data-expanded', 'false');
+
             } else {
+
                 contentDiv.style.display = 'block';
+
                 link.setAttribute('data-expanded', 'true');
+
             }
+
         });
+
     }
+
 }
 
+
+
 function displayTuningPrompt(elements, prompt) {
+
     console.log('Rubric link: src/ai_assessment/rubric/Critical_Thinking_VALUE_Rubric.pdf');
+
+
 
     prompt = prompt.replace('{rubric}', '<a href="src/ai_assessment/rubric/Critical_Thinking_VALUE_Rubric.pdf" target="_blank" style="color: var(--rami-highlight); text-decoration: underline;">{rubric}</a>');
 
+
+
     elements.promptContent.innerHTML = prompt;
+
 }
+
+
 
 function buildReflectionPrompt(item) {
+
     let template = getReflectionPrompt();
+
     let assignmentPrompt = getPromptForEssay(item.essayName);
 
+
+
     assignmentPrompt = assignmentPrompt.replace('You are an undergrad student in the first semester.\n\n', '');
+
     assignmentPrompt = assignmentPrompt.replace('You are an undergrad student in the first semester. ', '');
 
+
+
     template = template.replace('{ASSIGNMENT_PROMPT}', assignmentPrompt);
 
+
+
     return template;
+
 }
 
+
+
 function buildTuningPrompt(item) {
-    let template = getTuningPrompt();
+
+    let template = getTuningPrompt(item.testNumber);
+
     const assignmentPrompt = getPromptForEssay(item.essayName, item.testNumber);
+
+
 
     template = template.replace('{ASSIGNMENT_PROMPT}', assignmentPrompt);
 
+
+
     return template;
+
 }
 
 function getOriginalEssay(item) {

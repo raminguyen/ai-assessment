@@ -1,109 +1,74 @@
-from ai_assessment import Rubric, Util, ModelChatGPT, ModelClaude, ModelGemini3ProPreview, ModelGrok
+import argparse
+import os
+import json
+from ai_assessment import Util, ModelChatGPT, ModelClaude, ModelGemini3ProPreview, ModelGrok
+from ai_assessment.rubric.rubric import Rubric
 
 class Runner:
-    def __init__(self):
-        self.all_models = {
+    def main(self):
+        parser = argparse.ArgumentParser()
+        parser.add_argument('assignment', choices=['a1', 'a2', 'a3'])
+        parser.add_argument('model', choices=['chatgpt', 'gemini', 'claude', 'grok'])
+        parser.add_argument('test', choices=['test0', 'test1', 'test2'])
+        parser.add_argument('--folder', type=str, default='critical_thinking')
+        parser.add_argument('--tune', action='store_true', help='Run tuning instead of generation')
+
+        args = parser.parse_args()
+
+        # Extract assignment number (a1 -> 1, a2 -> 2, a3 -> 3)
+        assignment_num = int(args.assignment.replace('a', ''))
+
+        # Extract test number from test argument (test1 -> 1, test2 -> 2)
+        test_num = int(args.test.replace('test', ''))
+
+        all_models = {
             "gemini": ModelGemini3ProPreview(),
             "chatgpt": ModelChatGPT(),
             "claude": ModelClaude(),
             "grok": ModelGrok()
         }
-    
-    def generate(self, model, assignment, folder):
-    
-        gen_model = self.all_models[model]
-        rubric = folder
 
-        if Util.check_data_exists(assignment, 'generate', model, rubric=rubric):
-            print('Already exists, skipping: ' + model + ' generate assignment ' + str(assignment))
-            return
+        model = all_models[args.model]
+        rubric_name = args.folder
 
-        essay = Util.create_essay(assignment, rubric_folder=folder)
-        essay.load_prompt(assignment) 
-        data = gen_model.generate(essay)
-        Util.save_individual_file(data, assignment, 'generate', model, rubric=rubric)
+        essay = Util.create_essay(assignment_num, rubric_folder=rubric_name)
+        essay.load_test_prompt(test_num, assignment_num)
+
+        if args.tune:
+            print(f"\nTuning essay for {args.assignment}_test_{{test_num}}_prompt...")
+            print(f"Prompt: {essay.write_prompt[:100]}...")
+
+            # Load rubric
+            rubric_obj = Rubric(rubric_name)
+
+            # Tune directly with the test prompt (no generation needed)
+            data = model.tune(essay, rubric_obj)
+            data['prompt'] = essay.write_prompt
+            data['rubric'] = rubric_name
+            data['folder'] = rubric_name
+
+            filename = f"{args.assignment}_test{test_num}_tune_{args.model}.json"
+        
+        else:
+                print(f"\nGenerating essay with {args.assignment}_test_{test_num}_prompt...")
+                print(f"Prompt: {essay.write_prompt[:100]}...")
+                data = model.generate(essay)
+
+                filename = f"{args.assignment}_test{test_num}_{args.model}.json"
 
 
-    def tune(self, model, assignment, rubric):
+        # Save to test folder
+        test_folder = os.path.join(args.test, 'data', rubric_name)
+        os.makedirs(test_folder, exist_ok=True)
 
-        tune_model = self.all_models[model]
+        filepath = os.path.join(test_folder, filename)
 
-        if Util.check_data_exists(assignment, 'tune', model, rubric=rubric):
-            print('Already exists, skipping: ' + model + ' tune assignment ' + str(assignment))
-            return
+        with open(filepath, 'w') as f:
+            json.dump(data, f, indent=2)
 
-        essay = Util.create_essay(assignment)
-        essay.load_prompt(assignment)  # ← ADD THIS
+        action = "Tuning" if args.tune else "Test"
+        print(f"\n{action} {test_num} complete!")
+        print(f"Saved to: {filepath}")
 
-        rubric_obj = Rubric(rubric)
 
-        data = tune_model.tune(essay, rubric_obj)
-        data['rubric'] = rubric
-        data['folder'] = 'critical_thinking'
-
-        Util.save_individual_file(data, assignment, 'tune', model, rubric=rubric)
-
-    def score(self, grader, rubric, filename, assignment):
-
-        grader_model = self.all_models[grader]
-
-        essay_text, writer_name, essay_type = Util.load_essay_from_data(filename, rubric=rubric)
-
-        if Util.check_data_exists(assignment, 'score', grader, essay_type=essay_type, writer=writer_name, rubric=rubric):
-            print('Already exists, skipping: ' + grader + ' scoring ' + essay_type + ' assignment ' + str(assignment))
-            return
-
-        essay = Util.create_essay(assignment)
-        essay.load_prompt(assignment)  # ← ADD THIS
-
-        rubric_obj = Rubric(rubric)
-        essay.essay_text = essay_text
-
-        data = grader_model.score(essay, rubric_obj, writer=writer_name, essay_type=essay_type)
-
-        data['rubric'] = rubric
-        data['folder'] = 'critical_thinking'  # ← ADD THIS
-        data['scored_essay_text'] = essay_text
-        data['essay_type'] = essay_type
-
-        Util.save_individual_file(data, assignment, 'score', grader, essay_type=essay_type, rubric=rubric, writer=writer_name)
-
-    def reflect(self, model, assignment, rubric):
-
-        reflection_model = self.all_models[model]
-
-        if Util.check_data_exists(assignment, 'reflection', model, rubric=rubric):
-            print('Already exists, skipping: ' + model + ' reflection assignment ' + str(assignment))
-            return
-
-        # Map model name for filenames
-        name_map = {
-            "gemini": "gemini",
-            "chatgpt": "chatgpt",
-            "claude": "claude",
-            "grok": "grok"
-        }
-        short_model = name_map.get(model, model)
-
-        # Load the original (generated) essay
-        gen_filename = "a" + str(assignment) + "_gen_" + short_model + ".json"
-        original_essay, _, _ = Util.load_essay_from_data(gen_filename, rubric=rubric)
-
-        # Load the tuned essay
-        tune_filename = "a" + str(assignment) + "_tune_" + short_model + ".json"
-        tuned_essay, _, _ = Util.load_essay_from_data(tune_filename, rubric=rubric)
-
-        # Create essay object and load prompts
-        essay = Util.create_essay(assignment, rubric_folder=rubric)
-        essay.load_prompt(assignment)
-
-        # Load rubric
-        rubric_obj = Rubric(rubric)
-
-        # Generate reflection
-        data = reflection_model.reflect(essay, original_essay, tuned_essay, rubric_obj)
-
-        data['rubric'] = rubric
-        data['folder'] = rubric
-
-        Util.save_individual_file(data, assignment, 'reflection', model, rubric=rubric)
+  

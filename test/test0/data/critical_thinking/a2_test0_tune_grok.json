@@ -6,5 +6,6 @@
   "time_minutes": 0.43,
   "timestamp": "2026-01-10 13:49:58",
   "rubric": "critical_thinking",
-  "folder": "critical_thinking"
+  "folder": "critical_thinking",
+  "prompt": "\n\nNow, please tune the essay based on the attached rubric {rubric}"
 }
