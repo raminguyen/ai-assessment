@@ -1,5 +1,5 @@
 #!/bin/bash
-SCRIPT_PATH="../src/test_main.py"
+SCRIPT_PATH="./src/test_main.py"
 
 echo "Starting test1 runs for all assignments in parallel"
 

@@ -126,20 +126,13 @@ function displayPrompt(elements, item) {
 
         return;
 
-    } else {
-
-        // Try to get prompt from data first, fallback to getPromptForEssay
-
+    } else { // This is for 'generation'
         if (item.data && item.data.prompt) {
-
             prompt = item.data.prompt;
-
         } else {
-
-            prompt = getPromptForEssay(item.essayName, item.testNumber);
-
+            // Fallback for generation should ideally not be hit if data is loaded correctly
+            prompt = 'Error: Generation prompt not found in data.';
         }
-
     }
 
 
