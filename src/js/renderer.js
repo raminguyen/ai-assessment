@@ -108,7 +108,19 @@ function displayPrompt(elements, item) {
 
     } else if (item.command === 'tune') {
 
-        prompt = buildTuningPrompt(item);
+        // Check if prompt exists in data first
+        console.log('=== TUNE PROMPT DEBUG ===');
+        console.log('item.data exists:', !!item.data);
+        console.log('item.data.prompt exists:', !!(item.data && item.data.prompt));
+        console.log('item.data.prompt length:', item.data && item.data.prompt ? item.data.prompt.length : 0);
+
+        if (item.data && item.data.prompt) {
+            prompt = item.data.prompt;
+            console.log('Using prompt from data, length:', prompt.length);
+        } else {
+            prompt = buildTuningPrompt(item);
+            console.log('Using buildTuningPrompt, length:', prompt.length);
+        }
 
         displayTuningPrompt(elements, prompt);
 
@@ -132,19 +144,31 @@ function displayPrompt(elements, item) {
 
 
 
-    prompt = removeMarkdown(prompt);
+            prompt = removeMarkdown(prompt);
 
 
 
-    if (prompt) {
+        
 
-        displayPromptWithExpand(elements, prompt, item.command);
 
-    } else {
 
-        elements.promptContent.textContent = 'No prompt available';
+            if (prompt) {
 
-    }
+
+
+                displayPromptWithExpand(elements, prompt, item.command);
+
+
+
+            } else {
+
+
+
+                elements.promptContent.textContent = 'No prompt available';
+
+
+
+            }
 
 }
 
@@ -272,6 +296,9 @@ function displayReflectionPrompt(elements, prompt, item) {
 
 function displayTuningPrompt(elements, prompt) {
 
+    console.log('displayTuningPrompt called');
+    console.log('Prompt length:', prompt ? prompt.length : 0);
+    console.log('Prompt preview:', prompt ? prompt.substring(0, 100) : 'null/empty');
     console.log('Rubric link: src/ai_assessment/rubric/Critical_Thinking_VALUE_Rubric.pdf');
 
 
