@@ -93,75 +93,73 @@ function displayDate(elements, item) {
 }
 
 function displayPrompt(elements, item) {
-
     let prompt = '';
 
-
-
     if (item.command === 'reflection') {
-
         prompt = buildReflectionPrompt(item);
-
         displayReflectionPrompt(elements, prompt, item);
-
         return;
 
     } else if (item.command === 'tune') {
-
-        // Check if prompt exists in data first
-        console.log('=== TUNE PROMPT DEBUG ===');
-        console.log('item.data exists:', !!item.data);
-        console.log('item.data.prompt exists:', !!(item.data && item.data.prompt));
-        console.log('item.data.prompt length:', item.data && item.data.prompt ? item.data.prompt.length : 0);
-
+        // Get assignment content
+        let assignmentContent = '';
         if (item.data && item.data.prompt) {
-            prompt = item.data.prompt;
-            console.log('Using prompt from data, length:', prompt.length);
+            assignmentContent = item.data.prompt;
         } else {
-            prompt = buildTuningPrompt(item);
-            console.log('Using buildTuningPrompt, length:', prompt.length);
+            const nameToSearch = item.essayName || (item.data ? item.data.essay_name : '');
+            assignmentContent = getPromptForEssay(nameToSearch, item.testNumber);
+        }
+
+        if (!assignmentContent) {
+            console.warn('Warning: Assignment prompt text not found for', item);
+            assignmentContent = "[Error: Could not find assignment prompt text. Please add 'prompt' field to JSON or update prompt.js]";
+        }
+
+        // Check for embedded instructions
+        const hasInstructions = assignmentContent.includes('tune the essay based on the attached') ||
+                                assignmentContent.includes('write the essay based on the attached');
+
+        // Build prompt
+        if (hasInstructions) {
+            prompt = assignmentContent;
+        } else {
+            let template = getTuningPrompt(item.testNumber || '1') || '';
+
+            if (template && template.includes('{ASSIGNMENT_PROMPT}')) {
+                prompt = template.replace('{ASSIGNMENT_PROMPT}', assignmentContent);
+            } else if (template) {
+                prompt = template + '\n\n' + assignmentContent;
+            } else {
+                prompt = assignmentContent;
+            }
+        }
+
+        // Replace rubric placeholder
+        const rubricLinkHtml = '<a href="src/ai_assessment/rubric/Critical_Thinking_VALUE_Rubric.pdf" target="_blank" style="color: var(--rami-highlight); text-decoration: underline;">rubric</a>';
+        if (prompt && prompt.includes('{rubric}')) {
+            // Remove duplicate 'rubric ' before placeholder
+            prompt = prompt.replace('rubric {rubric}', rubricLinkHtml);
+            prompt = prompt.replace('{rubric}', rubricLinkHtml);
         }
 
         displayTuningPrompt(elements, prompt);
-
         return;
 
-    } else { // This is for 'generation'
+    } else {
         if (item.data && item.data.prompt) {
             prompt = item.data.prompt;
         } else {
-            // Fallback for generation should ideally not be hit if data is loaded correctly
             prompt = 'Error: Generation prompt not found in data.';
         }
     }
 
+    prompt = removeMarkdown(prompt);
 
-
-            prompt = removeMarkdown(prompt);
-
-
-
-        
-
-
-
-            if (prompt) {
-
-
-
-                displayPromptWithExpand(elements, prompt, item.command);
-
-
-
-            } else {
-
-
-
-                elements.promptContent.textContent = 'No prompt available';
-
-
-
-            }
+    if (prompt) {
+        displayPromptWithExpand(elements, prompt, item.command);
+    } else {
+        elements.promptContent.textContent = 'No prompt available';
+    }
 
 }
 

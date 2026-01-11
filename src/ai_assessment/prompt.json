@@ -6,7 +6,7 @@
 
   "reflection_prompt": "You are an undergrad student in first semester and you wrote an essay for the following prompt.\n\n{ASSIGNMENT_PROMPT}\n\nOriginal Essay: {original essay}\n\nThen, you tuned the essay for the attached {rubric}. What did you change?\n\nTuned Essay: {tuned essay}",
 
-  "tuning_prompt": "{ASSIGNMENT_PROMPT}\n\nNow, please tune the essay based on the attached rubric {rubric}",
+  "tuning_prompt": "{ASSIGNMENT_PROMPT}\n\nNow, please tune the essay based on the attached {rubric}",
 
   "assignment_1_prompt": "I am an undergrad student in the first semester.\n\nConsider the following problem: In the morning, when Professor Catlove opens a new can of cat food, his cats run into the kitchen purring and meowing and rubbing their backs against his legs. What examples, if any, of classical conditioning, operant conditioning, and social learning are at work in this brief scene? Note that both the cats and the professor might be exhibiting conditioned behavior here.\n\nYou and some fellow classmates have been discussing this problem over coffee, and you are convinced that the other members of your group are confused about the concepts. Write a five-page essay (1000 words or less) to set them straight and include at least 5 citations from peer-reviewed articles.",
 
@@ -20,7 +20,7 @@
 
   "a3_test_1_prompt": "I am an undergrad student in the first semester. Perform a real estate investment market analysis in the Boston Metropolitan Area for 2024. Summarize the key findings, insights from the analysis, highlight the best real estate investment opportunities, and any significant patterns observed. Write a five-page essay (1000 words or less) to set them straight and include at least 5 citations from peer-reviewed articles.",
 
-  "tuning_prompt_0": "{ASSIGNMENT_PROMPT}\n\nNow, please tune the essay based on the attached rubric {rubric}",
+  "tuning_prompt_0": "{ASSIGNMENT_PROMPT}\n\nNow, please tune the essay based on the attached {rubric}",
 
-  "tuning_prompt_1": "{ASSIGNMENT_PROMPT}\n\nNow, please write the essay based on the attached rubric {rubric}"
+  "tuning_prompt_1": "{ASSIGNMENT_PROMPT}\n\nNow, please write the essay based on the attached {rubric}"
 }

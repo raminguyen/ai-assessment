@@ -22,7 +22,9 @@ function findElements() {
 }
 
 async function loadPrompts() {
-    const response = await fetch('src/ai_assessment/prompt.json');
+    // Adjust path for subdirectories
+    const basePath = window.location.pathname.includes('/test/') ? '../' : '';
+    const response = await fetch(basePath + 'src/ai_assessment/prompt.json');
 
     if (!response.ok) {
         prompts = {};
@@ -32,10 +34,9 @@ async function loadPrompts() {
     }
 
     const data = await response.json();
-    prompts = {};
 
     for (const key in data) {
-        if (key.endsWith('_prompt')) {
+        if (key.includes('_prompt')) {
             if (key.startsWith('assignment_')) {
                 const match = key.match(/assignment_(\d+)_prompt/);
                 if (match) {
@@ -52,6 +53,8 @@ async function loadPrompts() {
 }
 
 async function loadRubrics() {
+    // Adjust path for subdirectories
+    const basePath = window.location.pathname.includes('/test/') ? '../' : '';
     const rubricFiles = {
         'critical_thinking': 'src/ai_assessment/rubric/rubric_critical_thinking.json',
         'oral_communication': 'src/ai_assessment/rubric/rubric_oral_communication.json'
@@ -59,7 +62,7 @@ async function loadRubrics() {
 
     for (const [rubricName, filePath] of Object.entries(rubricFiles)) {
         try {
-            const response = await fetch(filePath);
+            const response = await fetch(basePath + filePath);
             if (response.ok) {
                 const data = await response.json();
                 rubrics[rubricName] = data[rubricName] || '';
@@ -90,7 +93,7 @@ function getTuningPrompt(testNumber = null) {
     if (testNumber !== null && prompts['tuning_prompt_' + testNumber]) {
         return prompts['tuning_prompt_' + testNumber];
     }
-    return tuningPrompt; // fallback to default
+    return tuningPrompt;
 }
 
 function getRubrics() {
