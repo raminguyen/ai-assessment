@@ -62,5 +62,5 @@
 
   "a3_test_6_prompt": "You are an undergrad student in the first semester. Perform a real estate investment market analysis in the Boston Metropolitan Area for 2024. Summarize the key findings, insights from the analysis, highlight the best real estate investment opportunities, and any significant patterns observed. Write a formal five-page essay (1000 words or less) to set them straight and include at least 5 citations from peer-reviewed articles.",
 
-  "tuning_prompt_6": "{ASSIGNMENT_PROMPT}\n\nWrite a formal five-page essay. Tune the essay using the following rubric: {rubric}"
+  "tuning_prompt_6": "{ASSIGNMENT_PROMPT}\n\nTune the essay using the following rubric: {rubric}"
 }
