@@ -56,7 +56,10 @@ class Essay:
 
         self.grade_prompt = data["grade_prompt"]
         self.reflection_prompt = data["reflection_prompt"]
-        self.tuning_prompt = data.get("tuning_prompt", data["tuning_prompt_0"])
+
+        # Use test-specific tuning prompt (tuning_prompt_0, tuning_prompt_1, tuning_prompt_2)
+        tuning_prompt_key = f"tuning_prompt_{test_num}"
+        self.tuning_prompt = data.get(tuning_prompt_key, data["tuning_prompt_0"])
 
         # Map assignment number to professor type
         professor_types = {

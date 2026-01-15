@@ -9,7 +9,7 @@ class Runner:
         parser = argparse.ArgumentParser()
         parser.add_argument('assignment', choices=['a1', 'a2', 'a3'])
         parser.add_argument('model', choices=['chatgpt', 'gemini', 'claude', 'grok'])
-        parser.add_argument('test', choices=['test0', 'test1', 'test2'])
+        parser.add_argument('test', choices=['test0', 'test1', 'test2', 'test3', 'test4', 'test5', 'test6'])
         parser.add_argument('--folder', type=str, default='critical_thinking')
         parser.add_argument('--tune', action='store_true', help='Run tuning instead of generation')
 
@@ -34,8 +34,26 @@ class Runner:
         essay = Util.create_essay(assignment_num, rubric_folder=rubric_name)
         essay.load_test_prompt(test_num, assignment_num)
 
+        # Determine filename and filepath first
         if args.tune:
-            print(f"\nTuning essay for {args.assignment}_test_{{test_num}}_prompt...")
+            filename = f"{args.assignment}_test{test_num}_tune_{args.model}.json"
+        else:
+            filename = f"{args.assignment}_test{test_num}_{args.model}.json"
+
+        # Save to test folder
+        test_folder = os.path.join(args.test, 'data', rubric_name)
+        os.makedirs(test_folder, exist_ok=True)
+        filepath = os.path.join(test_folder, filename)
+
+        # Check if file already exists
+        if os.path.exists(filepath):
+            print(f"\n⏭️  Skipping: {filename} already exists")
+            print(f"Location: {filepath}")
+            return
+
+        # Generate or tune
+        if args.tune:
+            print(f"\n▶️  Tuning essay for {args.assignment}_test_{test_num}_prompt...")
             print(f"Prompt: {essay.write_prompt[:100]}...")
 
             # Load rubric
@@ -47,27 +65,17 @@ class Runner:
             data['rubric'] = rubric_name
             data['folder'] = rubric_name
 
-            filename = f"{args.assignment}_test{test_num}_tune_{args.model}.json"
-        
         else:
-                print(f"\nGenerating essay with {args.assignment}_test_{test_num}_prompt...")
-                print(f"Prompt: {essay.write_prompt[:100]}...")
-                data = model.generate(essay)
+            print(f"\n▶️  Generating essay with {args.assignment}_test_{test_num}_prompt...")
+            print(f"Prompt: {essay.write_prompt[:100]}...")
+            data = model.generate(essay)
 
-                filename = f"{args.assignment}_test{test_num}_{args.model}.json"
-
-
-        # Save to test folder
-        test_folder = os.path.join(args.test, 'data', rubric_name)
-        os.makedirs(test_folder, exist_ok=True)
-
-        filepath = os.path.join(test_folder, filename)
-
+        # Save the file
         with open(filepath, 'w') as f:
             json.dump(data, f, indent=2)
 
         action = "Tuning" if args.tune else "Test"
-        print(f"\n{action} {test_num} complete!")
+        print(f"\n✅ {action} {test_num} complete!")
         print(f"Saved to: {filepath}")
 
 
