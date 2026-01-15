@@ -54,7 +54,7 @@
 
   "a3_test_5_prompt": "You are an undergrad student in the first semester. Perform a real estate investment market analysis in the Boston Metropolitan Area for 2024. Summarize the key findings, insights from the analysis, highlight the best real estate investment opportunities, and any significant patterns observed. Write a formal five-page essay (1000 words or less) to set them straight and include at least 5 citations from peer-reviewed articles.",
 
-  "tuning_prompt_5": "{ASSIGNMENT_PROMPT}\n\nWrite a formal five-page essay. Tune the essay using the following rubric: {rubric}",
+  "tuning_prompt_5": "{ASSIGNMENT_PROMPT}\n\nTune the essay using the following rubric: {rubric}",
 
   "a1_test_6_prompt": "You are an undergrad student in the first semester. Consider the following problem: In the morning, when Professor Catlove opens a new can of cat food, his cats run into the kitchen purring and meowing and rubbing their backs against his legs. What examples, if any, of classical conditioning, operant conditioning, and social learning are at work in this brief scene? Note that both the cats and the professor might be exhibiting conditioned behavior here.\n\nYou and some fellow classmates have been discussing this problem over coffee, and you are convinced that the other members of your group are confused about the concepts. Write a formal five-page essay (1000 words or less) to set them straight and include at least 5 citations from peer-reviewed articles.",
 
