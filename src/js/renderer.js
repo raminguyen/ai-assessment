@@ -76,7 +76,13 @@ function displayContent(item) {
     displayPrompt(elements, item);
     displayRubricSection(elements, item);
     displayResponseText(elements, item);
-    displayScores(item);
+
+    // Don't show scores for reflection
+    if (item.command === 'reflection') {
+        showNoScoresMessage(elements);
+    } else {
+        displayScores(item);
+    }
 }
 
 function displayDate(elements, item) {
