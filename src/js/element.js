@@ -36,7 +36,17 @@ async function loadPrompts() {
     const data = await response.json();
 
     for (const key in data) {
-        if (key.includes('_prompt')) {
+        // Handle new format: assignment_1_p1, assignment_1_p2
+        if (key.startsWith('assignment_') && key.includes('_p')) {
+            const match = key.match(/assignment_(\d+)_p(\d+)/);
+            if (match) {
+                // Store as Assignment_1_p1, Assignment_1_p2
+                prompts['Assignment_' + match[1] + '_p' + match[2]] = data[key];
+            }
+            prompts[key] = data[key];
+        }
+        // Handle old format: assignment_X_prompt
+        else if (key.includes('_prompt')) {
             if (key.startsWith('assignment_')) {
                 const match = key.match(/assignment_(\d+)_prompt/);
                 if (match) {
@@ -45,11 +55,15 @@ async function loadPrompts() {
             }
             prompts[key] = data[key];
         }
+        // Handle tuning_p1, tuning_p2
+        else if (key.startsWith('tuning_p')) {
+            prompts[key] = data[key];
+        }
     }
 
     gradePrompt = data.grade_prompt || '';
     reflectionPrompt = data.reflection_prompt || '';
-    tuningPrompt = data.tuning_prompt || '';
+    tuningPrompt = data.tuning_prompt || data.tuning_p1 || '';
 }
 
 async function loadRubrics() {
@@ -71,13 +85,28 @@ async function loadRubrics() {
     }
 }
 
-function getPromptForEssay(essayName, testNumber = null) {
-    if (testNumber) {
-        const testPromptKey = `${essayName.toLowerCase().replace('assignment_', 'a')}_test_${testNumber}_prompt`;
+function getPromptForEssay(essayName, promptNumber = null) {
+    console.log('getPromptForEssay called with:', essayName, promptNumber);
+    console.log('Available prompts:', Object.keys(prompts));
+
+    // Try new format first: Assignment_1_p1, Assignment_1_p2
+    if (promptNumber) {
+        const newFormatKey = essayName + '_p' + promptNumber;
+        console.log('Looking for key:', newFormatKey);
+        if (prompts[newFormatKey]) {
+            console.log('Found prompt for:', newFormatKey);
+            return prompts[newFormatKey];
+        }
+
+        // Try test format: a1_test_1_prompt
+        const testPromptKey = essayName.toLowerCase().replace('assignment_', 'a') + '_test_' + promptNumber + '_prompt';
+        console.log('Looking for test key:', testPromptKey);
         if (prompts[testPromptKey]) {
+            console.log('Found prompt for:', testPromptKey);
             return prompts[testPromptKey];
         }
     }
+    console.log('Falling back to:', essayName);
     return prompts[essayName] || '';
 }
 
@@ -89,10 +118,21 @@ function getReflectionPrompt() {
     return reflectionPrompt;
 }
 
-function getTuningPrompt(testNumber = null) {
-    if (testNumber !== null && prompts['tuning_prompt_' + testNumber]) {
-        return prompts['tuning_prompt_' + testNumber];
+function getTuningPrompt(promptNumber = null) {
+    console.log('getTuningPrompt called with:', promptNumber);
+    console.log('Looking for tuning_p' + promptNumber, 'in prompts');
+
+    // Try new format: tuning_p1, tuning_p2
+    if (promptNumber !== null && prompts['tuning_p' + promptNumber]) {
+        console.log('Found tuning_p' + promptNumber);
+        return prompts['tuning_p' + promptNumber];
     }
+    // Try old format: tuning_prompt_X
+    if (promptNumber !== null && prompts['tuning_prompt_' + promptNumber]) {
+        console.log('Found tuning_prompt_' + promptNumber);
+        return prompts['tuning_prompt_' + promptNumber];
+    }
+    console.log('Using default tuningPrompt');
     return tuningPrompt;
 }
 
