@@ -19,16 +19,16 @@ python main.py reflection grok 1 critical_thinking --prompt 1 &&
 python main.py reflection claude 1 critical_thinking --prompt 1 &&
 
 # Score generated essays
-python main.py score chatgpt critical_thinking a1_gen_chatgpt_p1.json 1 &&
-python main.py score chatgpt critical_thinking a1_gen_gemini_p1.json 1 &&
-python main.py score chatgpt critical_thinking a1_gen_grok_p1.json 1 &&
-python main.py score chatgpt critical_thinking a1_gen_claude_p1.json 1 &&
+python main.py score chatgpt critical_thinking a1_gen_chatgpt_p1.json 1 --prompt 1 &&
+python main.py score chatgpt critical_thinking a1_gen_gemini_p1.json 1 --prompt 1 &&
+python main.py score chatgpt critical_thinking a1_gen_grok_p1.json 1 --prompt 1 &&
+python main.py score chatgpt critical_thinking a1_gen_claude_p1.json 1 --prompt 1 &&
 
 # Score tuned essays
-python main.py score chatgpt critical_thinking a1_tune_chatgpt_p1.json 1 &&
-python main.py score chatgpt critical_thinking a1_tune_gemini_p1.json 1 &&
-python main.py score chatgpt critical_thinking a1_tune_grok_p1.json 1 &&
-python main.py score chatgpt critical_thinking a1_tune_claude_p1.json 1
+python main.py score chatgpt critical_thinking a1_tune_chatgpt_p1.json 1 --prompt 1 &&
+python main.py score chatgpt critical_thinking a1_tune_gemini_p1.json 1 --prompt 1 &&
+python main.py score chatgpt critical_thinking a1_tune_grok_p1.json 1 --prompt 1 &&
+python main.py score chatgpt critical_thinking a1_tune_claude_p1.json 1 --prompt 1
 
 # Assignment 2
 # python main.py generate chatgpt 2 --folder critical_thinking --prompt 1 &

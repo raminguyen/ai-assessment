@@ -18,6 +18,18 @@ python main.py reflection gemini 1 critical_thinking --prompt 2 &
 python main.py reflection grok 1 critical_thinking --prompt 2 &
 python main.py reflection claude 1 critical_thinking --prompt 2 &
 
+# Score generated essays - Assignment 1
+python main.py score chatgpt critical_thinking a1_gen_chatgpt_p2.json 1 --prompt 2 &
+python main.py score chatgpt critical_thinking a1_gen_gemini_p2.json 1 --prompt 2 &
+python main.py score chatgpt critical_thinking a1_gen_grok_p2.json 1 --prompt 2 &
+python main.py score chatgpt critical_thinking a1_gen_claude_p2.json 1 --prompt 2 &
+
+# Score tuned essays - Assignment 1
+python main.py score chatgpt critical_thinking a1_tune_chatgpt_p2.json 1 --prompt 2 &
+python main.py score chatgpt critical_thinking a1_tune_gemini_p2.json 1 --prompt 2 &
+python main.py score chatgpt critical_thinking a1_tune_grok_p2.json 1 --prompt 2 &
+python main.py score chatgpt critical_thinking a1_tune_claude_p2.json 1 --prompt 2 &
+
 # Assignment 2
 python main.py generate chatgpt 2 --folder critical_thinking --prompt 2 &
 python main.py generate gemini 2 --folder critical_thinking --prompt 2 &

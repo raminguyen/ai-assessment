@@ -25,6 +25,7 @@ def main():
     score.add_argument('rubric', type=str)
     score.add_argument('filename', help='Individual file to read')
     score.add_argument('assignment', type=int)
+    score.add_argument('--prompt', type=int, default=1, help='Prompt number (1 or 2)')
 
     reflect = subparsers.add_parser('reflection')
     reflect.add_argument('model', choices=['chatgpt', 'gemini', 'claude', 'grok'])
@@ -43,7 +44,7 @@ def main():
         runner.tune(args.model, args.assignment, args.rubric, args.prompt)
 
     elif args.command == 'score':
-        runner.score(args.grader, args.rubric, args.filename, args.assignment)
+        runner.score(args.grader, args.rubric, args.filename, args.assignment, args.prompt)
 
     elif args.command == 'reflection':
         runner.reflect(args.model, args.assignment, args.rubric, args.prompt)

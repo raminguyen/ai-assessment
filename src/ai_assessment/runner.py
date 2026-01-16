@@ -71,11 +71,11 @@ class Runner:
 
         print("Saved: " + filepath)
 
-    def score(self, grader_name, rubric_name, filename, assignment):
+    def score(self, grader_name, rubric_name, filename, assignment, prompt_num=1):
         grader = self.all_models[grader_name]
 
         essay = Util.create_essay(assignment, rubric_folder=rubric_name)
-        essay.load_prompt_p(1, assignment)
+        essay.load_prompt_p(prompt_num, assignment)
 
         # Load essay from file
         essay_text, writer_model, essay_type = Util.load_essay_from_data(filename, rubric_name)
@@ -92,8 +92,8 @@ class Runner:
         }
         short_writer = name_map.get(writer_model, writer_model)
 
-        # Build score filename
-        score_filename = Util.build_filename(assignment, 'score', grader_name, essay_type, short_writer)
+        # Build score filename with prompt suffix
+        score_filename = Util.build_filename(assignment, 'score', grader_name, essay_type, short_writer, prompt_num)
         folder = os.path.join('..', 'data', rubric_name)
         filepath = os.path.join(folder, score_filename)
 
@@ -105,6 +105,7 @@ class Runner:
         print("Scoring " + filename + " with " + grader_name)
 
         data = grader.score(essay, rubric_obj, writer_model, essay_type)
+        data['prompt_num'] = prompt_num
 
         with open(filepath, 'w') as f:
             json.dump(data, f, indent=2)
