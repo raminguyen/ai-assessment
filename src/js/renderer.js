@@ -78,8 +78,10 @@ function displayContent(item) {
     displayResponseText(elements, item);
 
     // Don't show scores for reflection
+    console.log('item.command:', item.command);
     if (item.command === 'reflection') {
-        showNoScoresMessage(elements);
+        console.log('Hiding scores for reflection');
+        elements.scoreBody.innerHTML = '<p style="color: var(--rami-lightgrey); font-size: 0.85rem; text-align: center; padding: 2rem;">No scores for reflection</p>';
     } else {
         displayScores(item);
     }
@@ -230,12 +232,10 @@ function displayReflectionPrompt(elements, prompt, item) {
 
 
     const originalContent = elements.promptContent.querySelector('[data-essay-content="original"]');
-
     const tunedContent = elements.promptContent.querySelector('[data-essay-content="tuned"]');
 
-    if (originalContent) originalContent.textContent = cleanOriginalEssay;
-
-    if (tunedContent) tunedContent.textContent = cleanTunedEssay;
+    if (originalContent) originalContent.textContent = originalEssay;
+    if (tunedContent) tunedContent.textContent = tunedEssay;
 
 
 
