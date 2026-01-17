@@ -162,13 +162,17 @@ document.addEventListener('click', function(event) {
     <!-- UI Components -->
     <script src="src/js/element.js?v=11"></script>
     <script src="src/js/filter.js?v=10"></script>
-    <script src="src/js/renderer.js?v=12"></script>
+    <script src="src/js/renderer.js?v=16"></script>
 
     <!-- Data Loaders -->
     <script src="src/js/github-loader-p2.js?v=2"></script>
     <script src="src/js/local-loader.js?v=10"></script>
 
     <!-- Application Entry -->
-    <script src="src/js/application.js?v=10"></script>
+    <script src="src/js/application.js?v=11"></script>
+    <script>
+        // Override for Prompt 2
+        window.PROMPT_NUMBER = '2';
+    </script>
 </body>
 </html>
