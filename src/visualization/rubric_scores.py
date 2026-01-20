@@ -2,11 +2,12 @@ import os
 import json
 import re
 import matplotlib.pyplot as plt
+import pandas as pd
 import numpy as np
 from pathlib import Path
 
 # Configuration
-DATA_DIR = Path('/Users/ramizoey/ai-assessment/data/critical_thinking')
+DATA_DIR = Path(__file__).resolve().parent.parent.parent / 'data' / 'critical_thinking'
 OUTPUT_DIR = Path('src/visualization/rubric_plots')
 ASSIGNMENTS = ['a1', 'a2', 'a3']
 WRITERS = ['chatgpt', 'gemini', 'claude', 'grok']
@@ -216,15 +217,126 @@ def plot_combined_average(prompt_num=2):
     
     OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
     out_path = OUTPUT_DIR / f'all_assignments_p{prompt_num}_rubric_avg_progression.png'
-    plt.savefig(out_path, dpi=300)
+    plt.savefig(out_path, dpi=1500)
     print(f"Saved combined average plot to {out_path}")
     plt.close()
 
-if __name__ == "__main__":
-    print("Generating Combined Average Progression plots...")
+def visualize_dataset_as_png(assignment='a1', prompt_num=2, output_filename=None):
+    """
+    Generates a pretty table of the dataset for a specific assignment and prompt.
+    """
+    print(f"Generating dataset table for {assignment}, prompt {prompt_num}...")
+    data = load_data(assignment, prompt_num)
     
-    # Only generate the requested combined average charts
+    rows = []
+    for writer in WRITERS:
+        for grader in WRITERS:
+            if writer == grader:
+                continue
+            pair_data = data[writer][grader]
+            
+            for essay_type in ['gen', 'tune']:
+                scores = pair_data.get(essay_type)
+                if scores:
+                    row = {
+                        'Writer': writer,
+                        'Grader': grader,
+                        'Type': essay_type,
+                    }
+                    for dim in DIMENSIONS:
+                        short_dim = dim.split(' ')[0] 
+                        row[short_dim] = scores.get(dim, 0.0)
+                    rows.append(row)
+    
+    if not rows:
+        print("No data found for table generation!")
+        return
+
+    df = pd.DataFrame(rows)
+    
+    # Sort for better readability
+    df = df.sort_values(by=['Writer', 'Grader', 'Type'])
+
+    # Setup plotting
+    num_rows = len(df)
+    # Calculate figure size: roughly 0.5 inch per row + headers
+    fig_height = max(6, num_rows * 0.4 + 2)
+    fig_width = 14
+    
+    fig, ax = plt.subplots(figsize=(fig_width, fig_height))
+    ax.axis('off')
+    
+    # Prepare table data
+    # Format floats
+    display_df = df.copy()
+    dim_cols = [c for c in df.columns if c not in ['Writer', 'Grader', 'Type']]
+    for col in dim_cols:
+        display_df[col] = display_df[col].apply(lambda x: f"{x:.2f}")
+
+    table_data = [display_df.columns.tolist()] + display_df.values.tolist()
+    
+    # Create table
+    table = ax.table(cellText=table_data, 
+                     colLabels=None, 
+                     cellLoc='center', 
+                     loc='center')
+    
+    # Styling
+    table.auto_set_font_size(False)
+    table.set_fontsize(11)
+    table.scale(1, 1.8) # Increase row height
+    
+    # Colors
+    header_color = '#40466e'
+    header_text_color = '#ffffff'
+    row_colors = ['#f1f1f2', '#ffffff']
+    edge_color = '#bcbcbc'
+
+    for k, cell in table.get_celld().items():
+        row, col = k
+        cell.set_edgecolor(edge_color)
+        
+        # Header
+        if row == 0:
+            cell.set_text_props(weight='bold', color=header_text_color)
+            cell.set_facecolor(header_color)
+        else:
+            # Body
+            cell.set_facecolor(row_colors[row % 2])
+            cell.set_text_props(color='black')
+            
+            # Optional: Color code 'Type' (Gen vs Tune)
+            if display_df.columns[col] == 'Type':
+                val = table_data[row][col]
+                if val == 'tune':
+                    cell.set_text_props(color='#d35400', weight='bold') # Dark Orange
+                elif val == 'gen':
+                    cell.set_text_props(color='#2980b9', weight='bold') # Blue
+
+    # Add title
+    plt.title(f"Dataset Preview: Assignment {assignment.upper()} - Prompt {prompt_num}", 
+              fontweight="bold", fontsize=16, pad=20, color='#2c3e50')
+    
+    OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
+    if output_filename is None:
+        output_filename = f'{assignment}_p{prompt_num}_dataset_table.png'
+    output_path = OUTPUT_DIR / output_filename
+    
+    plt.savefig(output_path, bbox_inches='tight', dpi=1500)
+    print(f"Dataset table saved to {output_path}")
+    plt.close()
+
+if __name__ == "__main__":
+    print("Generating Rubric visualizations...")
+    
+    # 1. Combined Average Progression plots
     plot_combined_average(prompt_num=2)
     plot_combined_average(prompt_num=1)
+
+    # 2. Dataset Tables (Pretty PNGs)
+    visualize_dataset_as_png(assignment='a1', prompt_num=2)
+    # You can uncomment or add loops here to generate tables for other assignments if needed
+    # for assign in ASSIGNMENTS:
+    #     visualize_dataset_as_png(assignment=assign, prompt_num=2)
         
-    print("Done.")
+    print("All visualizations completed.")
