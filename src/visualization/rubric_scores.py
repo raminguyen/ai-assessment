@@ -6,7 +6,7 @@ import numpy as np
 from pathlib import Path
 
 # Configuration
-DATA_DIR = Path('data/critical_thinking')
+DATA_DIR = Path('/Users/ramizoey/ai-assessment/data/critical_thinking')
 OUTPUT_DIR = Path('src/visualization/rubric_plots')
 ASSIGNMENTS = ['a1', 'a2', 'a3']
 WRITERS = ['chatgpt', 'gemini', 'claude', 'grok']
@@ -151,12 +151,14 @@ def _draw_avg_progression_on_axis(ax, data, writer):
     gen_avg = gen_totals / counts
     tune_avg = tune_totals / counts
     
-    # Calculate Overall Average Improvement (Summary Statistic)
-    overall_delta = np.mean(tune_avg - gen_avg)
+    # Calculate Total Score Difference (Summary Statistic)
+    sum_gen = np.sum(gen_avg)
+    sum_tune = np.sum(tune_avg)
+    overall_delta = sum_tune - sum_gen
     
     # Plot
-    line_gen, = ax.plot(x_indices, gen_avg, color='gray', linestyle='--', marker='o', alpha=0.6, label='Gen (First Try)')
-    line_tune, = ax.plot(x_indices, tune_avg, color=writer_color, linewidth=2.5, marker='o', markersize=8, label='Tune (Reflected)')
+    line_gen, = ax.plot(x_indices, gen_avg, color='gray', linestyle='--', marker='o', alpha=0.6, label='Gen')
+    line_tune, = ax.plot(x_indices, tune_avg, color=writer_color, linewidth=2.5, marker='o', markersize=8, label='Tune')
     ax.fill_between(x_indices, gen_avg, tune_avg, color=writer_color, alpha=0.1)
     
     # Annotate deltas
@@ -170,8 +172,8 @@ def _draw_avg_progression_on_axis(ax, data, writer):
 
     # Add Summary Statistic Box
     stat_color = '#27AE60' if overall_delta > 0 else ('#C0392B' if overall_delta < -0.01 else 'gray')
-    stat_text = f"Avg Improv: {overall_delta:+.2f}"
-    ax.text(0.02, 0.95, stat_text, transform=ax.transAxes, fontsize=10, fontweight='bold',
+    stat_text = f"Diff: {overall_delta:+.1f}"
+    ax.text(0.02, 0.95, stat_text, transform=ax.transAxes, fontsize=9, fontweight='bold',
             color=stat_color, verticalalignment='top', bbox=dict(facecolor='white', alpha=0.8, edgecolor=stat_color, boxstyle='round,pad=0.3'))
 
     ax.set_xticks(x_indices)
@@ -186,7 +188,7 @@ def _draw_avg_progression_on_axis(ax, data, writer):
 def plot_combined_average(prompt_num=2):
     """Combines Average Progression into a 3x4 grid (Rows=Assignments, Cols=Writers)."""
     fig, axes = plt.subplots(3, 4, figsize=(22, 14), sharex=True, sharey=True)
-    fig.suptitle(f'Combined Average Improvement: A1, A2, A3 (Prompt {prompt_num})\nTitle = Writer | Score = Average of other 3 Grader Models', fontsize=22, fontweight='bold', y=0.98)
+    fig.suptitle(f'Rubric Progression by Average Score by Dimension: A1, A2, A3 (Prompt {prompt_num})\nTitle = Writer | Average score from other 3 grader models', fontsize=22, fontweight='bold', y=0.98)
     
     for row_idx, assignment in enumerate(ASSIGNMENTS):
         data = load_data(assignment, prompt_num)
@@ -200,13 +202,13 @@ def plot_combined_average(prompt_num=2):
             # Column Title (Top row only)
             if row_idx == 0:
                 ax.set_title(f"WRITER: {writer.upper()}", fontsize=14, fontweight='bold', color=WRITER_COLORS[writer], pad=25)
-                ax.text(0.5, 1.05, "(Scores averaged from others)", transform=ax.transAxes, 
+                ax.text(0.5, 1.05, "(Average score from other 3 grader models)", transform=ax.transAxes, 
                         ha='center', fontsize=9, style='italic', color='#555555')
             
             _draw_avg_progression_on_axis(ax, data, writer)
             
     # Add a global footer/caption
-    fig.text(0.5, 0.02, "Note: Each column shows the performance of a specific WRITER. Scores are the mean consensus given by the other models acting as GRADERS.", 
+    fig.text(0.5, 0.02, "Total Difference = Sum of (Tune Average Total - Gen Average Total) across all dimensions.", 
              ha='center', fontsize=12, style='italic', bbox=dict(facecolor='white', alpha=0.5, edgecolor='gray', boxstyle='round,pad=0.5'))
 
     plt.tight_layout()
