@@ -20,6 +20,17 @@ DIMENSIONS = [
 ]
 SHORT_DIMS = ['Issues', 'Evidence', 'Context', 'Position', 'Conclusion']
 
+# Flexible patterns for dimension names that handle variations in grader outputs
+# Maps canonical dimension name to regex pattern that matches variations
+# Note: Some graders use curly apostrophe (U+2019) vs straight apostrophe (')
+DIMENSION_PATTERNS = {
+    'Explanation of issues': r'Explanation of issues',
+    'Evidence': r'Evidence(?:\s*\([^)]*\))?',
+    'Influence of context and assumptions': r'Influence of context (?:and|&) assumptions',
+    "Student's position": r"Student['\u2019]s position(?:\s*\([^)]*\))?",
+    'Conclusions and related outcomes': r'Conclusions (?:and|&) related outcomes',
+}
+
 # Colors for writers (for labels/grouping)
 WRITER_COLORS = {
     'chatgpt': '#3498DB',
@@ -29,29 +40,111 @@ WRITER_COLORS = {
 }
 
 def parse_dimension_scores(text):
-    """Parse rubric dimension scores from text. Adapted from score_chart.py"""
+    """
+    Parse rubric dimension scores from text.
+    Based on comprehensive JS parser with many format variations.
+    """
     scores = {}
-    for dim in DIMENSIONS:
-        # Try multiple patterns
-        escaped_dim = re.escape(dim)
-        patterns = [
-            escaped_dim + r'.*?(\d+(?:\.\d+)?)',
-            r'\*\*' + escaped_dim + r':\*\*\s*(\d+(?:\.\d+)?)',
-            r'\|.*?'+ escaped_dim + r'.*?\|\s*(\d+(?:\.\d+)?)\s*\|',
-            r'- \*\*' + escaped_dim + r'\s*:?\*\*\s*:?\s*(\d+(?:\.\d+)?)'
-        ]
 
-        for pattern in patterns:
-            match = re.search(pattern, text, re.IGNORECASE | re.DOTALL)
-            if match:
-                try:
-                    scores[dim] = float(match.group(1))
-                except ValueError:
-                    scores[dim] = 0.0
+    # Alternate names for dimensions (like in JS parser)
+    dim_alternates = {
+        'Evidence': ['Evidence', 'Evidence (selecting and using information)', 'Evidence (selecting/using information)', 'Evidence (Selecting and using information to investigate a point of view or conclusion)'],
+        "Student's position": ["Student's position", "Student's position (perspective/thesis)", "Student's position (perspective, thesis/hypothesis)", "Student's position (perspective/thesis/hypothesis)"],
+        'Conclusions and related outcomes': ['Conclusions and related outcomes', 'Conclusions/outcomes', 'Conclusions and related outcomes (implications and consequences)'],
+    }
+
+    for dim in DIMENSIONS:
+        # Get base pattern and alternates
+        names_to_try = dim_alternates.get(dim, [dim])
+
+        for dim_name in names_to_try:
+            # Escape regex special chars and handle apostrophe variations
+            dim_escaped = re.escape(dim_name)
+            # Handle straight and curly apostrophes (re.escape doesn't escape apostrophe)
+            dim_escaped = dim_escaped.replace("'", r"['\u2019]")
+            # Handle "and" vs "&"
+            dim_escaped = dim_escaped.replace(r'\ and\ ', r'\ (?:and|&)\ ')
+
+            # Comprehensive list of patterns (ordered from most specific to least)
+            patterns = [
+                # Format: - **Dimension**: 4 (Grok style - colon before closing **)
+                r'^\s*-\s*\*\*' + dim_escaped + r'\*\*:\s*(\d+(?:\.\d+)?)',
+                # Format: - **Dimension:** 3 or 3.5
+                r'^\s*-\s*\*\*' + dim_escaped + r':\*\*\s*(\d+(?:\.\d+)?)',
+                # Format: ### 1. Dimension: **3.5/4
+                r'###\s*\d+\.\s*' + dim_escaped + r':[^\n]*?\*\*(\d+(?:\.\d+)?)',
+                # Format: **Score: 4 (Capstone)** after dimension name
+                dim_escaped + r'[^\n]*?\n[\s\S]{0,500}?\*\*Score:\s*(\d+(?:\.\d+)?)\s*\([^)]+\)\*\*',
+                # Format: **Score:** 3.5
+                dim_escaped + r'[^\n]*?\n[\s\S]{0,500}?\*\*Score:\*\*\s*(\d+(?:\.\d+)?)',
+                # Format: **Dimension:** 3.5/4
+                r'\*\*' + dim_escaped + r':\*\*\s*(\d+(?:\.\d+)?)/\d+',
+                # Format: **Dimension:** 3 or 3.5
+                r'\*\*' + dim_escaped + r':\*\*\s*(\d+(?:\.\d+)?)',
+                # Format: | **Dimension** | 4 (Capstone) |
+                r'\|\s*\*\*' + dim_escaped + r'\*\*\s*\|\s*(\d+(?:\.\d+)?)\s*\([^)]+\)\s*\|',
+                # Format: | **Dimension** | **3** | or **3.5** |
+                r'\|\s*\*\*' + dim_escaped + r'\*\*\s*\|\s*\*\*(\d+(?:\.\d+)?)\*\*\s*\|',
+                # Format: | **Dimension** | 3 | or 3.5 |
+                r'\|\s*\*\*' + dim_escaped + r'\*\*\s*\|\s*(\d+(?:\.\d+)?)\s*\|',
+                # Format: | Dimension | 3 | or 3.5 |
+                r'\|\s*' + dim_escaped + r'\s*\|\s*(\d+(?:\.\d+)?)\s*\|',
+                # Format: **Dimension:** **3 or **3.5
+                r'\*\*' + dim_escaped + r':\*\*\s*\*\*(\d+(?:\.\d+)?)',
+                # Format: Dimension: **3** or **3.5**
+                dim_escaped + r':\s*\*\*(\d+(?:\.\d+)?)\*\*',
+                # Format: Dimension: [3] or [3.5]
+                dim_escaped + r':\s*\[(\d+(?:\.\d+)?)\]',
+                # Format: Dimension: 3 or 3.5
+                dim_escaped + r':\s*(\d+(?:\.\d+)?)',
+                # Format: **Dimension: 3** or **Dimension: 3.5**
+                r'\*\*' + dim_escaped + r':\s*(\d+(?:\.\d+)?)\*\*',
+                # Flexible: any text then bold score
+                dim_escaped + r'.*?:\s*\*\*(\d+(?:\.\d+)?)\*\*',
+                # 1) Explanation of issues — **3 (Milestone)**
+                r'###\s*\d+[).]?\s*' + dim_escaped + r'\s*[\u2014\u2013\-]\s*\*\*(\d+(?:\.\d+)?)',
+                # Bold Table Rows with Bold Scores: | **Explanation of issues** | **4 (Capstone)** |
+                r'\|\s*\*\*' + dim_escaped + r'\*\*\s*\|\s*\*\*(\d+(?:\.\d+)?)(?:\s*\([^)]+\))?\*\*\s*\|',
+                # "Student's position" even with "(perspective...)" after it
+                r'\|?\s*\*?\*?' + dim_escaped + r'(?:\s*\([^)]+\))?\*?\*?\s*\|?\s*[\u2014\u2013\-:]?\s*\|?\s*\*\*(\d+(?:\.\d+)?)(?:\s*\([^)]+\))?\*\*',
+                # * **Student's position (perspective, thesis/hypothesis):** **4**
+                r'\*?\s*\*\*' + dim_escaped + r'(?:\s*\([^)]+\))?:?\*\*\s*[:\-]?\s*\*\*(\d+(?:\.\d+)?)\*\*',
+                # 2. Evidence (Selecting and using information): **4 (Capstone)**
+                r'###\s*\d+\.\s*' + dim_escaped + r'(?:\s*\(.*?\))?:\s*\*\*(\d+(?:\.\d+)?)',
+                # ChatGPT format: **4) Student's position (perspective/thesis): 4 (Capstone)**
+                r'\*\*\d+\)\s*' + dim_escaped + r'(?:\s*\([^)]*\))?:\s*(\d+(?:\.\d+)?)',
+                # ChatGPT summary: - **Student's position:** **4**
+                r'-\s*\*\*' + dim_escaped + r':\*\*\s*\*\*(\d+(?:\.\d+)?)\*\*',
+                # ChatGPT summary variant: - **Conclusions/outcomes:** **3**
+                r'-\s*\*\*' + dim_escaped + r':\*\*\s*\*\*(\d+(?:\.\d+)?)',
+                # Grok format: **Conclusions and related outcomes (implications and consequences): 4**
+                r'\*\*' + dim_escaped + r'(?:\s*\([^)]*\))?:\s*(\d+(?:\.\d+)?)\*\*',
+                # ChatGPT numerical summary: - Dimension: **3**
+                r'-\s*' + dim_escaped + r':\s*\*\*(\d+(?:\.\d+)?)\*\*',
+                # Simple format: Dimension: 3
+                dim_escaped + r':\s*(\d+(?:\.\d+)?)',
+            ]
+
+            for pattern in patterns:
+                match = re.search(pattern, text, re.IGNORECASE | re.MULTILINE)
+                if match:
+                    try:
+                        score = float(match.group(1))
+                        # Sanity check: scores should be 0-4
+                        if 0 <= score <= 4:
+                            scores[dim] = score
+                            break
+                    except ValueError:
+                        pass
+
+            # If found, break out of alternates loop
+            if dim in scores:
                 break
 
+        # Default to 0 if not found
         if dim not in scores:
             scores[dim] = 0.0
+
     return scores
 
 def load_data(assignment, prompt_num=2):
@@ -217,7 +310,7 @@ def plot_combined_average(prompt_num=2):
     
     OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
     out_path = OUTPUT_DIR / f'all_assignments_p{prompt_num}_rubric_avg_progression.png'
-    plt.savefig(out_path, dpi=1500)
+    plt.savefig(out_path, dpi=600)
     print(f"Saved combined average plot to {out_path}")
     plt.close()
 
@@ -322,7 +415,7 @@ def visualize_dataset_as_png(assignment='a1', prompt_num=2, output_filename=None
         output_filename = f'{assignment}_p{prompt_num}_dataset_table.png'
     output_path = OUTPUT_DIR / output_filename
     
-    plt.savefig(output_path, bbox_inches='tight', dpi=1500)
+    plt.savefig(output_path, bbox_inches='tight', dpi=600)
     print(f"Dataset table saved to {output_path}")
     plt.close()
 
@@ -334,9 +427,7 @@ if __name__ == "__main__":
     plot_combined_average(prompt_num=1)
 
     # 2. Dataset Tables (Pretty PNGs)
-    visualize_dataset_as_png(assignment='a1', prompt_num=2)
-    # You can uncomment or add loops here to generate tables for other assignments if needed
-    # for assign in ASSIGNMENTS:
-    #     visualize_dataset_as_png(assignment=assign, prompt_num=2)
+    for assign in ASSIGNMENTS:
+        visualize_dataset_as_png(assignment=assign, prompt_num=2)
         
     print("All visualizations completed.")
