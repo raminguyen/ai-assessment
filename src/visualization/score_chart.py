@@ -180,7 +180,7 @@ def _plot_assignment_on_axis(ax, folder_path, assignment, show_orientation_label
                     
                     # Orientation Label (Only for the first slot in the chart)
                     if show_orientation_labels and graders.index(grader) == 0:
-                        ax.annotate('P1', xy=(x_p1, 0.5), ha='center', va='bottom', fontsize=8, color='gray', fontweight='bold')
+                        ax.annotate('EXP1', xy=(x_p1, 0.5), ha='center', va='bottom', fontsize=8, color='gray', fontweight='bold')
 
 
                 # Plot P2 (Right offset)
@@ -214,11 +214,11 @@ def _plot_assignment_on_axis(ax, folder_path, assignment, show_orientation_label
                                            linestyle='-', zorder=5, alpha=0.8)
                         ax.add_patch(rect_p2)
                         
-                        ax.text(x_p2, ymax + 0.8, "P2 Better", ha='center', va='bottom', fontsize=7, fontweight='bold', color='#C0392B')
+                        ax.text(x_p2, ymax + 0.8, "EXP2 Better", ha='center', va='bottom', fontsize=7, fontweight='bold', color='#C0392B')
 
                     # Orientation Label (Only for the first slot in the chart)
                     if show_orientation_labels and graders.index(grader) == 0:
-                        ax.annotate('P2', xy=(x_p2, 0.5), ha='center', va='bottom', fontsize=8, color='gray', fontweight='bold')
+                        ax.annotate('EXP2', xy=(x_p2, 0.5), ha='center', va='bottom', fontsize=8, color='gray', fontweight='bold')
 
                 pos += 1
 
@@ -281,8 +281,8 @@ def plot_all_assignments(folder_path):
         Line2D([0], [0], marker='v', color='w', markerfacecolor='gray', markersize=10, label='Tuned (Declined)'),
         Line2D([0], [0], color='gray', linewidth=0, label=' '),
         Line2D([0], [0], color='w', markerfacecolor='none', label='PROMPTS'),
-        Line2D([0], [0], color='gray', linestyle='-', linewidth=2, label='Left Line: P1'),
-        Line2D([0], [0], color='gray', linestyle='-', linewidth=2, label='Right Line: P2'),
+        Line2D([0], [0], color='gray', linestyle='-', linewidth=2, label='Left Line: EXP1'),
+        Line2D([0], [0], color='gray', linestyle='-', linewidth=2, label='Right Line: EXP2'),
     ]
     
     axes[0].legend(handles=legend_elements, loc='upper left', bbox_to_anchor=(1.01, 1), borderaxespad=0, fontsize=10)
@@ -290,7 +290,7 @@ def plot_all_assignments(folder_path):
     # Center main title relative to the plot area (not the figure)
     left, right = 0.1, 0.85
     title_x = (left + right) / 2
-    fig.suptitle('Comparison of Prompt 1 vs Prompt 2 Performance\n(Total Score / 20)', fontsize=20, fontweight='bold', x=title_x, y=0.97)
+    fig.suptitle('Comparison of EXP1 and EXP2\n(Total Score / 20)', fontsize=20, fontweight='bold', x=title_x, y=0.97)
     
     plt.tight_layout()
     plt.subplots_adjust(left=left, right=right, top=0.90, bottom=0.08, hspace=0.3)
@@ -375,7 +375,7 @@ def plot_average_scores(folder_path):
                     ax.scatter(x_p1, p1_t_avg, s=120, c=color, marker=marker, edgecolors='white', linewidths=1.5, zorder=4, label='Tune' if idx==0 and pos==0 else "")
                     
                     if idx == 0 and pos == 0: # Legend/Annotation hack
-                         ax.annotate('P1', xy=(x_p1, 0.5), ha='center', va='bottom', fontsize=9, color='gray', fontweight='bold')
+                         ax.annotate('EXP1', xy=(x_p1, 0.5), ha='center', va='bottom', fontsize=9, color='gray', fontweight='bold')
 
                 # --- P2 (Right) ---
                 if p2_g_avg is not None and p2_t_avg is not None:
@@ -389,7 +389,7 @@ def plot_average_scores(folder_path):
                     ax.scatter(x_p2, p2_t_avg, s=120, c=color, marker=marker, edgecolors='white', linewidths=1.5, zorder=4, alpha=0.9)
 
                     if idx == 0 and pos == 0:
-                         ax.annotate('P2', xy=(x_p2, 0.5), ha='center', va='bottom', fontsize=9, color='gray', fontweight='bold')
+                         ax.annotate('EXP2', xy=(x_p2, 0.5), ha='center', va='bottom', fontsize=9, color='gray', fontweight='bold')
                 
                 # Vertical Separator
                 if pos < len(writers) - 1:
@@ -412,7 +412,7 @@ def plot_average_scores(folder_path):
     
     # Simple Legend
     legend_elements = [
-        Line2D([0], [0], color='gray', linestyle='-', linewidth=2, label='Left: P1 | Right: P2'),
+        Line2D([0], [0], color='gray', linestyle='-', linewidth=2, label='Left: EXP1 | Right: EXP2'),
         Line2D([0], [0], marker='o', color='w', markerfacecolor='gray', markersize=10, label='Generated'),
         Line2D([0], [0], marker='^', color='w', markerfacecolor='gray', markersize=10, label='Tune Improved'),
         Line2D([0], [0], marker='v', color='w', markerfacecolor='gray', markersize=10, label='Tune Declined'),

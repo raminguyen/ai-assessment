@@ -1,5 +1,5 @@
 """
-Prompt 1 vs Prompt 2 Performance Comparison
+Comparison of EXP1 and EXP2
 Uses the improved parser function to compare scores between prompts.
 """
 
@@ -272,7 +272,7 @@ def plot_prompt_comparison_by_writer():
             p1_diff = p1_tune_total - p1_gen_total
             p2_diff = p2_tune_total - p2_gen_total
 
-            summary = f'P1: {p1_gen_total:.2f}→{p1_tune_total:.2f} ({p1_diff:+.2f})\nP2: {p2_gen_total:.2f}→{p2_tune_total:.2f} ({p2_diff:+.2f})'
+            summary = f'EXP1: {p1_gen_total:.2f}→{p1_tune_total:.2f} ({p1_diff:+.2f})\nEXP2: {p2_gen_total:.2f}→{p2_tune_total:.2f} ({p2_diff:+.2f})'
             ax.text(0.98, 0.98, summary, transform=ax.transAxes, fontsize=8, verticalalignment='top',
                    horizontalalignment='right', bbox=dict(boxstyle='round', facecolor='white', alpha=0.8))
 
@@ -280,7 +280,7 @@ def plot_prompt_comparison_by_writer():
             if w_idx == 0 and a_idx == 0:
                 ax.legend(loc='upper left', fontsize=8)
 
-    plt.suptitle('Prompt 1 vs Prompt 2 Performance Comparison\n(By Writer and Assignment)',
+    plt.suptitle('Comparison of EXP1 and EXP2\n(By Writer and Assignment)',
                 fontsize=16, fontweight='bold', y=0.995)
     plt.tight_layout()
     plt.subplots_adjust(top=0.94, hspace=0.35, wspace=0.25)
@@ -289,7 +289,7 @@ def plot_prompt_comparison_by_writer():
 
 
 def plot_prompt_comparison_summary():
-    """Create a summary comparison showing overall P1 vs P2 performance."""
+    """Create a summary comparison showing overall EXP1 vs EXP2 performance."""
 
     # Load data for both prompts
     data_p1 = load_data_for_prompt(1)
@@ -329,10 +329,10 @@ def plot_prompt_comparison_summary():
         writer_p2_gen.append(np.mean(p2_gen_scores))
         writer_p2_tune.append(np.mean(p2_tune_scores))
 
-    bars1 = ax1.bar(x - 1.5*width, writer_p1_gen, width, label='P1 Gen', color='#AED6F1', edgecolor='#2980B9')
-    bars2 = ax1.bar(x - 0.5*width, writer_p1_tune, width, label='P1 Tune', color='#5DADE2', edgecolor='#2980B9')
-    bars3 = ax1.bar(x + 0.5*width, writer_p2_gen, width, label='P2 Gen', color='#ABEBC6', edgecolor='#27AE60')
-    bars4 = ax1.bar(x + 1.5*width, writer_p2_tune, width, label='P2 Tune', color='#58D68D', edgecolor='#27AE60')
+    bars1 = ax1.bar(x - 1.5*width, writer_p1_gen, width, label='EXP1 Gen', color='#AED6F1', edgecolor='#2980B9')
+    bars2 = ax1.bar(x - 0.5*width, writer_p1_tune, width, label='EXP1 Tune', color='#5DADE2', edgecolor='#2980B9')
+    bars3 = ax1.bar(x + 0.5*width, writer_p2_gen, width, label='EXP2 Gen', color='#ABEBC6', edgecolor='#27AE60')
+    bars4 = ax1.bar(x + 1.5*width, writer_p2_tune, width, label='EXP2 Tune', color='#58D68D', edgecolor='#27AE60')
 
     ax1.set_ylabel('Average Score (0-4)', fontsize=12)
     ax1.set_xlabel('Writer', fontsize=12)
@@ -365,13 +365,13 @@ def plot_prompt_comparison_summary():
     colors_gen = ['#27AE60' if d >= 0 else '#E74C3C' for d in gen_diff]
     colors_tune = ['#27AE60' if d >= 0 else '#E74C3C' for d in tune_diff]
 
-    bars1 = ax2.bar(x - width/2, gen_diff, width, label='Generated (P2-P1)', color=colors_gen, alpha=0.7, edgecolor='black')
-    bars2 = ax2.bar(x + width/2, tune_diff, width, label='Tuned (P2-P1)', color=colors_tune, edgecolor='black')
+    bars1 = ax2.bar(x - width/2, gen_diff, width, label='Generated (EXP2-EXP1)', color=colors_gen, alpha=0.7, edgecolor='black')
+    bars2 = ax2.bar(x + width/2, tune_diff, width, label='Tuned (EXP2-EXP1)', color=colors_tune, edgecolor='black')
 
     ax2.axhline(y=0, color='black', linewidth=1)
-    ax2.set_ylabel('Score Difference (P2 - P1)', fontsize=12)
+    ax2.set_ylabel('Score Difference (EXP2 - EXP1)', fontsize=12)
     ax2.set_xlabel('Writer', fontsize=12)
-    ax2.set_title('Prompt 2 vs Prompt 1 Difference\n(Positive = P2 Better)', fontweight='bold', fontsize=13)
+    ax2.set_title('EXP2 vs EXP1 Difference\n(Positive = EXP2 Better)', fontweight='bold', fontsize=13)
     ax2.set_xticks(x)
     ax2.set_xticklabels([w.upper() for w in WRITERS], fontsize=11, fontweight='bold')
     ax2.legend(loc='upper right', fontsize=10)
@@ -389,14 +389,14 @@ def plot_prompt_comparison_summary():
                         xytext=(0, offset), textcoords="offset points",
                         ha='center', va=va, fontsize=9, fontweight='bold')
 
-    plt.suptitle('Prompt 1 vs Prompt 2: Summary Comparison', fontsize=16, fontweight='bold', y=1.02)
+    plt.suptitle('Comparison of EXP1 and EXP2: Summary', fontsize=16, fontweight='bold', y=1.02)
     plt.tight_layout()
 
     return fig
 
 
 def plot_dimension_comparison_by_prompt():
-    """Create a comparison showing dimension-level performance for P1 vs P2."""
+    """Create a comparison showing dimension-level performance for EXP1 vs EXP2."""
 
     # Load data for both prompts
     data_p1 = load_data_for_prompt(1)
@@ -430,10 +430,10 @@ def plot_dimension_comparison_by_prompt():
             p2_gen_dim.append(np.mean(p2_gen_scores))
             p2_tune_dim.append(np.mean(p2_tune_scores))
 
-        bars1 = ax.bar(x - 1.5*width, p1_gen_dim, width, label='P1 Gen', color='#AED6F1', edgecolor='#2980B9')
-        bars2 = ax.bar(x - 0.5*width, p1_tune_dim, width, label='P1 Tune', color='#5DADE2', edgecolor='#2980B9')
-        bars3 = ax.bar(x + 0.5*width, p2_gen_dim, width, label='P2 Gen', color='#ABEBC6', edgecolor='#27AE60')
-        bars4 = ax.bar(x + 1.5*width, p2_tune_dim, width, label='P2 Tune', color='#58D68D', edgecolor='#27AE60')
+        bars1 = ax.bar(x - 1.5*width, p1_gen_dim, width, label='EXP1 Gen', color='#AED6F1', edgecolor='#2980B9')
+        bars2 = ax.bar(x - 0.5*width, p1_tune_dim, width, label='EXP1 Tune', color='#5DADE2', edgecolor='#2980B9')
+        bars3 = ax.bar(x + 0.5*width, p2_gen_dim, width, label='EXP2 Gen', color='#ABEBC6', edgecolor='#27AE60')
+        bars4 = ax.bar(x + 1.5*width, p2_tune_dim, width, label='EXP2 Tune', color='#58D68D', edgecolor='#27AE60')
 
         ax.set_ylabel('Average Score (0-4)', fontsize=11)
         ax.set_title(f'Assignment {assignment[1].upper()}', fontweight='bold', fontsize=13)
@@ -446,7 +446,7 @@ def plot_dimension_comparison_by_prompt():
         if a_idx == 0:
             ax.legend(loc='lower left', fontsize=9)
 
-    plt.suptitle('Dimension-Level Performance: Prompt 1 vs Prompt 2\n(Averaged Across All Writers)',
+    plt.suptitle('Dimension-Level Performance: Comparison of EXP1 and EXP2\n(Averaged Across All Writers)',
                 fontsize=14, fontweight='bold', y=1.02)
     plt.tight_layout()
 
@@ -454,7 +454,7 @@ def plot_dimension_comparison_by_prompt():
 
 
 def print_prompt_comparison_table():
-    """Print a detailed comparison table of P1 vs P2."""
+    """Print a detailed comparison table of EXP1 vs EXP2."""
 
     # Load data for both prompts
     data_p1 = load_data_for_prompt(1)
@@ -464,7 +464,7 @@ def print_prompt_comparison_table():
     avg_p2 = calculate_averages(data_p2)
 
     print("=" * 100)
-    print("PROMPT 1 vs PROMPT 2 COMPARISON TABLE")
+    print("EXP1 vs EXP2 COMPARISON TABLE")
     print("=" * 100)
 
     for writer in WRITERS:
@@ -475,7 +475,7 @@ def print_prompt_comparison_table():
         for assignment in ['a1', 'a2', 'a3']:
             print(f"\n  {assignment.upper()}:")
             print(f"  {'-'*70}")
-            print(f"  {'Metric':<20} {'P1 Gen':>10} {'P1 Tune':>10} {'P2 Gen':>10} {'P2 Tune':>10} {'P2-P1 Diff':>12}")
+            print(f"  {'Metric':<20} {'EXP1 Gen':>10} {'EXP1 Tune':>10} {'EXP2 Gen':>10} {'EXP2 Tune':>10} {'EXP2-EXP1':>12}")
             print(f"  {'-'*70}")
 
             for i, dim in enumerate(DIMENSIONS):
@@ -515,23 +515,23 @@ def print_prompt_comparison_table():
                 overall_p2_gen.append(avg_p2[assignment][writer]['gen'].get(dim, 0))
                 overall_p2_tune.append(avg_p2[assignment][writer]['tune'].get(dim, 0))
 
-    print(f"\n  P1 Generated Average:  {np.mean(overall_p1_gen):.3f}")
-    print(f"  P1 Tuned Average:      {np.mean(overall_p1_tune):.3f}")
-    print(f"  P1 Improvement:        {np.mean(overall_p1_tune) - np.mean(overall_p1_gen):+.3f}")
+    print(f"\n  EXP1 Generated Average:  {np.mean(overall_p1_gen):.3f}")
+    print(f"  EXP1 Tuned Average:      {np.mean(overall_p1_tune):.3f}")
+    print(f"  EXP1 Improvement:        {np.mean(overall_p1_tune) - np.mean(overall_p1_gen):+.3f}")
     print()
-    print(f"  P2 Generated Average:  {np.mean(overall_p2_gen):.3f}")
-    print(f"  P2 Tuned Average:      {np.mean(overall_p2_tune):.3f}")
-    print(f"  P2 Improvement:        {np.mean(overall_p2_tune) - np.mean(overall_p2_gen):+.3f}")
+    print(f"  EXP2 Generated Average:  {np.mean(overall_p2_gen):.3f}")
+    print(f"  EXP2 Tuned Average:      {np.mean(overall_p2_tune):.3f}")
+    print(f"  EXP2 Improvement:        {np.mean(overall_p2_tune) - np.mean(overall_p2_gen):+.3f}")
     print()
-    print(f"  P2 vs P1 (Gen):        {np.mean(overall_p2_gen) - np.mean(overall_p1_gen):+.3f}")
-    print(f"  P2 vs P1 (Tune):       {np.mean(overall_p2_tune) - np.mean(overall_p1_tune):+.3f}")
-    print(f"  P2 vs P1 (Overall):    {(np.mean(overall_p2_gen) + np.mean(overall_p2_tune))/2 - (np.mean(overall_p1_gen) + np.mean(overall_p1_tune))/2:+.3f}")
+    print(f"  EXP2 vs EXP1 (Gen):        {np.mean(overall_p2_gen) - np.mean(overall_p1_gen):+.3f}")
+    print(f"  EXP2 vs EXP1 (Tune):       {np.mean(overall_p2_tune) - np.mean(overall_p1_tune):+.3f}")
+    print(f"  EXP2 vs EXP1 (Overall):    {(np.mean(overall_p2_gen) + np.mean(overall_p2_tune))/2 - (np.mean(overall_p1_gen) + np.mean(overall_p1_tune))/2:+.3f}")
 
 
 if __name__ == "__main__":
     OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
 
-    print("Generating Prompt 1 vs Prompt 2 Comparison Charts...")
+    print("Generating EXP1 vs EXP2 Comparison Charts...")
 
     # 1. Detailed comparison by writer
     fig1 = plot_prompt_comparison_by_writer()
