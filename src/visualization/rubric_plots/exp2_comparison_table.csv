@@ -1,0 +1,40 @@
+Assignment,Writer,Grader,E1 Gen,E1 Tune,E2 Gen,E2 Tune,E2 Better,Reasons
+A1,Chatgpt,Claude,20.0,18.0,20.0,19.0,YES,Tune: 18→19
+A1,Chatgpt,Gemini,20.0,20.0,20.0,20.0,SIMILAR,-
+A1,Chatgpt,Grok,20.0,20.0,20.0,20.0,SIMILAR,-
+A1,Claude,Chatgpt,14.0,18.0,15.0,20.0,YES,"Gen: 14→15
+Tune: 18→20"
+A1,Claude,Gemini,20.0,20.0,20.0,20.0,SIMILAR,-
+A1,Claude,Grok,19.0,20.0,19.0,20.0,SIMILAR,-
+A1,Gemini,Chatgpt,17.0,18.0,17.0,16.0,NO,-
+A1,Gemini,Claude,18.0,18.0,18.0,20.0,YES,Tune: 18→20
+A1,Gemini,Grok,20.0,20.0,20.0,20.0,SIMILAR,-
+A1,Grok,Chatgpt,14.0,19.0,15.0,18.0,SIMILAR,-
+A1,Grok,Claude,17.0,20.0,15.0,19.0,NO,-
+A1,Grok,Gemini,20.0,20.0,20.0,20.0,SIMILAR,-
+A2,Chatgpt,Claude,17.0,20.0,18.0,18.0,NO,-
+A2,Chatgpt,Gemini,20.0,20.0,20.0,20.0,SIMILAR,-
+A2,Chatgpt,Grok,20.0,20.0,20.0,20.0,SIMILAR,-
+A2,Claude,Chatgpt,16.0,18.0,18.0,18.0,YES,Gen: 16→18
+A2,Claude,Gemini,20.0,20.0,20.0,20.0,SIMILAR,-
+A2,Claude,Grok,20.0,20.0,20.0,20.0,SIMILAR,-
+A2,Gemini,Chatgpt,16.0,18.0,18.0,17.0,YES,Gen: 16→18
+A2,Gemini,Claude,18.0,20.0,20.0,19.0,YES,Gen: 18→20
+A2,Gemini,Grok,20.0,20.0,20.0,20.0,SIMILAR,-
+A2,Grok,Chatgpt,15.0,18.0,16.0,17.0,SIMILAR,-
+A2,Grok,Claude,14.0,18.0,19.0,18.0,YES,Gen: 14→19
+A2,Grok,Gemini,20.0,20.0,20.0,20.0,SIMILAR,-
+A3,Chatgpt,Claude,19.0,20.0,19.0,20.0,SIMILAR,-
+A3,Chatgpt,Gemini,19.0,20.0,20.0,20.0,YES,Gen: 19→20
+A3,Chatgpt,Grok,20.0,20.0,20.0,20.0,SIMILAR,-
+A3,Claude,Chatgpt,15.0,18.0,14.0,17.0,NO,-
+A3,Claude,Gemini,19.0,20.0,19.0,20.0,SIMILAR,-
+A3,Claude,Grok,20.0,20.0,20.0,20.0,SIMILAR,-
+A3,Gemini,Chatgpt,16.0,17.0,14.0,17.0,NO,-
+A3,Gemini,Claude,14.0,18.0,15.0,19.0,YES,"Gen: 14→15
+Tune: 18→19"
+A3,Gemini,Grok,19.0,20.0,19.0,20.0,SIMILAR,-
+A3,Grok,Chatgpt,14.0,18.0,15.0,19.0,YES,"Gen: 14→15
+Tune: 18→19"
+A3,Grok,Claude,14.0,20.0,14.0,20.0,SIMILAR,-
+A3,Grok,Gemini,19.0,20.0,20.0,20.0,YES,Gen: 19→20

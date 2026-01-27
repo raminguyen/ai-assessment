@@ -1,6 +1,8 @@
 import os
 import json
 import re
+import matplotlib
+matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 
 
@@ -17,13 +19,28 @@ def parse_dimension_scores(text):
     scores = {}
 
     for dim in dimensions:
+        # Create a flexible regex for the dimension name
+        # 1. Replace "and" with "(?:and|&)"
+        # 2. Replace single quotes with "[.']" (or handle curly quotes)
+        
+        flexible_dim = re.escape(dim)
+        flexible_dim = flexible_dim.replace(r'and', r'(?:and|&)')
+        flexible_dim = flexible_dim.replace(r"'", r"['’]") 
+
         # Try multiple patterns
-        escaped_dim = re.escape(dim)
         patterns = [
-            escaped_dim + r'.*?(\d+(?:\.\d+)?)',
-            r'\*\*' + escaped_dim + r':\*\*\s*(\d+(?:\.\d+)?)',
-            r'\|.*?' + escaped_dim + r'.*?\|\s*(\d+(?:\.\d+)?)\s*\|',
-            r'- \*\*' + escaped_dim + r'\s*:?\*\*\s*:?\s*(\d+(?:\.\d+)?)'
+            # Standard: "Explanation of issues ... 3"
+            flexible_dim + r'.*?(\d+(?:\.\d+)?)',
+            
+            # Bold Header: "**Explanation of issues:** 3"
+            r'\*\*' + flexible_dim + r'.*?:\*\*\s*(\d+(?:\.\d+)?)',
+            
+            # Table Row: "| Explanation of issues | 3 |" or "| **Explanation of issues** | **3** |"
+            # This pattern handles optional ** around the dimension AND the score
+            r'\|.*?'+ flexible_dim + r'.*?\|\s*(?:\*\*)?(\d+(?:\.\d+)?)(?:\*\*)?\s*\|',
+            
+            # Bullet: "- **Explanation of issues:** 3"
+            r'- \*\*' + flexible_dim + r'.*?\*\*\s*:?\s*(\d+(?:\.\d+)?)'
         ]
 
         for pattern in patterns:
