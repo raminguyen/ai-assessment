@@ -38,20 +38,37 @@ def parse_dimension_scores(text):
         for dim_name in names_to_try:
             dim_escaped = re.escape(dim_name)
             dim_escaped = dim_escaped.replace("'", r"['\u2019]")
-            dim_escaped = dim_escaped.replace(r'\ and\ ', r'\ (?:and|&)\ ')
+            # Use normal string replacement to avoid raw string trailing backslash issues
+            dim_escaped = dim_escaped.replace(r'\ and\ ', "\\ (?:and|&)\\ ")
 
             patterns = [
-                r'^\s*-\s*\*\*' + dim_escaped + r'\*\*:\s*(\d+(?:\.\d+)?)',
-                r'^\s*-\s*\*\*' + dim_escaped + r':\*\*\s*(\d+(?:\.\d+)?)',
-                r'\*\*' + dim_escaped + r':\*\*\s*(\d+(?:\.\d+)?)',
-                r'\|\s*\*\*' + dim_escaped + r'\*\*\s*\|\s*(\d+(?:\.\d+)?)',
+                # 1. Standard Inline: - **Dimension**: 4
+                r'-\s*\*\*' + dim_escaped + r'\*\*:\s*(\d+(?:\.\d+)?)',
+                r'\*\*' + dim_escaped + r'\*\*:\s*(\d+(?:\.\d+)?)',
+                
+                # 2. Simple text: Dimension: 4
                 dim_escaped + r':\s*(\d+(?:\.\d+)?)',
-                r'-\s*\*\*' + dim_escaped + r':\*\*\s*\*\*(\d+(?:\.\d+)?)\*\*',
-                r'\*\*' + dim_escaped + r'(?:\s*\([^)]*\))?:\s*(\d+(?:\.\d+)?)\*\*',
+                
+                # 3. Claude Style Header with Score below
+                #    Matches: ## **1. Explanation...** \n **Score: 4**
+                #    Allow optional ** around the number part
+                r'#+\s*(?:\*\*)?\s*\d+\.\s*' + dim_escaped + r'.*?\n.*?Score:\s*(\d+(?:\.\d+)?)',
+                r'#+\s*(?:\*\*)?\s*\d+\.\s*' + dim_escaped + r'.*?\n.*?Score:\s*\*\*(\d+(?:\.\d+)?)\*\*',
+                
+                # 4. Inline Header style: ## 1. Dimension: **4**
+                r'#+\s*(?:\*\*)?\s*\d+\.\s*' + dim_escaped + r'.*?:\s*\*\*(\d+(?:\.\d+)?)\*\*',
+                
+                # 5. Multiline / Block format flexible
+                #    Matches: **Dimension** ... (content) ... **Score: 4**
+                r'\*\*' + dim_escaped + r'\*\*(?:(?!\*\*).)*\s+(?:(?!\*\*).)*\n\*\*Score:\s*(\d+(?:\.\d+)?)',
+                
+                # 6. Ultra-flexible Fallback
+                #    Look for Dimension ... (within 300 chars) ... Score: X
+                dim_escaped + r'.{0,300}?Score:?\s*(?:\*\*)?(\d+(?:\.\d+)?)'
             ]
 
             for pattern in patterns:
-                match = re.search(pattern, text, re.IGNORECASE | re.MULTILINE)
+                match = re.search(pattern, text, re.IGNORECASE | re.MULTILINE | re.DOTALL)
                 if match:
                     try:
                         score = float(match.group(1))

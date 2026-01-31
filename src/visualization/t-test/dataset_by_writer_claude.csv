@@ -1,0 +1,10 @@
+Assignment,Writer,Grader,E1 Gen,E2 Gen
+A1,Claude,Chatgpt,14.0,15.0
+A1,Claude,Gemini,20.0,20.0
+A1,Claude,Grok,19.0,19.0
+A2,Claude,Chatgpt,16.0,18.0
+A2,Claude,Gemini,20.0,20.0
+A2,Claude,Grok,20.0,20.0
+A3,Claude,Chatgpt,15.0,14.0
+A3,Claude,Gemini,19.0,19.0
+A3,Claude,Grok,20.0,20.0

@@ -1,0 +1,168 @@
+{
+  "overall": {
+    "test_type": "Independent samples t-test",
+    "comparison": "E1 Gen vs E2 Gen (all data)",
+    "n_e1": 36,
+    "n_e2": 36,
+    "mean_e1": 17.86,
+    "mean_e2": 18.25,
+    "std_e1": 2.33,
+    "std_e2": 2.2,
+    "t_statistic": -0.7285,
+    "p_value": 0.4687,
+    "significant": "No"
+  },
+  "by_writer": {
+    "Chatgpt": {
+      "test_type": "Paired t-test",
+      "n_pairs": 9,
+      "mean_e1": 19.44,
+      "mean_e2": 19.67,
+      "differences": [
+        0.0,
+        0.0,
+        0.0,
+        1.0,
+        0.0,
+        0.0,
+        0.0,
+        1.0,
+        0.0
+      ],
+      "t_statistic": -1.5119,
+      "p_value": 0.169,
+      "significant": "No"
+    },
+    "Claude": {
+      "test_type": "Paired t-test",
+      "n_pairs": 9,
+      "mean_e1": 18.11,
+      "mean_e2": 18.33,
+      "differences": [
+        1.0,
+        0.0,
+        0.0,
+        2.0,
+        0.0,
+        0.0,
+        -1.0,
+        0.0,
+        0.0
+      ],
+      "t_statistic": -0.8,
+      "p_value": 0.4468,
+      "significant": "No"
+    },
+    "Gemini": {
+      "test_type": "Paired t-test",
+      "n_pairs": 9,
+      "mean_e1": 17.56,
+      "mean_e2": 17.89,
+      "differences": [
+        0.0,
+        0.0,
+        0.0,
+        2.0,
+        2.0,
+        0.0,
+        -2.0,
+        1.0,
+        0.0
+      ],
+      "t_statistic": -0.8165,
+      "p_value": 0.4379,
+      "significant": "No"
+    },
+    "Grok": {
+      "test_type": "Paired t-test",
+      "n_pairs": 9,
+      "mean_e1": 16.33,
+      "mean_e2": 17.11,
+      "differences": [
+        1.0,
+        -2.0,
+        0.0,
+        1.0,
+        5.0,
+        0.0,
+        1.0,
+        0.0,
+        1.0
+      ],
+      "t_statistic": -1.2572,
+      "p_value": 0.2441,
+      "significant": "No"
+    }
+  },
+  "by_assignment": {
+    "A1": {
+      "test_type": "Paired t-test",
+      "n_pairs": 12,
+      "mean_e1": 18.25,
+      "mean_e2": 18.25,
+      "differences": [
+        0.0,
+        0.0,
+        0.0,
+        1.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        1.0,
+        -2.0,
+        0.0
+      ],
+      "t_statistic": 0.0,
+      "p_value": 1.0,
+      "significant": "No"
+    },
+    "A2": {
+      "test_type": "Paired t-test",
+      "n_pairs": 12,
+      "mean_e1": 18.0,
+      "mean_e2": 19.08,
+      "differences": [
+        1.0,
+        0.0,
+        0.0,
+        2.0,
+        0.0,
+        0.0,
+        2.0,
+        2.0,
+        0.0,
+        1.0,
+        5.0,
+        0.0
+      ],
+      "t_statistic": -2.4935,
+      "p_value": 0.0299,
+      "significant": "Yes"
+    },
+    "A3": {
+      "test_type": "Paired t-test",
+      "n_pairs": 12,
+      "mean_e1": 17.33,
+      "mean_e2": 17.42,
+      "differences": [
+        0.0,
+        1.0,
+        0.0,
+        -1.0,
+        0.0,
+        0.0,
+        -2.0,
+        1.0,
+        0.0,
+        1.0,
+        0.0,
+        1.0
+      ],
+      "t_statistic": -0.3206,
+      "p_value": 0.7545,
+      "significant": "No"
+    }
+  }
+}
