@@ -140,6 +140,42 @@ def load_and_merge_data():
     return merged_data
 
 
+def export_dataset_full(merged_data):
+    """Export dataset_full.csv with paired E1/E2 Gen scores for t-test analysis."""
+    rows = []
+    for key, values in merged_data.items():
+        assignment, writer, grader = key
+        g1 = values.get('p1_gen')
+        g2 = values.get('p2_gen')
+        if g1 is not None and g2 is not None:
+            rows.append({
+                'Assignment': assignment.upper(),
+                'Writer': writer.capitalize(),
+                'Grader': grader.capitalize(),
+                'E1 Gen': g1,
+                'E2 Gen': g2
+            })
+    df_full = pd.DataFrame(rows).sort_values(by=['Assignment', 'Writer', 'Grader'])
+    output_dir = 'src/visualization/t-test'
+    full_csv_path = os.path.join(output_dir, 'dataset_full.csv')
+    df_full.to_csv(full_csv_path, index=False)
+    print("[INFO] dataset_full.csv saved to " + full_csv_path)
+
+    # Export per assignment
+    for assignment in df_full['Assignment'].unique():
+        df_a = df_full[df_full['Assignment'] == assignment]
+        path = os.path.join(output_dir, 'dataset_' + assignment.lower() + '.csv')
+        df_a.to_csv(path, index=False)
+        print("[INFO] " + os.path.basename(path) + " saved")
+
+    # Export per writer
+    for writer in df_full['Writer'].unique():
+        df_w = df_full[df_full['Writer'] == writer]
+        path = os.path.join(output_dir, 'dataset_' + writer.lower() + '.csv')
+        df_w.to_csv(path, index=False)
+        print("[INFO] " + os.path.basename(path) + " saved")
+
+
 def build_comparison_dataframe(merged_data):
     """Build a comparison DataFrame from merged data."""
     results = []
@@ -252,6 +288,7 @@ def main():
         print("Error loading scores: " + str(e))
         return
 
+    export_dataset_full(merged_data)
     df = build_comparison_dataframe(merged_data)
     csv_path = os.path.join(OUTPUT_DIR, "exp2_comparison_table.csv")
     df.to_csv(csv_path, index=False)
