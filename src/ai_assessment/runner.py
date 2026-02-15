@@ -34,6 +34,7 @@ class Runner:
         print("Generating essay for assignment " + str(assignment) + " with prompt " + str(prompt_num))
 
         data = model.generate(essay, rubric_name)
+        
         data['prompt_num'] = prompt_num
 
         with open(filepath, 'w') as f:
