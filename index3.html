@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Essay Explorer - Prompt 3</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <!-- Main Container -->
+    <div class="main-container">
+        <!-- Left Panel -->
+        <div class="left-panel">
+            <button class="load-btn" id="githubBtn">Load from GitHub</button>
+            <!-- <button class="load-btn" id="localBtn">Load from Local Files</button> -->
+
+            <!-- Homepage Dropdown Navigation -->
+            <div style="margin-bottom: 1rem;">
+                <div class="dropdown" style="position: relative;">
+                    
+    <div id="dropdownContent" class="dropdown-content" style="display:none; position:absolute; left:0; top:100%; background: #333; min-width:160px; z-index:1000; border-radius:8px;">
+        <a href="index1.html" style="display:block; padding:0.5rem 1rem; color:#fff; text-decoration:none;">Prompt 1</a>
+        <a href="index2.html" style="display:block; padding:0.5rem 1rem; color:#fff; text-decoration:none;">Prompt 2</a>
+        <a href="index3.html" style="display:block; padding:0.5rem 1rem; color:#fff; text-decoration:none;">Work</a>
+        <a href="work.html" style="display:block; padding:0.5rem 1rem; color:#fff; text-decoration:none;">Work</a>
+    </div>
+</div>
+<script>
+function toggleDropdown() {
+    var dropdown = document.getElementById('dropdownContent');
+    dropdown.style.display = dropdown.style.display === 'block' ? 'none' : 'block';
+}
+document.addEventListener('click', function(event) {
+    var dropdown = document.getElementById('dropdownContent');
+    var button = event.target.closest('.load-btn-secondary');
+    if (!button && dropdown && event.target.closest('.dropdown') === null) {
+        dropdown.style.display = 'none';
+    }
+});
+</script>
+            </div>
+
+            <!-- Assignment Filter -->
+            <div class="assignment-filter">
+                <button class="filter-btn active" data-assignment="a1"> Catlove Case Study</button>
+                <button class="filter-btn" data-assignment="a2">Social Spending & Economic Growth</button>
+                <button class="filter-btn" data-assignment="a3">Real Estate Analysis </button>
+            </div>
+
+            <!-- Assignment Section -->
+            <div class="assignment-section" data-assignment="a1">
+                <h2 class="assignment-title">Critical Thinking</h2>
+
+                <div class="model-group">
+                    <h3 class="model-name">ChatGPT</h3>
+                    <div class="button-row">
+                        <button class="action-btn" data-model="chatgpt" data-type="generation">Generation</button>
+                        <button class="action-btn" data-model="chatgpt" data-type="tuning">Tuning</button>
+                        <button class="action-btn" data-model="chatgpt" data-type="reflection">Reflection</button>
+                    </div>
+                </div>
+
+                <div class="model-group">
+                    <h3 class="model-name">Gemini</h3>
+                    <div class="button-row">
+                        <button class="action-btn" data-model="gemini" data-type="generation">Generation</button>
+                        <button class="action-btn" data-model="gemini" data-type="tuning">Tuning</button>
+                        <button class="action-btn" data-model="gemini" data-type="reflection">Reflection</button>
+                    </div>
+                </div>
+
+                <div class="model-group">
+                    <h3 class="model-name">Claude</h3>
+                    <div class="button-row">
+                        <button class="action-btn" data-model="claude" data-type="generation">Generation</button>
+                        <button class="action-btn" data-model="claude" data-type="tuning">Tuning</button>
+                        <button class="action-btn" data-model="claude" data-type="reflection">Reflection</button>
+                    </div>
+                </div>
+
+                <div class="model-group">
+                    <h3 class="model-name">Grok</h3>
+                    <div class="button-row">
+                        <button class="action-btn" data-model="grok" data-type="generation">Generation</button>
+                        <button class="action-btn" data-model="grok" data-type="tuning">Tuning</button>
+                        <button class="action-btn" data-model="grok" data-type="reflection">Reflection</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Center Panel -->
+        <div class="center-panel">
+            <div class="date-display" id="dateDisplay">Date: --</div>
+
+            <div class="prompt-section">
+                <h3 class="section-label">Prompt</h3>
+                <div class="prompt-content" id="promptContent">
+                    Select an item from the left panel to view details
+                </div>
+            </div>
+
+            <div class="rubric-section" id="rubricSection" style="display: none;">
+                <h3 class="section-label">Rubric</h3>
+                <div class="rubric-content" id="rubricContent"></div>
+            </div>
+
+            <div class="response-section">
+                <h3 class="section-label">Response</h3>
+                <div class="response-content" id="responseContent">
+                    Select an item to view the response
+                </div>
+            </div>
+        </div>
+
+        <!-- Right Panel -->
+        <div class="right-panel">
+            <div class="score-table" id="scoreTable">
+                <div class="score-header">
+                    <span>Scores</span>
+                </div>
+                <div class="score-body" id="scoreBody">
+                    <!-- Scores will be populated here -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Score Detail Modal -->
+    <div id="scoreModal" class="modal" style="display:none;">
+        <div class="modal-content" id="modalContent">
+            <div class="modal-header" id="modalHeader">
+                <span class="modal-title">Score Details</span>
+                <span class="modal-close">&times;</span>
+            </div>
+            <div id="scoreModalBody"></div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="footer-left">
+            © Dec 2025 Developed by Rami Huu Nguyen - AI Researcher 
+        </div>
+        <div class="footer-right">
+            <a href="https://www.linkedin.com/in/raminguyen/" target="_blank">LinkedIn</a>
+            <span class="footer-spacer"></span>
+            <span class="footer-spacer"></span>
+            <a href="mailto:raminguyen.12@gmail.com">Email</a>
+        </div>
+    </footer>
+
+    <!-- Scripts - Load in order -->
+    <!-- Core Data & Utilities -->
+    <script src="src/js/data.js?v=10"></script>
+    <script src="src/js/content.js?v=10"></script>
+    <script src="src/js/parser.js?v=15"></script>
+    <script src="src/js/data-processor.js?v=10"></script>
+
+
+
+    <!-- UI Components -->
+    <script src="src/js/element.js?v=11"></script>
+    <script src="src/js/filter.js?v=10"></script>
+    <script src="src/js/renderer.js?v=16"></script>
+
+    <!-- Data Loaders -->
+    <script src="src/js/github-loader-p3.js?v=2"></script>
+    <script src="src/js/local-loader.js?v=10"></script>
+
+    <!-- Application Entry -->
+    <script src="src/js/application.js?v=11"></script>
+    <script>
+        // Override for Prompt 3
+        window.PROMPT_NUMBER = '3';
+    </script>
+</body>
+</html>
