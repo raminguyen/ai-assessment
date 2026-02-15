@@ -18,3 +18,14 @@ class ModelGemini3ProPreview(Model):
             contents=prompt
         )
         return response.text
+
+    def api_call_multi(self, messages):
+        contents = []
+        for msg in messages:
+            role = "user" if msg["role"] == "user" else "model"
+            contents.append({"role": role, "parts": [{"text": msg["content"]}]})
+        response = self.client.models.generate_content(
+            model=self.name,
+            contents=contents
+        )
+        return response.text

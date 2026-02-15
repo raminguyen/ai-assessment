@@ -18,3 +18,13 @@ class ModelChatGPT(Model):
             input=prompt
         )
         return response.output_text
+
+    def api_call_multi(self, messages):
+        input_msgs = []
+        for msg in messages:
+            input_msgs.append({"role": msg["role"], "content": msg["content"]})
+        response = self.client.responses.create(
+            model=self.name,
+            input=input_msgs
+        )
+        return response.output_text

@@ -19,4 +19,12 @@ class ModelClaude(Model):
             messages=[{"role": "user", "content": prompt}]
         )
         return message.content[0].text
+
+    def api_call_multi(self, messages):
+        message = self.client.messages.create(
+            model=self.name,
+            max_tokens=2048,
+            messages=messages
+        )
+        return message.content[0].text
     

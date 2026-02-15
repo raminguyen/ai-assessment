@@ -39,7 +39,48 @@ class Model:
             "timestamp": datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         }
         return data
-    
+
+    def generate_iterative(self, essay, rubric_folder=None):
+
+        print("Generating essay (iterative 2-step)")
+        print("Step 1 prompt:", essay.context_prompt)
+        print("Step 2 prompt:", essay.generate_prompt)
+
+        start = time.time()
+
+        # Step 1: Send context, get analysis
+        step1_result = self.api_call(essay.context_prompt)
+        print("Step 1 complete, got analysis")
+        time.sleep(5)
+
+        # Step 2: Send generation instruction in same conversation
+        messages = [
+            {"role": "user", "content": essay.context_prompt},
+            {"role": "assistant", "content": step1_result},
+            {"role": "user", "content": essay.generate_prompt}
+        ]
+        result = self.api_call_multi(messages)
+
+        essay.essay_text = result
+        essay.status = 1
+        essay.time = time.time() - start
+        print(f"Done in {essay.time/60:.2f} mins")
+        time.sleep(5)
+
+        data = {
+            "command": "generate",
+            "model": self.name,
+            "essay_name": essay.name,
+            "folder": essay.rubric_folder,
+            "prompt": essay.context_prompt,
+            "prompt_step2": essay.generate_prompt,
+            "step1_result": step1_result,
+            "result": result,
+            "time_minutes": round(essay.time / 60, 2),
+            "timestamp": datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        }
+        return data
+
     def tune(self, essay, rubric):
 
         print("Tuning with rubric")

@@ -18,7 +18,12 @@ class Runner:
         model = self.all_models[model_name]
 
         essay = Util.create_essay(assignment, rubric_folder=rubric_name)
-        essay.load_prompt_p(prompt_num, assignment)
+
+        # Load prompts based on prompt number
+        if prompt_num == 7:
+            essay.load_prompt_p7(assignment)
+        else:
+            essay.load_prompt_p(prompt_num, assignment)
 
         # Build filename with prompt suffix
         filename = Util.build_filename(assignment, 'generate', model_name, prompt_num=prompt_num)
@@ -33,8 +38,12 @@ class Runner:
 
         print("Generating essay for assignment " + str(assignment) + " with prompt " + str(prompt_num))
 
-        data = model.generate(essay, rubric_name)
-        
+        # Use iterative generation for p7
+        if prompt_num == 7:
+            data = model.generate_iterative(essay, rubric_name)
+        else:
+            data = model.generate(essay, rubric_name)
+
         data['prompt_num'] = prompt_num
 
         with open(filepath, 'w') as f:

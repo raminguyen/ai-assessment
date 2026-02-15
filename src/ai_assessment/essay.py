@@ -102,3 +102,32 @@ class Essay:
         self.grade_prompt = self.grade_prompt.replace("{PROFESSOR_TYPE}", professor_type)
 
         return self.write_prompt, self.grade_prompt
+
+    def load_prompt_p7(self, assignment_num=1):
+        base_direction = os.path.dirname(os.path.abspath(__file__))
+        file_path = os.path.join(base_direction, "prompt.json")
+
+        with open(file_path, 'r') as f:
+            data = json.load(f)
+
+        print("Loading iterative prompt p7 from: " + file_path)
+
+        context_key = "assignment_" + str(assignment_num) + "_p7_context"
+        generate_key = "assignment_" + str(assignment_num) + "_p7_generate"
+        self.context_prompt = data[context_key]
+        self.generate_prompt = data[generate_key]
+        self.write_prompt = self.context_prompt + "\n\n" + self.generate_prompt
+
+        self.grade_prompt = data["grade_prompt"]
+        self.reflection_prompt = data["reflection_prompt"]
+        self.tuning_prompt = data.get("tuning_p1")
+
+        professor_types = {
+            1: "Psychology",
+            2: "Economics",
+            3: "Real Estate"
+        }
+        professor_type = professor_types.get(assignment_num, "Psychology")
+        self.grade_prompt = self.grade_prompt.replace("{PROFESSOR_TYPE}", professor_type)
+
+        return self.context_prompt, self.generate_prompt
