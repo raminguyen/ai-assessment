@@ -9,7 +9,7 @@ google_api_key = os.getenv("GOOGLE_API_KEY")
 
 class ModelGemini3ProPreview(Model):
     def __init__(self):
-        super().__init__("gemini-3-flash-preview")
+        super().__init__("gemini-3-pro-preview")
         self.client = genai.Client(api_key=google_api_key)
     
     def api_call(self, prompt):
