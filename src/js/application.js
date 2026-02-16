@@ -34,7 +34,7 @@ function copyText(text) {
 
 async function initApp() {
     // Use PROMPT_NUMBER if set (for index2.html), otherwise default to '1'
-    var promptNum = window.PROMPT_NUMBER || '1';
+    var promptNum = (window.PROMPT_NUMBER !== undefined) ? window.PROMPT_NUMBER : '1';
     await initRenderer(promptNum);
     document.getElementById('githubBtn').addEventListener('click', handleLoadFromGitHub);
     //document.getElementById('localBtn').addEventListener('click', handleLoadFromLocal);
