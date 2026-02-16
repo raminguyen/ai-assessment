@@ -101,8 +101,8 @@ function displayDate(elements, item) {
 }
 
 function displayPrompt(elements, item) {
-    // Hide prompt section for p7 since prompts are shown in response panel
-    if (window.PROMPT_NUMBER === '7' && item.data.step1_result) {
+    // Hide prompt section for p7/p8 since prompts are shown in response panel
+    if ((['7','8','9','10'].includes(window.PROMPT_NUMBER)) && item.data.step1_result) {
         elements.promptContent.textContent = '';
         document.querySelector('.prompt-section').style.display = 'none';
         return;
@@ -440,8 +440,8 @@ function displayRubricSection(elements, item) {
 }
 
 function displayResponseText(elements, item) {
-    // Iterative prompt (p7): show step 1 and step 2
-    if (window.PROMPT_NUMBER === '7' && item.data.step1_result) {
+    // Iterative prompt (p7/p8): show step 1 and step 2
+    if ((['7','8','9','10'].includes(window.PROMPT_NUMBER)) && item.data.step1_result) {
         var step1Prompt = removeMarkdown(item.data.prompt || '');
         var step1Result = removeMarkdown(item.data.step1_result || '');
         var step2Prompt = removeMarkdown(item.data.prompt_step2 || '');

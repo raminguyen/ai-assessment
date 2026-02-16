@@ -103,17 +103,17 @@ class Essay:
 
         return self.write_prompt, self.grade_prompt
 
-    def load_prompt_p7(self, assignment_num=1):
+    def load_prompt_p7(self, assignment_num=1, prompt_num=7):
         base_direction = os.path.dirname(os.path.abspath(__file__))
         file_path = os.path.join(base_direction, "prompt.json")
 
         with open(file_path, 'r') as f:
             data = json.load(f)
 
-        print("Loading iterative prompt p7 from: " + file_path)
+        print("Loading iterative prompt p" + str(prompt_num) + " from: " + file_path)
 
-        context_key = "assignment_" + str(assignment_num) + "_p7_context"
-        generate_key = "assignment_" + str(assignment_num) + "_p7_generate"
+        context_key = "assignment_" + str(assignment_num) + "_p" + str(prompt_num) + "_context"
+        generate_key = "assignment_" + str(assignment_num) + "_p" + str(prompt_num) + "_generate"
         self.context_prompt = data[context_key]
         self.generate_prompt = data[generate_key]
         self.write_prompt = self.context_prompt + "\n\n" + self.generate_prompt

@@ -1,0 +1,14 @@
+Assignment,Model,p1,p2,p3,p4,p5,p6,p7
+Assignment 1,chatgpt, , ,x, ,x,x,x
+Assignment 1,claude,x,x, , ,x,x, 
+Assignment 1,gemini,x,x,x,x,x,x,x
+Assignment 1,grok,x, , , , ,x,x
+Assignment 2,chatgpt,x,x,x,x,x,x,x
+Assignment 2,claude, , , , , , , 
+Assignment 2,gemini, ,x, , , ,x, 
+Assignment 2,grok,x, , , , , ,x
+Assignment 3,chatgpt, , , , ,x, ,x
+Assignment 3,claude, , , , , , , 
+Assignment 3,gemini,x, , , , , , 
+Assignment 3,grok,x, , , , ,x,x
+Total Informal Essay,,7,4,3,2,5,7,7
