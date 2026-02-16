@@ -177,6 +177,7 @@ def main():
 
         # Technique name row (second row)
         technique_names = {
+            0: 'Write',
             1: 'Persona + Write',
             2: 'Persona + Write Formal',
             3: 'CoT + Write',
@@ -187,6 +188,7 @@ def main():
             8: 'Iterative + Persona + Write',
             9: 'Iterative + Generate',
             10: 'Iterative + CoT + Generate',
+            11: 'Iterative + Write'
         }
         technique_row = ['Technique', '']
         for p in prompts:

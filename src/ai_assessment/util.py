@@ -113,7 +113,7 @@ class Util:
 
         # Add prompt suffix
         p_suffix = ""
-        if prompt_num:
+        if prompt_num is not None:
             p_suffix = "_p" + str(prompt_num)
 
         filename_map = {
