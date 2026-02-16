@@ -1,14 +1,18 @@
-Assignment,Model,p1,p2,p3,p4,p5,p6,p7
-Assignment 1,chatgpt, , ,x, ,x,x,x
-Assignment 1,claude,x,x, , ,x,x, 
-Assignment 1,gemini,x,x,x,x,x,x,x
-Assignment 1,grok,x, , , , ,x,x
-Assignment 2,chatgpt,x,x,x,x,x,x,x
-Assignment 2,claude, , , , , , , 
-Assignment 2,gemini, ,x, , , ,x, 
-Assignment 2,grok,x, , , , , ,x
-Assignment 3,chatgpt, , , , ,x, ,x
-Assignment 3,claude, , , , , , , 
-Assignment 3,gemini,x, , , , , , 
-Assignment 3,grok,x, , , , ,x,x
-Total Informal Essay,,7,4,3,2,5,7,7
+Assignment,Model,p0,p1,p2,p3,p4,p5,p6,p7,p8,p9,p10,p11
+Technique,,,Persona + Write,Persona + Write Formal,CoT + Write,Generate,CoT + Generate,Persona + Generate,Iterative + Persona + Generate,Iterative + Persona + Write,Iterative + Generate,Iterative + CoT + Generate,
+Assignment 1,chatgpt, ,x, , , ,x,x,x,x,x,x,x
+Assignment 1,claude, ,x,x, , ,x,x, , ,x, ,x
+Assignment 1,gemini, ,x,x,x,x,x,x, ,x,x, ,x
+Assignment 1,grok, ,x, , , ,x,x,x,x, , ,x
+,Total A1,0,4,2,1,1,4,4,2,3,3,1,4
+Assignment 2,chatgpt, ,x,x,x,x,x,x,x,x,x,x,x
+Assignment 2,claude, , , ,x, , , ,x, , , , 
+Assignment 2,gemini, , ,x, , , ,x, , , , , 
+Assignment 2,grok, ,x, , , , , ,x,x, , , 
+,Total A2,0,2,2,2,1,1,2,3,2,1,1,1
+Assignment 3,chatgpt, , , , , , , ,x,x, , ,x
+Assignment 3,claude, , , , , , , , , ,x, ,x
+Assignment 3,gemini, ,x, , , , , , ,x, , , 
+Assignment 3,grok, ,x, , , , ,x,x,x, , , 
+,Total A3,0,2,0,0,0,0,1,2,3,1,0,2
+Total Informal Essay,,0,8,4,3,2,5,7,7,8,5,2,7
