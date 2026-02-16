@@ -85,7 +85,8 @@ class Essay:
         prompt_key = "assignment_" + str(assignment_num) + "_p" + str(prompt_num)
         self.write_prompt = data[prompt_key]
 
-        self.grade_prompt = data["grade_prompt"]
+        grade_key = "grade_prompt_p" + str(prompt_num)
+        self.grade_prompt = data.get(grade_key, data["grade_prompt"])
         self.reflection_prompt = data["reflection_prompt"]
 
         # Use prompt-specific tuning (tuning_p1, tuning_p2)

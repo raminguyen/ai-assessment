@@ -3,6 +3,8 @@
 
   "grade_prompt": "You are a professor of {PROFESSOR_TYPE}. Score this student essay based on the attached rubric: {rubric} and return numerical scores for the categories.",
 
+  "grade_prompt_p4": "Score this student essay based on the attached rubric: {rubric} and return numerical scores for the categories.",
+
   "reflection_prompt": "You are an undergrad student in first semester and you wrote an essay for the following prompt.\n\n{ASSIGNMENT_PROMPT}\n\nOriginal Essay: {original essay}\n\nThen, you tuned the essay for the attached rubric: {rubric}. Provide an explanation of the changes you made.\n\nTuned Essay: {tuned essay}",
 
   "tuning_p1": "{ASSIGNMENT_PROMPT}\n Tune the essay using the following rubric: {rubric}",
