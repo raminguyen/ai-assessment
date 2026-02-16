@@ -12,7 +12,7 @@ async function loadFromGitHub() {
 
         const files = await response.json();
         const jsonFiles = files.filter(function(file) {
-            return file.name.endsWith('.json') && file.name.includes('_p0');
+            return file.name.endsWith('.json') && file.name.includes('_p0.');
         });
 
         for (const file of jsonFiles) {
