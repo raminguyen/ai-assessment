@@ -44,7 +44,6 @@ def parse_dimension_scores(text):
 
     return scores
 
-
 def main():
     base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
     data_dir = os.path.join(base_dir, 'data', 'critical_thinking')
@@ -88,16 +87,27 @@ def main():
 
     # CSV
     csv_file = f'scores_p{prompt_num}.csv'
+
+    df = pd.DataFrame(rows, columns=header)
+
+    avg = round(df['Total'].mean(), 2)
+    
+    avg_row = ['Average Total', '', '', '', '', '', '', '', avg]
+
     with open(csv_file, 'w', newline='', encoding='utf-8') as f:
         writer = csv.writer(f)
         writer.writerow(header)
         writer.writerows(rows)
-    print(f"Scores written to {csv_file}")
+        writer.writerow(avg_row) 
 
-    # Excel
-    df = pd.DataFrame(rows, columns=header)
+    print(f"Scores written to {csv_file}")
+   
+
     excel_file = f'scores_p{prompt_num}.xlsx'
+
+    df = pd.DataFrame(rows + [avg_row], columns=header)
     df.to_excel(excel_file, index=False)
+    
     print(f"Scores written to {excel_file}")
 
     # Charts
