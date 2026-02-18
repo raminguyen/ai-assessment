@@ -222,9 +222,29 @@ def main():
             total_row.append(str(counts[p]))
         writer.writerow(total_row)
 
+        # Add total score for each prompt
+        avg_score_row = ['Avg Total Score', '']
+        
+        for p in prompts:
+
+            csv_path = 'scores_p' + str(p) + '.csv' 
+
+            if not os.path.exists(csv_path):
+                avg_score_row.append('')
+                continue
+            
+            df_score = pd.read_csv(csv_path)  
+
+            match = df_score[df_score['Assignment'] == 'Average Total']
+
+            avg_score_row.append(str(match['Total'].values[0]))
+
+        writer.writerow(avg_score_row)
+
     print(f"Summary results written to {summary_csv}")
 
     # Write word count CSV
+    
     wc_csv = 'word_count_results.csv'
     with open(wc_csv, 'w', newline='', encoding='utf-8') as csvfile:
         writer = csv.writer(csvfile)
@@ -247,6 +267,7 @@ def main():
     print(f"Word count results written to {wc_csv}")
 
     # Write Excel file with both sheets
+
     excel_file = 'formality_results.xlsx'
 
     df_evidence = pd.read_csv(evidence_csv)
