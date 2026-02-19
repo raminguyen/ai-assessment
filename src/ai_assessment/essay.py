@@ -83,6 +83,10 @@ class Essay:
 
         # Load prompt in format: assignment_1_p1, assignment_2_p2, etc.
         prompt_key = "assignment_" + str(assignment_num) + "_p" + str(prompt_num)
+
+        if prompt_key not in data:
+            prompt_key = prompt_key + "_generate"
+
         self.write_prompt = data[prompt_key]
 
         grade_key = "grade_prompt_p" + str(prompt_num)
