@@ -1,7 +1,7 @@
 import os
+import sys
 import re
 import json
-import csv
 import glob
 import pandas as pd
 import matplotlib
@@ -27,29 +27,99 @@ def parse_dimension_scores(text):
         flexible_dim = flexible_dim.replace(r"'", r"['\u2019\u2018]")
 
         patterns = [
-            flexible_dim + r'.*?(\d+(?:\.\d+)?)',
+            flexible_dim + r'[^\n|]{0,120}(?::|—|–)\s*\**(\d+(?:\.\d+)?)',
             r'\*\*' + flexible_dim + r'.*?:\*\*\s*(\d+(?:\.\d+)?)',
-            r'\|.*?'+ flexible_dim + r'.*?\|\s*(?:\*\*)?(\d+(?:\.\d+)?)(?:\*\*)?\s*\|',
-            r'- \*\*' + flexible_dim + r'.*?\*\*\s*:?\s*(\d+(?:\.\d+)?)'
+            r'\|[^\|]*'+ flexible_dim + r'[^\|]*\|\s*(?:\*\*)?(\d+(?:\.\d+)?)[^\|]*\|',
+            r'- \*\*' + flexible_dim + r'.*?\*\*\s*:?\s*(\d+(?:\.\d+)?)',
+            flexible_dim + r'[\s\S]{0,150}?\*\*Score:\s*(\d+(?:\.\d+)?)',
+            flexible_dim + r'[\s\S]{0,150}?\*\*Score:\s*\w+(?:\s+\w+)*?\s*\((\d+(?:\.\d+)?)\)',
+            flexible_dim + r'[^\n|]*(?::|—|–)[^\n|]*\((\d+(?:\.\d+)?)\)',
         ]
 
         for pattern in patterns:
             match = re.search(pattern, text, re.IGNORECASE | re.DOTALL)
             if match:
-                scores[dim] = float(match.group(1))
-                break
+                val = float(match.group(1))
+                if 0 <= val <= 4:
+                    scores[dim] = val
+                    break
 
         if dim not in scores:
             scores[dim] = 0
 
     return scores
 
+def parse_prompt(data_dir, prompt_num, dimensions, short_dims):
+    pattern = os.path.join(data_dir, '*_score_*_p' + str(prompt_num) + '.json')
+    files = sorted(glob.glob(pattern))
+    header = ['Assignment', 'Writer', 'Grader'] + short_dims + ['Total']
+    rows = []
+    for filepath in files:
+        filename = os.path.basename(filepath)
+        m = re.match(r'a(\d+)_gen_([\w-]+)_score_([\w-]+)_p\d+\.json', filename)
+        if not m:
+            continue
+        a_num, writer_name, grader_name = int(m.group(1)), m.group(2), m.group(3)
+        with open(filepath, 'r', encoding='utf-8') as jf:
+            data = json.load(jf)
+        scores = parse_dimension_scores(data.get('result', ''))
+        total = sum(scores.get(dim, 0) for dim in dimensions)
+        rows.append(['A' + str(a_num), writer_name, grader_name] +
+                    [scores.get(dim, 0) for dim in dimensions] + [total])
+    return pd.DataFrame(rows, columns=header)
+
+
+def join_scores():
+    base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+    data_dir = os.path.join(base_dir, 'data', 'critical_thinking')
+    src_dir = os.path.dirname(os.path.abspath(__file__))
+
+    dimensions = [
+        'Explanation of issues', 'Evidence',
+        'Influence of context and assumptions',
+        "Student's position", 'Conclusions and related outcomes'
+    ]
+    short_dims = ['Issues', 'Evidence', 'Context', 'Position', 'Conclusions']
+    dim_cols = short_dims + ['Total']
+
+    dfs = []
+    for p_num in range(0, 12):
+        df = parse_prompt(data_dir, p_num, dimensions, short_dims)
+        if df.empty:
+            continue
+        df.insert(0, 'Prompt', 'p' + str(p_num))
+        dfs.append(df)
+
+    all_df = pd.concat(dfs, ignore_index=True)
+
+    for col in dim_cols:
+        all_df[col] = pd.to_numeric(all_df[col], errors='coerce').fillna(0)
+
+    all_df['HasZero'] = np.any(all_df[dim_cols].values == 0, axis=1)
+    for col in short_dims:
+        all_df[col + '_zero'] = all_df[col] == 0
+
+    all_df.to_csv(os.path.join(src_dir, 'scores_all.csv'), index=False)
+    all_df.to_excel(os.path.join(src_dir, 'scores_all.xlsx'), index=False)
+    zeros = int(all_df['HasZero'].sum())
+    print('Saved scores_all.csv / scores_all.xlsx (' + str(len(all_df)) + ' rows, ' + str(zeros) + ' with zeros)')
+
+
 def main():
     base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
     data_dir = os.path.join(base_dir, 'data', 'critical_thinking')
 
-    prompt_num = 4
+    if len(sys.argv) > 1 and sys.argv[1] == '--join':
+        join_scores()
+        return
+
+    if len(sys.argv) > 1:
+        prompt_num = int(sys.argv[1].lstrip('p'))
+    else:
+        prompt_num = 4
+
     pattern = os.path.join(data_dir, f'*_score_*_p{prompt_num}.json')
+
     files = sorted(glob.glob(pattern))
 
     print(f"Found {len(files)} score files for p{prompt_num}")
@@ -66,7 +136,7 @@ def main():
     rows = []
     for filepath in files:
         filename = os.path.basename(filepath)
-        match = re.match(r'a(\d+)_gen_(\w+)_score_(\w+)_p\d+\.json', filename)
+        match = re.match(r'a(\d+)_gen_([\w-]+)_score_([\w-]+)_p\d+\.json', filename)
         if not match:
             continue
 
@@ -84,31 +154,7 @@ def main():
         rows.append([f'A{a_num}', writer_name, grader_name] + [scores.get(dim, 0) for dim in dimensions] + [total])
 
     header = ['Assignment', 'Writer', 'Grader'] + short_dims + ['Total']
-
-    # CSV
-    csv_file = f'scores_p{prompt_num}.csv'
-
     df = pd.DataFrame(rows, columns=header)
-
-    avg = round(df['Total'].mean(), 2)
-    
-    avg_row = ['Average Total', '', '', '', '', '', '', '', avg]
-
-    with open(csv_file, 'w', newline='', encoding='utf-8') as f:
-        writer = csv.writer(f)
-        writer.writerow(header)
-        writer.writerows(rows)
-        writer.writerow(avg_row) 
-
-    print(f"Scores written to {csv_file}")
-   
-
-    excel_file = f'scores_p{prompt_num}.xlsx'
-
-    df = pd.DataFrame(rows + [avg_row], columns=header)
-    df.to_excel(excel_file, index=False)
-    
-    print(f"Scores written to {excel_file}")
 
     # Charts
     plot_avg_by_writer(df, prompt_num)
