@@ -222,23 +222,18 @@ def main():
             total_row.append(str(counts[p]))
         writer.writerow(total_row)
 
-        # Add total score for each prompt
+        # Add total score for each prompt from scores_all.csv
         avg_score_row = ['Avg Total Score', '']
-        
-        for p in prompts:
-
-            csv_path = 'scores_p' + str(p) + '.csv' 
-
-            if not os.path.exists(csv_path):
+        scores_all_path = 'scores_all.csv'
+        if os.path.exists(scores_all_path):
+            df_all = pd.read_csv(scores_all_path)
+            df_all['Total'] = pd.to_numeric(df_all['Total'], errors='coerce')
+            for p in prompts:
+                subset = df_all[df_all['Prompt'] == 'p' + str(p)]['Total']
+                avg_score_row.append(str(round(subset.mean(), 2)) if len(subset) > 0 else '')
+        else:
+            for p in prompts:
                 avg_score_row.append('')
-                continue
-            
-            df_score = pd.read_csv(csv_path)  
-
-            match = df_score[df_score['Assignment'] == 'Average Total']
-
-            avg_score_row.append(str(match['Total'].values[0]))
-
         writer.writerow(avg_score_row)
 
     print(f"Summary results written to {summary_csv}")
@@ -277,12 +272,29 @@ def main():
     df_wc = pd.read_csv(wc_csv)
 
     with pd.ExcelWriter(excel_file, engine='openpyxl') as writer:
-
         df_evidence.to_excel(writer, sheet_name='Evidence', index=False)
-
         df_summary.to_excel(writer, sheet_name='Summary', index=False)
-
         df_wc.to_excel(writer, sheet_name='Word Count', index=False)
+
+    from openpyxl import load_workbook
+    from openpyxl.styles import PatternFill
+    wb = load_workbook(excel_file)
+    ws = wb['Summary']
+    red_fill = PatternFill(start_color='FF0000', end_color='FF0000', fill_type='solid')
+
+    for row in ws.iter_rows():
+        if row[0].value == 'Avg Total Score':
+            score_cells = []
+            for c in row:
+                if c.value is not None and c.value != '' and c.column > 2:
+                    score_cells.append((c, float(c.value)))
+            if score_cells:
+                max_val = max(v for _, v in score_cells)
+                for c, v in score_cells:
+                    if v == max_val:
+                        c.fill = red_fill
+
+    wb.save(excel_file)
     print(f"Excel results written to {excel_file}")
 
 if __name__ == "__main__":
