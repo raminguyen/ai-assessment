@@ -5,10 +5,6 @@
 
   "reflection_prompt": "You are an undergrad student in first semester and you wrote an essay for the following prompt.\n\n{ASSIGNMENT_PROMPT}\n\nOriginal Essay: {original essay}\n\nThen, you tuned the essay for the attached rubric: {rubric}. Provide an explanation of the changes you made.\n\nTuned Essay: {tuned essay}",
 
-  "tuning_p1": "{ASSIGNMENT_PROMPT}\n Tune the essay using the following rubric: {rubric}",
-
-  "tuning_p2": "{ASSIGNMENT_PROMPT}\n Tune the essay using the following rubric: {rubric}",
-
   
   
   "assignment_1_p0": "Consider the following problem: In the morning, when Professor Catlove opens a new can of cat food, his cats run into the kitchen purring and meowing and rubbing their backs against his legs. What examples, if any, of classical conditioning, operant conditioning, and social learning are at work in this brief scene? Note that both the cats and the professor might be exhibiting conditioned behavior here.\n\nYou and some fellow classmates have been discussing this problem over coffee, and you are convinced that the other members of your group are confused about the concepts. Write a five-page essay (1000 words or less) to set them straight and include at least 5 citations from peer-reviewed articles.",
@@ -19,6 +15,7 @@
 
   "grade_prompt_p0": "Score this student essay based on the attached rubric: {rubric} and return numerical scores for the categories.",
 
+   "tuning_p0": "{ASSIGNMENT_PROMPT}\n Tune the essay using the following rubric: {rubric}",
   
   
   "assignment_1_p1": "You are an undergrad student in the first semester.\n\nConsider the following problem: In the morning, when Professor Catlove opens a new can of cat food, his cats run into the kitchen purring and meowing and rubbing their backs against his legs. What examples, if any, of classical conditioning, operant conditioning, and social learning are at work in this brief scene? Note that both the cats and the professor might be exhibiting conditioned behavior here.\n\nYou and some fellow classmates have been discussing this problem over coffee, and you are convinced that the other members of your group are confused about the concepts. Write a five-page essay (1000 words or less) to set them straight and include at least 5 citations from peer-reviewed articles.",
@@ -29,7 +26,8 @@
 
   "grade_prompt_p1": "You are an undergrad student in the first semester. Score this student essay based on the attached rubric: {rubric} and return numerical scores for the categories.",
   
-
+  "tuning_p1": "You are an undergrad student in the first semester. {ASSIGNMENT_PROMPT}\n Tune the essay using the following rubric: {rubric}",
+  
   
   "assignment_1_p2": "You are an undergrad student in the first semester.\n\nConsider the following problem: In the morning, when Professor Catlove opens a new can of cat food, his cats run into the kitchen purring and meowing and rubbing their backs against his legs. What examples, if any, of classical conditioning, operant conditioning, and social learning are at work in this brief scene? Note that both the cats and the professor might be exhibiting conditioned behavior here.\n\nYou and some fellow classmates have been discussing this problem over coffee, and you are convinced that the other members of your group are confused about the concepts. Write a formal five-page essay (1000 words or less) to set them straight and include at least 5 citations from peer-reviewed articles.",
 
