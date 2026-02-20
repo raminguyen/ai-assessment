@@ -93,9 +93,9 @@ class Essay:
         self.grade_prompt = data.get(grade_key, data["grade_prompt"])
         self.reflection_prompt = data["reflection_prompt"]
 
-        # Use prompt-specific tuning (tuning_p1, tuning_p2)
+        # Use prompt-specific tuning (tuning_p0, tuning_p1, tuning_p2, ...)
         tuning_key = "tuning_p" + str(prompt_num)
-        self.tuning_prompt = data.get(tuning_key, data["tuning_p1"])
+        self.tuning_prompt = data[tuning_key]
 
         # Map assignment number to professor type
         professor_types = {
