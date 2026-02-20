@@ -50,26 +50,43 @@ def parse_dimension_scores(text):
     return scores
 
 def parse_prompt(data_dir, prompt_num, dimensions, short_dims):
+
     pattern = os.path.join(data_dir, '*_score_*_p' + str(prompt_num) + '.json')
+
     files = sorted(glob.glob(pattern))
-    header = ['Assignment', 'Writer', 'Grader'] + short_dims + ['Total']
+
+    header = ['Assignment', 'EssayType', 'Writer', 'Grader'] + short_dims + ['Total']
+
     rows = []
+
     for filepath in files:
+
         filename = os.path.basename(filepath)
-        m = re.match(r'a(\d+)_gen_([\w-]+)_score_([\w-]+)_p\d+\.json', filename)
+
+        m = re.match(r'a(\d+)_(gen|tune)_([\w-]+)_score_([\w-]+)_p\d+\.json', filename)
+
         if not m:
             continue
-        a_num, writer_name, grader_name = int(m.group(1)), m.group(2), m.group(3)
+
+        a_num = int(m.group(1))
+        writer_name = m.group(3)
+        grader_name = m.group(4)
+
         with open(filepath, 'r', encoding='utf-8') as jf:
             data = json.load(jf)
+
+        essay_type = data.get('essay_type', 'generate')
         scores = parse_dimension_scores(data.get('result', ''))
         total = sum(scores.get(dim, 0) for dim in dimensions)
-        rows.append(['A' + str(a_num), writer_name, grader_name] +
+
+        rows.append(['A' + str(a_num), essay_type, writer_name, grader_name] +
                     [scores.get(dim, 0) for dim in dimensions] + [total])
+
     return pd.DataFrame(rows, columns=header)
 
 
 def join_scores():
+
     base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
     data_dir = os.path.join(base_dir, 'data', 'critical_thinking')
     src_dir = os.path.dirname(os.path.abspath(__file__))
@@ -83,6 +100,7 @@ def join_scores():
     dim_cols = short_dims + ['Total']
 
     dfs = []
+
     for p_num in range(0, 12):
         df = parse_prompt(data_dir, p_num, dimensions, short_dims)
         if df.empty:
@@ -96,6 +114,7 @@ def join_scores():
         all_df[col] = pd.to_numeric(all_df[col], errors='coerce').fillna(0)
 
     all_df['HasZero'] = np.any(all_df[dim_cols].values == 0, axis=1)
+
     for col in short_dims:
         all_df[col + '_zero'] = all_df[col] == 0
 
@@ -136,24 +155,25 @@ def main():
     rows = []
     for filepath in files:
         filename = os.path.basename(filepath)
-        match = re.match(r'a(\d+)_gen_([\w-]+)_score_([\w-]+)_p\d+\.json', filename)
+        match = re.match(r'a(\d+)_(gen|tune)_([\w-]+)_score_([\w-]+)_p\d+\.json', filename)
         if not match:
             continue
 
         a_num = int(match.group(1))
-        writer_name = match.group(2)
-        grader_name = match.group(3)
+        writer_name = match.group(3)
+        grader_name = match.group(4)
 
         with open(filepath, 'r', encoding='utf-8') as jf:
             data = json.load(jf)
 
+        essay_type = data.get('essay_type', 'generate')
         result = data.get('result', '')
         scores = parse_dimension_scores(result)
 
         total = sum(scores.get(dim, 0) for dim in dimensions)
-        rows.append([f'A{a_num}', writer_name, grader_name] + [scores.get(dim, 0) for dim in dimensions] + [total])
+        rows.append([f'A{a_num}', essay_type, writer_name, grader_name] + [scores.get(dim, 0) for dim in dimensions] + [total])
 
-    header = ['Assignment', 'Writer', 'Grader'] + short_dims + ['Total']
+    header = ['Assignment', 'EssayType', 'Writer', 'Grader'] + short_dims + ['Total']
     df = pd.DataFrame(rows, columns=header)
 
     # Charts
