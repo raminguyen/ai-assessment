@@ -3,6 +3,7 @@ import os
 import json
 from ai_assessment import Util, ModelChatGPT, ModelClaude, ModelGemini3ProPreview, ModelGrok
 from ai_assessment.rubric.rubric import Rubric
+import sys
 
 class Runner:
 
@@ -55,7 +56,10 @@ class Runner:
         model = self.all_models[model_name]
 
         essay = Util.create_essay(assignment, rubric_folder=rubric_name)
-        essay.load_prompt_p(prompt_num, assignment)
+        if prompt_num in [7, 8, 9, 10]:
+            essay.load_prompt_p7(assignment, prompt_num=prompt_num)
+        else:
+            essay.load_prompt_p(prompt_num, assignment)
 
         rubric_obj = Rubric(rubric_name)
 
@@ -85,7 +89,11 @@ class Runner:
         grader = self.all_models[grader_name]
 
         essay = Util.create_essay(assignment, rubric_folder=rubric_name)
-        essay.load_prompt_p(prompt_num, assignment)
+        if prompt_num in [7, 8, 9, 10]:
+            essay.load_prompt_p7(assignment, prompt_num=prompt_num)
+        else:
+            essay.load_prompt_p(prompt_num, assignment)
+        
 
         # Load essay from file
         essay_text, writer_model, essay_type = Util.load_essay_from_data(filename, rubric_name)
@@ -126,7 +134,10 @@ class Runner:
         model = self.all_models[model_name]
 
         essay = Util.create_essay(assignment, rubric_folder=rubric_name)
-        essay.load_prompt_p(prompt_num, assignment)
+        if prompt_num in [7, 8, 9, 10]:
+            essay.load_prompt_p7(assignment, prompt_num=prompt_num)
+        else:
+            essay.load_prompt_p(prompt_num, assignment)
 
         rubric_obj = Rubric(rubric_name)
 
