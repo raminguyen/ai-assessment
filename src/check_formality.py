@@ -127,25 +127,27 @@ def main():
     if not os.path.exists(data_dir):
         data_dir = os.path.join('data', 'critical_thinking')
 
-    results = {} # (a, m, p) -> (is_informal, keywords, evidence)
+    results = {} # (a, m, p, essay_type) -> (is_informal, keywords, evidence)
     word_counts = {} # (a, m, p) -> word count
-    files = glob.glob(os.path.join(data_dir, 'a*_gen_*.json'))
+    files = glob.glob(os.path.join(data_dir, 'a*_gen_*.json')) + glob.glob(os.path.join(data_dir, 'a*_tune_*.json'))
 
     for filepath in files:
         filename = os.path.basename(filepath)
-        match = re.match(r'a(\d+)_gen_([a-z]+)_p(\d+)\.json', filename)
+        match = re.match(r'a(\d+)_(gen|tune)_([a-z]+)_p(\d+)\.json', filename)
 
         if match:
             a_num = int(match.group(1))
-            m_name = match.group(2)
-            p_num = int(match.group(3))
+            essay_type = 'generate' if match.group(2) == 'gen' else 'tune'
+            m_name = match.group(3)
+            p_num = int(match.group(4))
 
             try:
                 with open(filepath, 'r', encoding='utf-8') as f:
                     data = json.load(f)
                     text_to_check = data.get('result', '')
-                    results[(a_num, m_name, p_num)] = get_informal_data(text_to_check)
-                    word_counts[(a_num, m_name, p_num)] = len(text_to_check.split())
+                    results[(a_num, m_name, p_num, essay_type)] = get_informal_data(text_to_check)
+                    if essay_type == 'generate':
+                        word_counts[(a_num, m_name, p_num)] = len(text_to_check.split())
             except Exception:
                 pass
 
@@ -153,16 +155,17 @@ def main():
     evidence_csv = 'formality_results_with_evidence.csv'
     with open(evidence_csv, 'w', newline='', encoding='utf-8') as csvfile:
         writer = csv.writer(csvfile)
-        writer.writerow(['Assignment', 'Model', 'Prompt', 'Is Informal', 'Matched Keywords', 'Exact Sentence'])
+        writer.writerow(['Assignment', 'EssayType', 'Model', 'Prompt', 'Is Informal', 'Matched Keywords', 'Exact Sentence'])
 
         for a in assignments:
             for m in models:
                 for p in prompts:
-                    is_inf, keywords, evidence = results.get((a, m, p), (None, "", ""))
-                    if is_inf is None:
-                        continue
-                    status = 'x' if is_inf else ' '
-                    writer.writerow([f'Assignment {a}', m, f'p{p}', status, keywords, evidence])
+                    for essay_type in ['generate', 'tune']:
+                        is_inf, keywords, evidence = results.get((a, m, p, essay_type), (None, "", ""))
+                        if is_inf is None:
+                            continue
+                        status = 'x' if is_inf else ' '
+                        writer.writerow([f'Assignment {a}', essay_type, m, f'p{p}', status, keywords, evidence])
     
     print(f"Detailed results with evidence written to {evidence_csv}")
 
@@ -172,7 +175,7 @@ def main():
         writer = csv.writer(csvfile)
         
         # Header row
-        header = ['Assignment', 'Model'] + [f'p{p}' for p in prompts]
+        header = ['Assignment', 'Model', 'EssayType'] + [f'p{p}' for p in prompts]
         writer.writerow(header)
 
         # Technique name row (second row)
@@ -190,7 +193,7 @@ def main():
             10: 'Iterative + CoT + Generate',
             11: 'Iterative + Write'
         }
-        technique_row = ['Technique', '']
+        technique_row = ['Technique', '', '']
         for p in prompts:
             technique_row.append(technique_names.get(p, ''))
         writer.writerow(technique_row)
@@ -201,40 +204,66 @@ def main():
 
         for a in assignments:
             for m in models:
-                row = [f'Assignment {a}', m]
+
+                gen_row = [f'Assignment {a}', m, 'generate']
+                tune_row = [f'Assignment {a}', m, 'tune']
+
                 for p in prompts:
-                    is_inf, _, _ = results.get((a, m, p), (False, "", ""))
-                    row.append('x' if is_inf else ' ')
-                    if is_inf:
+                    is_inf_gen, _, _ = results.get((a, m, p, 'generate'), (False, "", ""))
+                    is_inf_tune, _, _ = results.get((a, m, p, 'tune'), (False, "", ""))
+
+                    gen_row.append('x' if is_inf_gen else ' ')
+                    tune_row.append('x' if is_inf_tune else ' ')
+
+                    if is_inf_gen:
                         counts[p] += 1
                         assignment_counts[a][p] += 1
-                writer.writerow(row)
+
+                writer.writerow(gen_row)
+                writer.writerow(tune_row)
 
             # Add per-assignment total row
-            a_total = ['', f'Total A{a}']
+            a_total = ['', f'Total A{a}', '']
             for p in prompts:
                 a_total.append(str(assignment_counts[a][p]))
             writer.writerow(a_total)
 
         # Add overall total row
-        total_row = ['Total Informal Essay', '']
+        total_row = ['Total Informal Essay', '', '']
         for p in prompts:
             total_row.append(str(counts[p]))
         writer.writerow(total_row)
 
-        # Add total score for each prompt from scores_all.csv
-        avg_score_row = ['Avg Total Score', '']
+        # Add avg total score rows from scores_all.csv
+        writer.writerow([])
+
+        avg_gen_row = ['Avg Total Score (Generate)', '', '']
+        avg_tune_row = ['Avg Total Score (Tune)', '', '']
+
         scores_all_path = 'scores_all.csv'
+
         if os.path.exists(scores_all_path):
+
             df_all = pd.read_csv(scores_all_path)
             df_all['Total'] = pd.to_numeric(df_all['Total'], errors='coerce')
+
             for p in prompts:
-                subset = df_all[df_all['Prompt'] == 'p' + str(p)]['Total']
-                avg_score_row.append(str(round(subset.mean(), 2)) if len(subset) > 0 else '')
+                p_df = df_all[df_all['Prompt'] == 'p' + str(p)]
+
+                gen = p_df[p_df['EssayType'] == 'generate']['Total']
+                tune = p_df[p_df['EssayType'] == 'tune']['Total']
+
+                avg_gen_row.append(str(round(gen.mean(), 2)) if len(gen) > 0 else '')
+                avg_tune_row.append(str(round(tune.mean(), 2)) if len(tune) > 0 else '')
+
         else:
+
             for p in prompts:
-                avg_score_row.append('')
-        writer.writerow(avg_score_row)
+                avg_gen_row.append('')
+                avg_tune_row.append('')
+
+        writer.writerow(avg_gen_row)
+        writer.writerow(avg_tune_row)
 
     print(f"Summary results written to {summary_csv}")
 
@@ -283,7 +312,7 @@ def main():
     red_fill = PatternFill(start_color='FF0000', end_color='FF0000', fill_type='solid')
 
     for row in ws.iter_rows():
-        if row[0].value == 'Avg Total Score':
+        if row[0].value in ('Avg Total Score (Generate)', 'Avg Total Score (Tune)'):
             score_cells = []
             for c in row:
                 if c.value is not None and c.value != '' and c.column > 2:
