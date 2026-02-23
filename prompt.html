@@ -17,8 +17,6 @@
     --text-muted: #6b7f6b;
     --text-dim: #9aaa9a;
     --border: rgba(255,255,255,0.06);
-
-    /* Technique colors */
     --c-role:   #4fc3f7;
     --c-cot:    #f5c518;
     --c-gen:    #00e5a0;
@@ -37,399 +35,341 @@
     flex-direction: column;
   }
 
-  /* ── TOPBAR ── */
   .topbar {
     height: 46px;
     background: var(--bg2);
     border-bottom: 1px solid var(--border);
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 0 20px;
-    flex-shrink: 0;
-    z-index: 10;
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 0 20px; flex-shrink: 0;
   }
   .logo { font-family:'Space Mono',monospace; font-size:12px; color:var(--teal); letter-spacing:.06em; }
-  .legend {
-    display: flex; gap: 14px; align-items: center;
-  }
-  .leg { display:flex; align-items:center; gap:5px; font-size:10px; font-family:'Space Mono',monospace; }
-  .leg-dot { width:9px; height:9px; border-radius:2px; }
+  .legend { display:flex; gap:14px; align-items:center; }
+  .leg { display:flex; align-items:center; gap:5px; font-size:10px; font-family:'Space Mono',monospace; color:var(--text-muted); }
+  .leg-dot { width:9px; height:9px; border-radius:2px; flex-shrink:0; }
 
-  /* ── FILTER BAR ── */
   .filterbar {
-    height: 38px;
-    background: var(--bg2);
+    height: 38px; background: var(--bg2);
     border-bottom: 1px solid var(--border);
-    display: flex;
-    align-items: center;
-    padding: 0 16px;
-    gap: 8px;
-    flex-shrink: 0;
+    display: flex; align-items: center; padding: 0 16px; gap: 8px; flex-shrink: 0;
   }
   .filter-label { font-size:10px; font-family:'Space Mono',monospace; color:var(--text-muted); margin-right:4px; }
   .filter-btn {
     font-size:10px; font-family:'Space Mono',monospace;
-    padding: 3px 11px; border-radius: 20px; border: 1px solid var(--border);
-    background: transparent; color: var(--text-muted); cursor: pointer;
-    transition: all .15s;
+    padding:3px 11px; border-radius:20px; border:1px solid var(--border);
+    background:transparent; color:var(--text-muted); cursor:pointer; transition:all .15s;
   }
-  .filter-btn:hover { color: var(--text); border-color: var(--text-muted); }
-  .filter-btn.on { color: var(--bg); font-weight:700; border-color:transparent; }
-  .filter-btn[data-f="all"]   { color: var(--teal); border-color: var(--teal-border); }
-  .filter-btn[data-f="all"].on { background:var(--teal); color:var(--bg); }
+  .filter-btn:hover { color:var(--text); border-color:var(--text-muted); }
+  .filter-btn.on { color:var(--bg); font-weight:700; border-color:transparent; }
+  .filter-btn[data-f="all"].on   { background:var(--teal); }
   .filter-btn[data-f="role"].on   { background:var(--c-role); }
   .filter-btn[data-f="cot"].on    { background:var(--c-cot); }
   .filter-btn[data-f="gen"].on    { background:var(--c-gen); }
   .filter-btn[data-f="iter"].on   { background:var(--c-iter); }
   .filter-btn[data-f="formal"].on { background:var(--c-formal); }
 
-  /* ── PANEL STRIP ── */
+  /* STRIP */
   .strip-wrap {
-    flex: 1;
-    overflow-x: auto;
-    overflow-y: hidden;
-    display: flex;
-    padding: 16px 20px 16px;
-    gap: 12px;
-    scroll-behavior: smooth;
+    flex:1; overflow-x:auto; overflow-y:hidden;
+    display:flex; padding:16px 20px; gap:10px;
+    align-items:stretch; scroll-behavior:smooth;
   }
-  .strip-wrap::-webkit-scrollbar { height: 6px; }
-  .strip-wrap::-webkit-scrollbar-track { background: var(--bg2); }
-  .strip-wrap::-webkit-scrollbar-thumb { background: var(--teal-border); border-radius: 3px; }
+  .strip-wrap::-webkit-scrollbar { height:6px; }
+  .strip-wrap::-webkit-scrollbar-track { background:var(--bg2); }
+  .strip-wrap::-webkit-scrollbar-thumb { background:var(--teal-border); border-radius:3px; }
 
-  /* ── PANEL CARD ── */
+  /* PANEL */
   .panel {
     flex-shrink: 0;
-    width: 260px;
+    width: 52px;
     background: var(--bg2);
     border: 1px solid var(--border);
     border-radius: 10px;
-    display: flex;
-    flex-direction: column;
+    display: flex; flex-direction: column;
     overflow: hidden;
-    transition: border-color .2s, transform .2s, opacity .25s;
+    transition: width .35s cubic-bezier(.4,0,.2,1), border-color .2s, opacity .25s;
+    cursor: pointer;
+    position: relative;
   }
-  .panel:hover { border-color: var(--teal-border); transform: translateY(-2px); }
-  .panel.dimmed { opacity: .25; pointer-events: none; }
+  .panel:hover:not(.open) { border-color:var(--teal-border); }
+  .panel.open { width:272px; cursor:default; border-color:var(--teal-border); }
+  .panel.dimmed { opacity:.18; pointer-events:none; }
 
-  /* panel top stripe (technique color) */
-  .panel-stripe { height: 3px; width: 100%; flex-shrink: 0; }
+  .panel-stripe { height:3px; width:100%; flex-shrink:0; }
 
-  /* panel header */
-  .panel-head {
-    padding: 11px 14px 9px;
-    border-bottom: 1px solid var(--border);
-    flex-shrink: 0;
+  /* COLLAPSED */
+  .panel-mini {
+    flex:1; display:flex; flex-direction:column;
+    align-items:center; padding:10px 0 14px; gap:10px; overflow:hidden;
   }
-  .panel-id-row { display:flex; align-items:center; gap:8px; margin-bottom:6px; }
-  .pid {
+  .panel.open .panel-mini { display:none; }
+
+  .mini-pid {
     font-family:'Space Mono',monospace; font-size:10px;
     color:var(--teal); background:var(--teal-muted);
     border:1px solid var(--teal-border);
-    padding:2px 8px; border-radius:4px;
+    padding:3px 6px; border-radius:4px; white-space:nowrap;
   }
-  .pname { font-size:12px; font-weight:600; color:var(--text); }
-  .badge-row { display:flex; gap:5px; flex-wrap:wrap; }
-  .badge {
-    font-size:9px; font-family:'Space Mono',monospace;
-    padding:2px 8px; border-radius:20px; border:1px solid;
+  .mini-name {
+    font-size:10px; color:var(--text-muted);
+    font-family:'Space Mono',monospace;
+    writing-mode:vertical-rl; text-orientation:mixed;
+    transform:rotate(180deg);
+    white-space:nowrap; letter-spacing:.06em;
   }
+  .mini-dots { display:flex; flex-direction:column; gap:4px; margin-top:auto; }
+  .mini-dot { width:6px; height:6px; border-radius:50%; }
 
-  /* technique pill badges */
+  /* OPEN */
+  .panel-full { display:none; flex-direction:column; flex:1; overflow:hidden; min-width:0; }
+  .panel.open .panel-full { display:flex; }
+
+  .panel-head {
+    padding:11px 32px 9px 14px;
+    border-bottom:1px solid var(--border); flex-shrink:0;
+  }
+  .panel-id-row { display:flex; align-items:center; gap:8px; margin-bottom:7px; }
+  .pid {
+    font-family:'Space Mono',monospace; font-size:10px;
+    color:var(--teal); background:var(--teal-muted);
+    border:1px solid var(--teal-border); padding:2px 8px; border-radius:4px;
+  }
+  .pname { font-size:13px; font-weight:600; color:var(--text); }
+  .badge-row { display:flex; gap:5px; flex-wrap:wrap; }
+  .badge { font-size:9px; font-family:'Space Mono',monospace; padding:2px 8px; border-radius:20px; border:1px solid; }
   .b-role   { color:var(--c-role);   border-color:rgba(79,195,247,.3);   background:rgba(79,195,247,.08); }
   .b-cot    { color:var(--c-cot);    border-color:rgba(245,197,24,.3);   background:rgba(245,197,24,.08); }
-  .b-gen    { color:var(--c-gen);    border-color:var(--teal-border);     background:var(--teal-muted); }
+  .b-gen    { color:var(--c-gen);    border-color:var(--teal-border);    background:var(--teal-muted); }
   .b-iter   { color:var(--c-iter);   border-color:rgba(255,140,66,.3);   background:rgba(255,140,66,.08); }
   .b-formal { color:var(--c-formal); border-color:rgba(192,132,252,.3);  background:rgba(192,132,252,.08); }
-  .b-write  { color:var(--c-write);  border-color:rgba(148,163,184,.25); background:rgba(148,163,184,.06); }
+  .b-base   { color:var(--c-write);  border-color:rgba(148,163,184,.25); background:rgba(148,163,184,.06); }
 
-  /* panel body: scrollable prompt text */
-  .panel-body {
-    flex: 1;
-    overflow-y: auto;
-    padding: 13px 14px;
-    font-size: 11.5px;
-    color: var(--text-dim);
-    line-height: 1.7;
+  .close-btn {
+    position:absolute; top:9px; right:9px;
+    background:transparent; border:1px solid var(--border);
+    color:var(--text-muted); font-size:11px; cursor:pointer;
+    padding:2px 6px; border-radius:4px; z-index:5; display:none;
+    font-family:'Space Mono',monospace; transition:all .15s;
   }
-  .panel-body::-webkit-scrollbar { width: 3px; }
-  .panel-body::-webkit-scrollbar-thumb { background: var(--teal-border); border-radius:2px; }
+  .panel.open .close-btn { display:block; }
+  .close-btn:hover { color:var(--teal); border-color:var(--teal-border); background:var(--teal-muted); }
 
-  .step-block { margin-bottom: 12px; }
+  .panel-body { flex:1; overflow-y:auto; padding:12px 14px; }
+  .panel-body::-webkit-scrollbar { width:3px; }
+  .panel-body::-webkit-scrollbar-thumb { background:var(--teal-border); border-radius:2px; }
+
+  .step-block { margin-bottom:10px; }
   .step-tag {
-    font-size: 9px; font-family:'Space Mono',monospace;
-    color: var(--teal); letter-spacing:.08em;
-    margin-bottom: 5px; opacity:.8;
+    font-size:9px; font-family:'Space Mono',monospace;
+    color:var(--teal); letter-spacing:.08em; margin-bottom:5px; opacity:.8;
   }
   .step-text {
-    background: var(--bg3);
-    border-left: 2px solid var(--teal-border);
-    border-radius: 0 5px 5px 0;
-    padding: 9px 11px;
-    font-size: 11.5px;
-    color: var(--text-dim);
-    line-height: 1.7;
+    background:var(--bg3); border-left:2px solid var(--teal-border);
+    border-radius:0 5px 5px 0; padding:9px 11px;
+    font-size:11.5px; color:var(--text-dim); line-height:1.7;
   }
 
-  /* ── HIGHLIGHTS ── */
-  .hl-role   { color:var(--c-role);   background:rgba(79,195,247,.1);   border-radius:3px; padding:0 2px; font-weight:600; }
-  .hl-cot    { color:var(--c-cot);    background:rgba(245,197,24,.1);   border-radius:3px; padding:0 2px; font-weight:600; }
-  .hl-gen    { color:var(--c-gen);    background:rgba(0,229,160,.1);    border-radius:3px; padding:0 2px; font-weight:600; }
-  .hl-iter   { color:var(--c-iter);   background:rgba(255,140,66,.1);   border-radius:3px; padding:0 2px; font-weight:600; }
-  .hl-formal { color:var(--c-formal); background:rgba(192,132,252,.1);  border-radius:3px; padding:0 2px; font-weight:600; }
+  /* HIGHLIGHTS */
+  .hl-role   { color:var(--c-role);   background:rgba(79,195,247,.12);  border-radius:3px; padding:0 2px; font-weight:600; }
+  .hl-cot    { color:var(--c-cot);    background:rgba(245,197,24,.12);  border-radius:3px; padding:0 2px; font-weight:600; }
+  .hl-gen    { color:var(--c-gen);    background:rgba(0,229,160,.12);   border-radius:3px; padding:0 2px; font-weight:600; }
+  .hl-iter   { color:var(--c-iter);   background:rgba(255,140,66,.12);  border-radius:3px; padding:0 2px; font-weight:600; }
+  .hl-formal { color:var(--c-formal); background:rgba(192,132,252,.12); border-radius:3px; padding:0 2px; font-weight:600; }
 
-  /* tuning section */
   .tuning-block {
-    margin: 0 14px 14px;
-    background: rgba(0,229,160,.04);
-    border: 1px solid var(--teal-border);
-    border-radius: 6px;
-    padding: 9px 11px;
-    flex-shrink: 0;
+    margin:0 14px 12px;
+    background:rgba(0,229,160,.04); border:1px solid var(--teal-border);
+    border-radius:6px; padding:9px 11px; flex-shrink:0;
   }
-  .tuning-lbl {
-    font-size:9px; font-family:'Space Mono',monospace;
-    color:var(--teal); letter-spacing:.08em; margin-bottom:4px;
-  }
-  .tuning-text {
-    font-size:10px; font-family:'Space Mono',monospace;
-    color:var(--text-muted); line-height:1.65;
-  }
+  .tuning-lbl { font-size:9px; font-family:'Space Mono',monospace; color:var(--teal); letter-spacing:.08em; margin-bottom:4px; }
+  .tuning-text { font-size:10px; font-family:'Space Mono',monospace; color:var(--text-muted); line-height:1.65; }
   .t-key { color:var(--teal); }
 </style>
 </head>
 <body>
 
-<!-- TOPBAR -->
 <div class="topbar">
-  <span class="logo">PROMPT PANEL VIEW — P0 → P11</span>
+  <span class="logo">PROMPT PANEL VIEW — P0 → P11  ·  Click any panel to expand</span>
   <div class="legend">
-    <div class="leg"><div class="leg-dot" style="background:var(--c-role)"></div>Role-based</div>
-    <div class="leg"><div class="leg-dot" style="background:var(--c-cot)"></div>Chain-of-Thought</div>
-    <div class="leg"><div class="leg-dot" style="background:var(--c-gen)"></div>Gen. Knowledge</div>
-    <div class="leg"><div class="leg-dot" style="background:var(--c-iter)"></div>Iterative</div>
+    <div class="leg"><div class="leg-dot" style="background:var(--c-role)"></div>Role</div>
+    <div class="leg"><div class="leg-dot" style="background:var(--c-cot)"></div>CoT</div>
+    <div class="leg"><div class="leg-dot" style="background:var(--c-gen)"></div>Gen.</div>
+    <div class="leg"><div class="leg-dot" style="background:var(--c-iter)"></div>Iter</div>
     <div class="leg"><div class="leg-dot" style="background:var(--c-formal)"></div>Formal</div>
   </div>
 </div>
 
-<!-- FILTER BAR -->
 <div class="filterbar">
   <span class="filter-label">FILTER:</span>
-  <button class="filter-btn on" data-f="all"   onclick="filter('all')">All</button>
-  <button class="filter-btn"   data-f="role"   onclick="filter('role')">Role-based</button>
-  <button class="filter-btn"   data-f="cot"    onclick="filter('cot')">Chain-of-Thought</button>
-  <button class="filter-btn"   data-f="gen"    onclick="filter('gen')">Gen. Knowledge</button>
-  <button class="filter-btn"   data-f="iter"   onclick="filter('iter')">Iterative</button>
-  <button class="filter-btn"   data-f="formal" onclick="filter('formal')">Formal</button>
+  <button class="filter-btn on" data-f="all"   onclick="doFilter('all')">All</button>
+  <button class="filter-btn"   data-f="role"   onclick="doFilter('role')">Role-based</button>
+  <button class="filter-btn"   data-f="cot"    onclick="doFilter('cot')">Chain-of-Thought</button>
+  <button class="filter-btn"   data-f="gen"    onclick="doFilter('gen')">Gen. Knowledge</button>
+  <button class="filter-btn"   data-f="iter"   onclick="doFilter('iter')">Iterative</button>
+  <button class="filter-btn"   data-f="formal" onclick="doFilter('formal')">Formal</button>
 </div>
 
-<!-- PANEL STRIP -->
 <div class="strip-wrap" id="strip"></div>
 
 <script>
 const BASE = `Consider the following problem: In the morning, when Professor Catlove opens a new can of cat food, his cats run into the kitchen purring and meowing and rubbing their backs against his legs. What examples, if any, of classical conditioning, operant conditioning, and social learning are at work in this brief scene? Note that both the cats and the professor might be exhibiting conditioned behavior here.\n\nYou and some fellow classmates have been discussing this problem over coffee, and you are convinced that the other members of your group are confused about the concepts.`;
 
-const CTX = `Consider the following problem: In the morning, when Professor Catlove opens a new can of cat food, his cats run into the kitchen purring and meowing and rubbing their backs against his legs. What examples, if any, of classical conditioning, operant conditioning, and social learning are at work in this brief scene? Note that both the cats and the professor might be exhibiting conditioned behavior here.\n\nYou and some fellow classmates have been discussing this problem over coffee, and you are convinced that the other members of your group are confused about the concepts.`;
-
 const prompts = [
-  {
-    id: 0, name: "Baseline",
-    techniques: [],
-    stripe: "#2a3a2a",
-    steps: [
-      { label: null, text: BASE + `\nWrite a five-page essay (1000 words or less) to set them straight and include at least 5 citations from peer-reviewed articles.` }
+  { id:0, name:"Baseline", techniques:[], stripe:"#1f2e1f",
+    steps:[{l:null, tx:BASE+`\nWrite a five-page essay (1000 words or less) to set them straight and include at least 5 citations from peer-reviewed articles.`}],
+    tu:"{ASSIGNMENT_PROMPT}\nTune the essay using the following rubric: {rubric}" },
+
+  { id:1, name:"Role-based", techniques:["role"], stripe:"var(--c-role)",
+    steps:[{l:null, tx:`[ROLE]You are an undergrad student in the first semester.[/ROLE] `+BASE+`\nWrite a five-page essay (1000 words or less) to set them straight and include at least 5 citations from peer-reviewed articles.`}],
+    tu:"{ASSIGNMENT_PROMPT}\nYou are an undergrad student in the first semester. Tune the essay using the following rubric: {rubric}" },
+
+  { id:2, name:"Role + Formal", techniques:["role","formal"], stripe:"linear-gradient(90deg,var(--c-role),var(--c-formal))",
+    steps:[{l:null, tx:`[ROLE]You are an undergrad student in the first semester.[/ROLE] `+BASE+`\nWrite a [FORMAL]formal[/FORMAL] five-page essay (1000 words or less) to set them straight and include at least 5 citations from peer-reviewed articles.`}],
+    tu:"{ASSIGNMENT_PROMPT}\nYou are an undergrad student in the first semester. Tune the essay using the following rubric: {rubric}" },
+
+  { id:3, name:"Chain-of-Thought", techniques:["cot"], stripe:"var(--c-cot)",
+    steps:[{l:null, tx:BASE+`\n[COT]Let's think step-by-step.[/COT] Write a five-page essay (1000 words or less) to set them straight and include at least 5 citations from peer-reviewed articles.`}],
+    tu:"{ASSIGNMENT_PROMPT}\nLet's think step-by-step. Tune the essay using the following rubric: {rubric}" },
+
+  { id:4, name:"Gen. Knowledge", techniques:["gen"], stripe:"var(--c-gen)",
+    steps:[{l:null, tx:BASE+`\n[GEN]Generate[/GEN] a five-page essay (1000 words or less) to set them straight and include at least 5 citations from peer-reviewed articles.`}],
+    tu:"{ASSIGNMENT_PROMPT}\nTune the essay using the following rubric: {rubric}" },
+
+  { id:5, name:"CoT + Gen.", techniques:["cot","gen"], stripe:"linear-gradient(90deg,var(--c-cot),var(--c-gen))",
+    steps:[{l:null, tx:BASE+`\n[COT]Let's think step-by-step.[/COT] [GEN]Generate[/GEN] a five-page essay (1000 words or less) to set them straight and include at least 5 citations from peer-reviewed articles.`}],
+    tu:"{ASSIGNMENT_PROMPT}\nLet's think step-by-step. Tune the essay using the following rubric: {rubric}" },
+
+  { id:6, name:"Role + Gen.", techniques:["role","gen"], stripe:"linear-gradient(90deg,var(--c-role),var(--c-gen))",
+    steps:[{l:null, tx:`[ROLE]You are an undergrad student in the first semester.[/ROLE] `+BASE+`\n[GEN]Generate[/GEN] a five-page essay (1000 words or less) to set them straight and include at least 5 citations from peer-reviewed articles.`}],
+    tu:"{ASSIGNMENT_PROMPT}\nYou are an undergrad student in the first semester. Tune the essay using the following rubric: {rubric}" },
+
+  { id:7, name:"Iter+Role+Gen.", techniques:["iter","role","gen"], stripe:"linear-gradient(90deg,var(--c-iter),var(--c-role),var(--c-gen))",
+    steps:[
+      {l:"STEP 1 · Context", tx:BASE},
+      {l:"STEP 2 · Generate", tx:`[ROLE]You are an undergrad student in the first semester.[/ROLE] [GEN]Generate[/GEN] a five-page essay (1000 words or less) to set them straight and include at least 5 citations from peer-reviewed articles.`}
     ],
-    tuning: `{ASSIGNMENT_PROMPT}\nTune the essay using the following rubric: {rubric}`
-  },
-  {
-    id: 1, name: "Role-based",
-    techniques: ["role"],
-    stripe: "var(--c-role)",
-    steps: [
-      { label: null, text: `[ROLE]You are an undergrad student in the first semester.[/ROLE] ` + BASE + `\nWrite a five-page essay (1000 words or less) to set them straight and include at least 5 citations from peer-reviewed articles.` }
+    tu:"{ASSIGNMENT_PROMPT}\nYou are an undergrad student in the first semester. Tune the essay using the following rubric: {rubric}" },
+
+  { id:8, name:"Iter + Role", techniques:["iter","role"], stripe:"linear-gradient(90deg,var(--c-iter),var(--c-role))",
+    steps:[
+      {l:"STEP 1 · Context", tx:BASE},
+      {l:"STEP 2 · Write", tx:`[ROLE]You are an undergrad student in the first semester.[/ROLE] Write a five-page essay (1000 words or less) to set them straight and include at least 5 citations from peer-reviewed articles.`}
     ],
-    tuning: `{ASSIGNMENT_PROMPT}\nYou are an undergrad student in the first semester. Tune the essay using the following rubric: {rubric}`
-  },
-  {
-    id: 2, name: "Role + Formal",
-    techniques: ["role","formal"],
-    stripe: "linear-gradient(90deg, var(--c-role), var(--c-formal))",
-    steps: [
-      { label: null, text: `[ROLE]You are an undergrad student in the first semester.[/ROLE] ` + BASE + `\nWrite a [FORMAL]formal[/FORMAL] five-page essay (1000 words or less) to set them straight and include at least 5 citations from peer-reviewed articles.` }
+    tu:"{ASSIGNMENT_PROMPT}\nYou are an undergrad student in the first semester. Tune the essay using the following rubric: {rubric}" },
+
+  { id:9, name:"Iter + Gen.", techniques:["iter","gen"], stripe:"linear-gradient(90deg,var(--c-iter),var(--c-gen))",
+    steps:[
+      {l:"STEP 1 · Context", tx:BASE},
+      {l:"STEP 2 · Generate", tx:`[GEN]Generate[/GEN] a five-page essay (1000 words or less) to set them straight and include at least 5 citations from peer-reviewed articles.`}
     ],
-    tuning: `{ASSIGNMENT_PROMPT}\nYou are an undergrad student in the first semester. Tune the essay using the following rubric: {rubric}`
-  },
-  {
-    id: 3, name: "Chain-of-Thought",
-    techniques: ["cot"],
-    stripe: "var(--c-cot)",
-    steps: [
-      { label: null, text: BASE + `\n[COT]Let's think step-by-step.[/COT] Write a five-page essay (1000 words or less) to set them straight and include at least 5 citations from peer-reviewed articles.` }
+    tu:"{ASSIGNMENT_PROMPT}\nTune the essay using the following rubric: {rubric}" },
+
+  { id:10, name:"Iter+CoT+Gen.", techniques:["iter","cot","gen"], stripe:"linear-gradient(90deg,var(--c-iter),var(--c-cot),var(--c-gen))",
+    steps:[
+      {l:"STEP 1 · Context", tx:BASE},
+      {l:"STEP 2 · Generate", tx:`[COT]Let's think step by step.[/COT] [GEN]Generate[/GEN] a five-page essay (1000 words or less) to set them straight and include at least 5 citations from peer-reviewed articles.`}
     ],
-    tuning: `{ASSIGNMENT_PROMPT}\nLet's think step-by-step. Tune the essay using the following rubric: {rubric}`
-  },
-  {
-    id: 4, name: "Gen. Knowledge",
-    techniques: ["gen"],
-    stripe: "var(--c-gen)",
-    steps: [
-      { label: null, text: BASE + `\n[GEN]Generate[/GEN] a five-page essay (1000 words or less) to set them straight and include at least 5 citations from peer-reviewed articles.` }
+    tu:"{ASSIGNMENT_PROMPT}\nLet's think step by step. Tune the essay using the following rubric: {rubric}" },
+
+  { id:11, name:"Iter + Original", techniques:["iter"], stripe:"var(--c-iter)",
+    steps:[
+      {l:"STEP 1 · Context", tx:BASE},
+      {l:"STEP 2 · Write", tx:`Write a five-page essay (1000 words or less) to set them straight and include at least 5 citations from peer-reviewed articles.`}
     ],
-    tuning: `{ASSIGNMENT_PROMPT}\nTune the essay using the following rubric: {rubric}`
-  },
-  {
-    id: 5, name: "CoT + Gen.",
-    techniques: ["cot","gen"],
-    stripe: "linear-gradient(90deg, var(--c-cot), var(--c-gen))",
-    steps: [
-      { label: null, text: BASE + `\n[COT]Let's think step-by-step.[/COT] [GEN]Generate[/GEN] a five-page essay (1000 words or less) to set them straight and include at least 5 citations from peer-reviewed articles.` }
-    ],
-    tuning: `{ASSIGNMENT_PROMPT}\nLet's think step-by-step. Tune the essay using the following rubric: {rubric}`
-  },
-  {
-    id: 6, name: "Role + Gen.",
-    techniques: ["role","gen"],
-    stripe: "linear-gradient(90deg, var(--c-role), var(--c-gen))",
-    steps: [
-      { label: null, text: `[ROLE]You are an undergrad student in the first semester.[/ROLE] ` + BASE + `\n[GEN]Generate[/GEN] a five-page essay (1000 words or less) to set them straight and include at least 5 citations from peer-reviewed articles.` }
-    ],
-    tuning: `{ASSIGNMENT_PROMPT}\nYou are an undergrad student in the first semester. Tune the essay using the following rubric: {rubric}`
-  },
-  {
-    id: 7, name: "Iter+Role+Gen.",
-    techniques: ["iter","role","gen"],
-    stripe: "linear-gradient(90deg, var(--c-iter), var(--c-role), var(--c-gen))",
-    steps: [
-      { label: "STEP 1 · Context", text: CTX },
-      { label: "STEP 2 · Generate", text: `[ROLE]You are an undergrad student in the first semester.[/ROLE] [GEN]Generate[/GEN] a five-page essay (1000 words or less) to set them straight and include at least 5 citations from peer-reviewed articles.` }
-    ],
-    tuning: `{ASSIGNMENT_PROMPT}\nYou are an undergrad student in the first semester. Tune the essay using the following rubric: {rubric}`
-  },
-  {
-    id: 8, name: "Iter + Role",
-    techniques: ["iter","role"],
-    stripe: "linear-gradient(90deg, var(--c-iter), var(--c-role))",
-    steps: [
-      { label: "STEP 1 · Context", text: CTX },
-      { label: "STEP 2 · Write", text: `[ROLE]You are an undergrad student in the first semester.[/ROLE] Write a five-page essay (1000 words or less) to set them straight and include at least 5 citations from peer-reviewed articles.` }
-    ],
-    tuning: `{ASSIGNMENT_PROMPT}\nYou are an undergrad student in the first semester. Tune the essay using the following rubric: {rubric}`
-  },
-  {
-    id: 9, name: "Iter + Gen.",
-    techniques: ["iter","gen"],
-    stripe: "linear-gradient(90deg, var(--c-iter), var(--c-gen))",
-    steps: [
-      { label: "STEP 1 · Context", text: CTX },
-      { label: "STEP 2 · Generate", text: `[GEN]Generate[/GEN] a five-page essay (1000 words or less) to set them straight and include at least 5 citations from peer-reviewed articles.` }
-    ],
-    tuning: `{ASSIGNMENT_PROMPT}\nTune the essay using the following rubric: {rubric}`
-  },
-  {
-    id: 10, name: "Iter+CoT+Gen.",
-    techniques: ["iter","cot","gen"],
-    stripe: "linear-gradient(90deg, var(--c-iter), var(--c-cot), var(--c-gen))",
-    steps: [
-      { label: "STEP 1 · Context", text: CTX },
-      { label: "STEP 2 · Generate", text: `[COT]Let's think step by step.[/COT] [GEN]Generate[/GEN] a five-page essay (1000 words or less) to set them straight and include at least 5 citations from peer-reviewed articles.` }
-    ],
-    tuning: `{ASSIGNMENT_PROMPT}\nLet's think step by step. Tune the essay using the following rubric: {rubric}`
-  },
-  {
-    id: 11, name: "Iter + Original",
-    techniques: ["iter"],
-    stripe: "var(--c-iter)",
-    steps: [
-      { label: "STEP 1 · Context", text: CTX },
-      { label: "STEP 2 · Write", text: `Write a five-page essay (1000 words or less) to set them straight and include at least 5 citations from peer-reviewed articles.` }
-    ],
-    tuning: `{ASSIGNMENT_PROMPT}\nTune the essay using the following rubric: {rubric}`
-  }
+    tu:"{ASSIGNMENT_PROMPT}\nTune the essay using the following rubric: {rubric}" }
 ];
 
-/* ── HIGHLIGHT ENGINE ── */
-function highlight(text) {
-  return text
-    .replace(/\[ROLE\](.*?)\[\/ROLE\]/gs, `<span class="hl-role">$1</span>`)
-    .replace(/\[COT\](.*?)\[\/COT\]/gs,  `<span class="hl-cot">$1</span>`)
-    .replace(/\[GEN\](.*?)\[\/GEN\]/gs,  `<span class="hl-gen">$1</span>`)
-    .replace(/\[ITER\](.*?)\[\/ITER\]/gs,`<span class="hl-iter">$1</span>`)
+const techColor = { role:'var(--c-role)', cot:'var(--c-cot)', gen:'var(--c-gen)', iter:'var(--c-iter)', formal:'var(--c-formal)' };
+const badgeMap  = { role:['b-role','Role'], cot:['b-cot','CoT'], gen:['b-gen','Gen.Know'], iter:['b-iter','Iterative'], formal:['b-formal','Formal'] };
+
+function highlight(t) {
+  return t
+    .replace(/\[ROLE\](.*?)\[\/ROLE\]/gs,   `<span class="hl-role">$1</span>`)
+    .replace(/\[COT\](.*?)\[\/COT\]/gs,     `<span class="hl-cot">$1</span>`)
+    .replace(/\[GEN\](.*?)\[\/GEN\]/gs,     `<span class="hl-gen">$1</span>`)
     .replace(/\[FORMAL\](.*?)\[\/FORMAL\]/gs,`<span class="hl-formal">$1</span>`)
-    .replace(/\n/g, '<br>');
+    .replace(/\n/g,'<br>');
 }
 
-/* ── BADGE MAP ── */
-const badgeMap = {
-  role:   ['b-role',   'Role-based'],
-  cot:    ['b-cot',    'Chain-of-Thought'],
-  gen:    ['b-gen',    'Gen. Knowledge'],
-  iter:   ['b-iter',   'Iterative'],
-  formal: ['b-formal', 'Formal'],
-};
-
-/* ── BUILD PANELS ── */
 function buildPanels() {
   const strip = document.getElementById('strip');
-  strip.innerHTML = '';
-  prompts.forEach(p => {
-    // badge HTML
-    const badges = p.techniques.length
-      ? p.techniques.map(t => `<span class="badge ${badgeMap[t][0]}">${badgeMap[t][1]}</span>`).join('')
-      : `<span class="badge b-write">Baseline</span>`;
+  prompts.forEach((p, idx) => {
+    const dots = p.techniques.length
+      ? p.techniques.map(t=>`<div class="mini-dot" style="background:${techColor[t]}"></div>`).join('')
+      : `<div class="mini-dot" style="background:#2a3a2a;border:1px solid var(--border)"></div>`;
 
-    // steps HTML
+    const badges = p.techniques.length
+      ? p.techniques.map(t=>`<span class="badge ${badgeMap[t][0]}">${badgeMap[t][1]}</span>`).join('')
+      : `<span class="badge b-base">Baseline</span>`;
+
     let stepsHTML = '';
-    if (p.steps.length === 1 && !p.steps[0].label) {
-      stepsHTML = `<div class="step-text">${highlight(p.steps[0].text)}</div>`;
+    if (p.steps.length===1 && !p.steps[0].l) {
+      stepsHTML = `<div class="step-text">${highlight(p.steps[0].tx)}</div>`;
     } else {
-      stepsHTML = p.steps.map(s => `
+      stepsHTML = p.steps.map(s=>`
         <div class="step-block">
-          <div class="step-tag">${s.label}</div>
-          <div class="step-text">${highlight(s.text)}</div>
+          <div class="step-tag">${s.l}</div>
+          <div class="step-text">${highlight(s.tx)}</div>
         </div>`).join('');
     }
 
-    // tuning HTML
-    const tuningHTML = p.tuning
+    const tuningHTML = p.tu
       .replace(/\n/g,'<br>')
-      .replace(/\{(\w+)\}/g, '<span class="t-key">{$1}</span>');
+      .replace(/\{(\w+)\}/g,'<span class="t-key">{$1}</span>');
 
     const el = document.createElement('div');
-    el.className = 'panel';
-    el.dataset.techniques = p.techniques.join(',');
+    el.className = 'panel' + (idx===0 ? ' open' : '');
     el.id = `panel-${p.id}`;
+    el.dataset.techniques = p.techniques.join(',');
+
     el.innerHTML = `
       <div class="panel-stripe" style="background:${p.stripe}"></div>
-      <div class="panel-head">
-        <div class="panel-id-row">
-          <span class="pid">P${p.id}</span>
-          <span class="pname">${p.name}</span>
-        </div>
-        <div class="badge-row">${badges}</div>
+
+      <!-- COLLAPSED VIEW -->
+      <div class="panel-mini">
+        <span class="mini-pid">P${p.id}</span>
+        <span class="mini-name">${p.name}</span>
+        <div class="mini-dots">${dots}</div>
       </div>
-      <div class="panel-body">${stepsHTML}</div>
-      <div class="tuning-block">
-        <div class="tuning-lbl">TUNING PROMPT</div>
-        <div class="tuning-text">${tuningHTML}</div>
+
+      <!-- CLOSE BUTTON -->
+      <button class="close-btn" onclick="closePanel(event,${p.id})">✕</button>
+
+      <!-- EXPANDED VIEW -->
+      <div class="panel-full">
+        <div class="panel-head">
+          <div class="panel-id-row">
+            <span class="pid">P${p.id}</span>
+            <span class="pname">${p.name}</span>
+          </div>
+          <div class="badge-row">${badges}</div>
+        </div>
+        <div class="panel-body">${stepsHTML}</div>
+        <div class="tuning-block">
+          <div class="tuning-lbl">TUNING PROMPT</div>
+          <div class="tuning-text">${tuningHTML}</div>
+        </div>
       </div>
     `;
+
+    el.addEventListener('click', function() {
+      if (!this.classList.contains('open')) this.classList.add('open');
+    });
+
     strip.appendChild(el);
   });
 }
 
-/* ── FILTER ── */
-function filter(f) {
-  document.querySelectorAll('.filter-btn').forEach(b => {
-    b.classList.toggle('on', b.dataset.f === f);
-  });
+function closePanel(e, id) {
+  e.stopPropagation();
+  document.getElementById(`panel-${id}`).classList.remove('open');
+}
+
+function doFilter(f) {
+  document.querySelectorAll('.filter-btn').forEach(b => b.classList.toggle('on', b.dataset.f===f));
   document.querySelectorAll('.panel').forEach(panel => {
-    if (f === 'all') {
-      panel.classList.remove('dimmed');
-    } else {
-      const techs = panel.dataset.techniques.split(',');
-      panel.classList.toggle('dimmed', !techs.includes(f));
-    }
+    if (f==='all') { panel.classList.remove('dimmed'); return; }
+    const techs = panel.dataset.techniques.split(',');
+    panel.classList.toggle('dimmed', !techs.includes(f));
   });
 }
 
