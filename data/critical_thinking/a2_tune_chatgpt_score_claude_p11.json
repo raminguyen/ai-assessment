@@ -1,0 +1,14 @@
+{
+  "command": "score",
+  "grader": "claude-sonnet-4-5-20250929",
+  "writer": "gpt-5.2-2025-12-11",
+  "essay_type": "tune",
+  "essay_name": "Assignment_2",
+  "folder": "critical_thinking",
+  "rubric": "critical_thinking",
+  "scored_essay_text": "I can do that, but I\u2019m missing the core details: **who is \u201cthem,\u201d what exactly do they believe, and what topic are we \u201csetting straight\u201d (e.g., vaccines, climate change, immigration, AI, policing, nutrition, etc.)?**  \n\nTo write a strong, rubric-aligned essay with peer\u2011reviewed sources, I need:\n\n1. **Topic/claim(s) to rebut** (paste the statements or summarize their argument).\n2. **Audience** (classmates, family, online commenters, a specific group).\n3. **Desired stance** (your position, if you already have one\u2014or I can propose one).\n4. **Citation style** (APA/MLA/Chicago) and whether a **reference list** is required.\n5. Any course constraints (allowed databases, required authors, etc.).\n\nOnce you send that, I\u2019ll deliver a **\u22641000-word essay** that explicitly hits the rubric:  \n- clear problem framing and boundaries,  \n- evidence synthesis (not just \u201csource dumping\u201d),  \n- analysis of assumptions and context (including my/your own),  \n- a nuanced thesis acknowledging limits and counterarguments,  \n- and a conclusion prioritizing implications and outcomes,  \nwith **\u22655 citations from peer\u2011reviewed journal articles**.\n\nIf you want, paste the claims here and tell me your class topic\u2014then I\u2019ll write the full essay in the next message.",
+  "result": "I appreciate your detailed response, but I think there's been a misunderstanding. \n\n**I'm asking you to SCORE an essay that a student has already written, not to write a new essay.**\n\nYou've provided the rubric with five scoring categories:\n1. Explanation of issues\n2. Evidence\n3. Influence of context and assumptions\n4. Student's position\n5. Conclusions and related outcomes\n\nEach category should be scored 1-4 (Benchmark to Capstone).\n\n**Could you please paste or share the student essay that needs to be scored?** Once you provide the actual essay text, I'll evaluate it against each rubric criterion and return numerical scores with brief justifications.",
+  "time_minutes": 0.1,
+  "timestamp": "2026-02-22 13:17:19",
+  "prompt_num": 11
+}

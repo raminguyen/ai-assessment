@@ -1,0 +1,10 @@
+{
+  "command": "tune",
+  "model": "gpt-5.2-2025-12-11",
+  "essay_name": "Assignment_2",
+  "result": "I can do that, but I\u2019m missing the core details: **who is \u201cthem,\u201d what exactly do they believe, and what topic are we \u201csetting straight\u201d (e.g., vaccines, climate change, immigration, AI, policing, nutrition, etc.)?**  \n\nTo write a strong, rubric-aligned essay with peer\u2011reviewed sources, I need:\n\n1. **Topic/claim(s) to rebut** (paste the statements or summarize their argument).\n2. **Audience** (classmates, family, online commenters, a specific group).\n3. **Desired stance** (your position, if you already have one\u2014or I can propose one).\n4. **Citation style** (APA/MLA/Chicago) and whether a **reference list** is required.\n5. Any course constraints (allowed databases, required authors, etc.).\n\nOnce you send that, I\u2019ll deliver a **\u22641000-word essay** that explicitly hits the rubric:  \n- clear problem framing and boundaries,  \n- evidence synthesis (not just \u201csource dumping\u201d),  \n- analysis of assumptions and context (including my/your own),  \n- a nuanced thesis acknowledging limits and counterarguments,  \n- and a conclusion prioritizing implications and outcomes,  \nwith **\u22655 citations from peer\u2011reviewed journal articles**.\n\nIf you want, paste the claims here and tell me your class topic\u2014then I\u2019ll write the full essay in the next message.",
+  "time_minutes": 0.1,
+  "timestamp": "2026-02-22 13:09:47",
+  "prompt_num": 11,
+  "rubric": "critical_thinking"
+}
