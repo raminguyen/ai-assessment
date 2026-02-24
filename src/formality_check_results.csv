@@ -1,33 +1,33 @@
 Assignment,Model,EssayType,p0,p1,p2,p3,p4,p5,p6,p7,p8,p9,p10,p11
 Technique,,,Write,Persona + Write,Persona + Write Formal,CoT + Write,Generate,CoT + Generate,Persona + Generate,Iterative + Persona + Generate,Iterative + Persona + Write,Iterative + Generate,Iterative + CoT + Generate,Iterative + Write
-Assignment 1,chatgpt,generate,x,x, , , ,x,x,x,x,x,x,x
-Assignment 1,chatgpt,tune,x,x,x, , , , , , , , , 
+Assignment 1,chatgpt,generate,x,x, , , ,x,x,x,x,x,x, 
+Assignment 1,chatgpt,tune,x,x,x,x,x,x,x,x,x,x, ,x
 Assignment 1,claude,generate, ,x,x, , ,x,x, , ,x, ,x
-Assignment 1,claude,tune,x,x,x, , , , , , , , , 
-Assignment 1,gemini,generate,x,x,x,x,x,x,x, ,x,x, ,x
-Assignment 1,gemini,tune,x,x,x, , , , , , , , , 
-Assignment 1,grok,generate, ,x, , , ,x,x,x,x, , ,x
-Assignment 1,grok,tune,x,x,x, , , , , , , , , 
-,Total A1,,2,4,2,1,1,4,4,2,3,3,1,4
+Assignment 1,claude,tune,x,x,x,x,x,x,x,x,x,x,x, 
+Assignment 1,gemini,generate,x,x,x,x,x,x,x, ,x,x,x,x
+Assignment 1,gemini,tune,x,x,x,x,x,x,x,x,x,x,x, 
+Assignment 1,grok,generate, ,x, , , ,x,x,x,x, , , 
+Assignment 1,grok,tune,x,x,x, ,x,x,x,x,x, ,x,x
+,Total A1,,2,4,2,1,1,4,4,2,3,3,2,2
 Assignment 2,chatgpt,generate,x,x,x,x,x,x,x,x,x,x,x,x
-Assignment 2,chatgpt,tune,x,x,x, , , , , , , , , 
-Assignment 2,claude,generate, , , ,x, , , ,x, , , , 
-Assignment 2,claude,tune,x,x, , , , , , , , , , 
+Assignment 2,chatgpt,tune,x,x,x,x,x,x,x,x,x,x,x,x
+Assignment 2,claude,generate, , , ,x, , , ,x, , , ,x
+Assignment 2,claude,tune,x,x, , ,x, , ,x, , , , 
 Assignment 2,gemini,generate, , ,x, , , ,x, , , , , 
-Assignment 2,gemini,tune, , , , , , , , , , , , 
+Assignment 2,gemini,tune, , , , ,x, ,x,x,x,x,x,x
 Assignment 2,grok,generate, ,x, , , , , ,x,x, , , 
-Assignment 2,grok,tune, ,x,x, , , , , , , , , 
-,Total A2,,1,2,2,2,1,1,2,3,2,1,1,1
-Assignment 3,chatgpt,generate,x, , , , , , ,x,x, , ,x
-Assignment 3,chatgpt,tune,x,x,x, , , , , , , , , 
-Assignment 3,claude,generate,x, , , , , , , , ,x, ,x
-Assignment 3,claude,tune, , ,x, , , , , , , , , 
+Assignment 2,grok,tune, ,x,x, ,x, ,x,x,x,x,x,x
+,Total A2,,1,2,2,2,1,1,2,3,2,1,1,2
+Assignment 3,chatgpt,generate,x, , , , , , ,x,x, ,x,x
+Assignment 3,chatgpt,tune,x,x,x, ,x,x, ,x,x,x,x,x
+Assignment 3,claude,generate,x, , , , , , , , ,x, , 
+Assignment 3,claude,tune, , ,x, , ,x,x,x,x, ,x,x
 Assignment 3,gemini,generate, ,x, , , , , , ,x, , , 
-Assignment 3,gemini,tune, , , , , , , , , , , , 
+Assignment 3,gemini,tune, , , , , ,x,x,x, , , , 
 Assignment 3,grok,generate, ,x, , , , ,x,x,x, , , 
-Assignment 3,grok,tune, ,x,x, , , , , , , , , 
-,Total A3,,2,2,0,0,0,0,1,2,3,1,0,2
-Total Informal Essay,,,5,8,4,3,2,5,7,7,8,5,2,7
+Assignment 3,grok,tune, ,x,x,x, , ,x,x,x,x,x,x
+,Total A3,,2,2,0,0,0,0,1,2,3,1,1,1
+Total Informal Essay,,,5,8,4,3,2,5,7,7,8,5,4,5
 
-Avg Total Score (Generate),,,18.61,16.83,17.19,18.66,18.58,18.08,17.36,16.97,16.28,18.75,18.37,18.72
-Avg Total Score (Tune),,,19.51,,,,,,,,,,,
+Avg Total Score (Generate),,,18.61,17.58,17.92,18.69,18.58,18.08,17.47,17.83,17.06,18.75,16.67,18.39
+Avg Total Score (Tune),,,19.56,19.5,19.58,19.58,19.61,19.58,19.33,19.31,19.36,19.36,19.39,14.33
