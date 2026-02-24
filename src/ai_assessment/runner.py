@@ -56,7 +56,7 @@ class Runner:
         model = self.all_models[model_name]
 
         essay = Util.create_essay(assignment, rubric_folder=rubric_name)
-        if prompt_num in [7, 8, 9, 10]:
+        if prompt_num in [7, 8, 9, 10, 11]:
             essay.load_prompt_p7(assignment, prompt_num=prompt_num)
         else:
             essay.load_prompt_p(prompt_num, assignment)

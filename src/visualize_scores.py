@@ -3,6 +3,8 @@ import pandas as pd
 import matplotlib.colors as mcolors
 import numpy as np
 from matplotlib.patches import Patch
+from adjustText import adjust_text
+
 
 
 def avg_total_score_by_essay_type(scores, prompts, techniques):
@@ -198,11 +200,14 @@ def writer_performance_by_assignment(scores, writers):
 
 
 
-def writer_performance_by_technique(scores, writers, prompts, techniques, technique_groups):
+def writer_performance_by_technique(scores, writers, prompts, techniques, technique_groups, essay_type='generate'):
 
     # build df
 
-    df = scores.groupby(['Writer', 'Prompt'])['Total'].mean().round(2).unstack()
+    df_filtered = scores[scores['EssayType'] == essay_type]
+
+    df = df_filtered.groupby(['Writer', 'Prompt'])['Total'].mean().round(2).unstack()
+
 
     df = df.reindex(writers)[prompts]
 
@@ -334,3 +339,396 @@ def writer_performance_by_technique(scores, writers, prompts, techniques, techni
     plt.show()
 
     return df
+
+def plot_trend(scores, writers, prompts, technique_groups):
+
+    group_order = [
+        'Baseline',
+        'Single',
+        'Double',
+        'Iterative_Prompt',
+        'Iterative_Prompt_Complex'
+    ]
+
+    prompt_order = [
+        p for g in group_order
+        for p in technique_groups[g]
+        if p in prompts
+    ]
+
+    colors = {
+        'chatgpt': '#3498DB',
+        'claude':  '#2ECC71',
+        'gemini':  '#E67E22',
+        'grok':    '#9B59B6'
+    }
+
+    technique_labels = {
+        'p0':  'Baseline',
+        'p1':  'Role-based',
+        'p2':  'Role-based\n+ Formal',
+        'p3':  'Chain of\nThought',
+        'p4':  'Generate\nKnowledge',
+        'p5':  'CoT +\nGen Know',
+        'p6':  'Role +\nGen Know',
+        'p7':  'Role + CoT\n+ Gen Know',
+        'p8':  'Iter +\nRole',
+        'p9':  'Iter +\nGen Know',
+        'p10': 'Iter + CoT\n+ Gen Know',
+        'p11': 'Iter +\nOriginal'
+    }
+
+    # one row per writer
+    fig, axes = plt.subplots(
+        len(writers), 1,
+        figsize=(16, 5 * len(writers)),
+        sharex=True
+    )
+    fig.patch.set_facecolor('#f7f9fc')
+
+    # make iterable if only one writer
+    if len(writers) == 1:
+        axes = [axes]
+
+    for ax, writer in zip(axes, writers):
+
+        color = colors.get(writer, 'gray')
+        ax.set_facecolor('#f7f9fc')
+        all_texts = []
+
+        # plot generate and tune lines
+        for essay_type, style, marker in [
+            ('generate', 'solid',  'o'),
+            ('tune',     'dashed', 's')
+        ]:
+            vals = (
+                scores[scores['EssayType'] == essay_type]
+                .groupby(['Writer', 'Prompt'])['Total']
+                .mean().round(2)
+                .unstack()
+                .reindex([writer])[prompt_order]
+                .values.flatten()
+            )
+
+            ax.plot(
+                range(len(prompt_order)), vals,
+                color=color, linewidth=2,
+                marker=marker, markersize=6,
+                linestyle=style,
+                label=f'{essay_type.capitalize()}',
+                zorder=5
+            )
+
+        # compute gen and tune for shaded gap + labels
+        gen = (
+            scores[scores['EssayType'] == 'generate']
+            .groupby(['Writer', 'Prompt'])['Total']
+            .mean().round(2)
+            .unstack()
+            .reindex([writer])[prompt_order]
+            .values.flatten()
+        )
+
+        tune = (
+            scores[scores['EssayType'] == 'tune']
+            .groupby(['Writer', 'Prompt'])['Total']
+            .mean().round(2)
+            .unstack()
+            .reindex([writer])[prompt_order]
+            .values.flatten()
+        )
+
+        # shaded gap between generate and tune
+        ax.fill_between(
+            range(len(prompt_order)),
+            gen, tune,
+            color=color, alpha=0.08
+        )
+
+        # collect labels for adjust_text
+        for x, val in enumerate(gen):
+            t = ax.text(
+                x, val, str(val),
+                fontsize=8, color=color,
+                fontfamily='Times New Roman',
+                ha='center'
+            )
+            all_texts.append(t)
+
+        for x, val in enumerate(tune):
+            t = ax.text(
+                x, val, str(val),
+                fontsize=8, color=color,
+                fontfamily='Times New Roman',
+                ha='center'
+            )
+            all_texts.append(t)
+
+        # fix overlapping labels
+        adjust_text(
+            all_texts,
+            ax=ax,
+            expand_points=(1.5, 1.8),
+            arrowprops=dict(
+                arrowstyle='-',
+                color='gray',
+                lw=0.5,
+                shrinkA=4,
+                shrinkB=4
+            )
+        )
+
+        # group dividers
+        pos = 0
+        for group in group_order:
+            ps = [p for p in technique_groups[group] if p in prompt_order]
+            pos += len(ps)
+            if pos < len(prompt_order):
+                ax.axvline(
+                    pos - 0.5,
+                    color='#cccccc',
+                    linewidth=1.5,
+                    linestyle='--',
+                    zorder=2
+                )
+
+        ax.set_ylabel(
+            'Mean Total Score',
+            fontfamily='Times New Roman',
+            fontsize=10
+        )
+
+        ax.set_title(
+            writer.capitalize(),
+            fontfamily='Times New Roman',
+            fontsize=12,
+            fontweight='bold',
+            loc='left'
+        )
+
+        ax.legend(
+            loc='lower right',
+            fontsize=9,
+            frameon=False,
+            prop={'family': 'Times New Roman'}
+        )
+
+        ax.grid(axis='y', linestyle='--', alpha=0.4)
+
+        for spine in ax.spines.values():
+            spine.set_visible(False)
+
+    # group labels on top — first subplot only
+    ax2 = axes[0].twiny()
+    ax2.set_xlim(axes[0].get_xlim())
+
+    group_centers = []
+    pos = 0
+    for group in group_order:
+        ps = [p for p in technique_groups[group] if p in prompt_order]
+        group_centers.append(pos + len(ps) / 2 - 0.5)
+        pos += len(ps)
+
+    ax2.set_xticks(group_centers)
+    ax2.set_xticklabels(
+        [g.replace('_', ' ') for g in group_order],
+        fontfamily='Times New Roman',
+        fontsize=10,
+        fontweight='bold'
+    )
+    ax2.tick_params(length=0)
+    for spine in ax2.spines.values():
+        spine.set_visible(False)
+
+    # x axis labels — last subplot only
+    axes[-1].set_xticks(range(len(prompt_order)))
+    axes[-1].set_xticklabels(
+        [f"{p}\n{technique_labels.get(p, '')}" for p in prompt_order],
+        fontfamily='Times New Roman',
+        fontsize=8,
+        ha='center'
+    )
+
+    fig.suptitle(
+        'Prompt Complexity Effects on Generate vs Tuned Essays',
+        fontfamily='Times New Roman',
+        fontsize=14,
+        fontweight='bold',
+        y=1.01
+    )
+
+    plt.tight_layout()
+    plt.show()
+
+def plot_trend1(scores, writers, prompts, technique_groups):
+
+    group_order = [
+        'Baseline',
+        'Single',
+        'Double',
+        'Iterative_Prompt',
+        'Iterative_Prompt_Complex'
+    ]
+
+    prompt_order = [
+        p for g in group_order
+        for p in technique_groups[g]
+        if p in prompts
+    ]
+
+    colors = {
+        'chatgpt': '#3498DB',
+        'claude':  '#2ECC71',
+        'gemini':  '#E67E22',
+        'grok':    '#9B59B6'
+    }
+
+    technique_labels = {
+        'p0':  'Baseline',
+        'p1':  'Role-based',
+        'p2':  'Role-based\n+ Formal',
+        'p3':  'Chain of\nThought',
+        'p4':  'Generate\nKnowledge',
+        'p5':  'CoT +\nGen Know',
+        'p6':  'Role +\nGen Know',
+        'p7':  'Role + CoT\n+ Gen Know',
+        'p8':  'Iter +\nRole',
+        'p9':  'Iter +\nGen Know',
+        'p10': 'Iter + CoT\n+ Gen Know',
+        'p11': 'Iter +\nOriginal'
+    }
+
+    n_writers = len(writers)
+    n_prompts = len(prompt_order)
+    bar_width  = 0.18
+    group_gap  = 0.1
+
+    fig, axes = plt.subplots(
+        2, 1, figsize=(20, 10),
+        sharex=True
+    )
+    fig.patch.set_facecolor('#f7f9fc')
+
+    for ax, essay_type, title in zip(axes, ['generate', 'tune'], ['Generate', 'Tune']):
+
+        ax.set_facecolor('#f7f9fc')
+
+        df = (
+            scores[scores['EssayType'] == essay_type]
+            .groupby(['Writer', 'Prompt'])['Total']
+            .mean().round(2)
+            .unstack()
+            .reindex(writers)[prompt_order]
+        )
+
+        for i, writer in enumerate(writers):
+            color  = colors.get(writer, 'gray')
+            offset = (i - n_writers / 2 + 0.5) * (bar_width + group_gap / n_writers)
+            x_pos  = [j + offset for j in range(n_prompts)]
+            vals   = df.loc[writer].values
+
+            # dots only — no lines
+            ax.scatter(
+                x_pos, vals,
+                color=color,
+                s=80,
+                zorder=5,
+                label=writer.capitalize()
+            )
+
+            # value labels above each dot
+            for x, val in zip(x_pos, vals):
+                ax.text(
+                    x, val + 0.05, str(val),
+                    ha='center', va='bottom',
+                    fontsize=6.5, color=color,
+                    fontfamily='Times New Roman'
+                )
+
+        # group dividers
+        pos = 0
+        for group in group_order:
+            ps = [p for p in technique_groups[group] if p in prompt_order]
+            pos += len(ps)
+            if pos < n_prompts:
+                ax.axvline(
+                    pos - 0.5,
+                    color='#cccccc',
+                    linewidth=1.5,
+                    linestyle='--',
+                    zorder=2
+                )
+
+        ax.set_ylim(16, 20.5)
+
+
+        ax.set_ylabel(
+            'Mean Total Score',
+            fontfamily='Times New Roman',
+            fontsize=10
+        )
+        ax.set_title(
+            title,
+            fontfamily='Times New Roman',
+            fontsize=12,
+            fontweight='bold',
+            loc='left'
+        )
+
+        
+       # legend on bottom subplot only
+        axes[1].legend(
+            loc='lower right',
+            fontsize=9,
+            frameon=False,
+            prop={'family': 'Times New Roman'}
+        )
+
+        ax.grid(axis='y', linestyle='--', alpha=0.4, zorder=0)
+        for spine in ax.spines.values():
+            spine.set_visible(False)
+
+    # group labels on top — first subplot only
+    ax2 = axes[0].twiny()
+
+    ax2.set_xlim(axes[0].get_xlim())
+
+    group_centers = []
+
+    pos = 0
+    for group in group_order:
+        ps = [p for p in technique_groups[group] if p in prompt_order]
+        group_centers.append(pos + len(ps) / 2 - 0.5)
+        pos += len(ps)
+
+    ax2.set_xticks(group_centers)
+
+    ax2.set_xticklabels(
+        [g.replace('_', ' ') for g in group_order],
+        fontfamily='Times New Roman',
+        fontsize=10,
+        fontweight='bold'
+    )
+    ax2.tick_params(length=0)
+    for spine in ax2.spines.values():
+        spine.set_visible(False)
+
+    # x axis labels — last subplot only
+    axes[-1].set_xticks(range(n_prompts))
+    axes[-1].set_xticklabels(
+        [f"{p}\n{technique_labels.get(p, '')}" for p in prompt_order],
+        fontfamily='Times New Roman',
+        fontsize=8,
+        ha='center'
+    )
+
+    fig.suptitle(
+        'Generate vs Tune — Score by Prompt Technique',
+        fontfamily='Times New Roman',
+        fontsize=14,
+        fontweight='bold',
+        y=1.01
+    )
+
+
+    plt.show()

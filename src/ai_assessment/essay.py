@@ -89,13 +89,12 @@ class Essay:
 
         self.write_prompt = data[prompt_key]
 
-        grade_key = "grade_prompt_p" + str(prompt_num)
-        self.grade_prompt = data.get(grade_key, data["grade_prompt"])
+        self.grade_prompt = data["grade_prompt_p0"]
         self.reflection_prompt = data["reflection_prompt"]
 
         # Use prompt-specific tuning (tuning_p0, tuning_p1, tuning_p2, ...)
         tuning_key = "tuning_p" + str(prompt_num)
-        self.tuning_prompt = data[tuning_key]
+        self.tuning_prompt = data.get(tuning_key, data["tuning_p0"])
 
         # Map assignment number to professor type
         professor_types = {
@@ -123,7 +122,7 @@ class Essay:
         self.generate_prompt = data[generate_key]
         self.write_prompt = self.context_prompt + "\n\n" + self.generate_prompt
 
-        self.grade_prompt = data["grade_prompt"]
+        self.grade_prompt = data["grade_prompt_p0"]
         self.reflection_prompt = data["reflection_prompt"]
         self.tuning_prompt = data.get("tuning_p1")
 

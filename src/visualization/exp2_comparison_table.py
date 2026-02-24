@@ -8,7 +8,7 @@ import numpy as np
 from scipy import stats
 
 sys.path.append(os.path.join(os.getcwd(), 'src'))
-from visualization import score_chart
+from visualize_scores import score_chart
 
 FOLDER_PATH = 'data/critical_thinking'
 OUTPUT_DIR = 'src/visualization/rubric_plots'
