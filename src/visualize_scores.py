@@ -3,8 +3,7 @@ import pandas as pd
 import matplotlib.colors as mcolors
 import numpy as np
 from matplotlib.patches import Patch
-from adjustText import adjust_text
-
+from matplotlib.lines import Line2D 
 
 
 def avg_total_score_by_essay_type(scores, prompts, techniques):
@@ -394,7 +393,7 @@ def plot_trend(scores, writers, prompts, technique_groups):
 
         color = colors.get(writer, 'gray')
         ax.set_facecolor('#f7f9fc')
-        all_texts = []
+        
 
         # plot generate and tune lines
         for essay_type, style, marker in [
@@ -444,8 +443,6 @@ def plot_trend(scores, writers, prompts, technique_groups):
             gen, tune,
             color=color, alpha=0.08
         )
-
-        # collect labels for adjust_text
         for x, val in enumerate(gen):
             t = ax.text(
                 x, val, str(val),
@@ -453,7 +450,7 @@ def plot_trend(scores, writers, prompts, technique_groups):
                 fontfamily='Times New Roman',
                 ha='center'
             )
-            all_texts.append(t)
+        
 
         for x, val in enumerate(tune):
             t = ax.text(
@@ -462,21 +459,7 @@ def plot_trend(scores, writers, prompts, technique_groups):
                 fontfamily='Times New Roman',
                 ha='center'
             )
-            all_texts.append(t)
-
-        # fix overlapping labels
-        adjust_text(
-            all_texts,
-            ax=ax,
-            expand_points=(1.5, 1.8),
-            arrowprops=dict(
-                arrowstyle='-',
-                color='gray',
-                lw=0.5,
-                shrinkA=4,
-                shrinkB=4
-            )
-        )
+           
 
         # group dividers
         pos = 0
@@ -542,6 +525,7 @@ def plot_trend(scores, writers, prompts, technique_groups):
 
     # x axis labels — last subplot only
     axes[-1].set_xticks(range(len(prompt_order)))
+
     axes[-1].set_xticklabels(
         [f"{p}\n{technique_labels.get(p, '')}" for p in prompt_order],
         fontfamily='Times New Roman',
@@ -560,7 +544,7 @@ def plot_trend(scores, writers, prompts, technique_groups):
     plt.tight_layout()
     plt.show()
 
-def plot_trend1(scores, writers, prompts, technique_groups):
+def all_models_performance(scores, writers, prompts, technique_groups):
 
     group_order = [
         'Baseline',
@@ -676,15 +660,9 @@ def plot_trend1(scores, writers, prompts, technique_groups):
         )
 
         
-       # legend on bottom subplot only
-        axes[1].legend(
-            loc='lower right',
-            fontsize=9,
-            frameon=False,
-            prop={'family': 'Times New Roman'}
-        )
 
         ax.grid(axis='y', linestyle='--', alpha=0.4, zorder=0)
+        
         for spine in ax.spines.values():
             spine.set_visible(False)
 
@@ -715,12 +693,29 @@ def plot_trend1(scores, writers, prompts, technique_groups):
 
     # x axis labels — last subplot only
     axes[-1].set_xticks(range(n_prompts))
+
     axes[-1].set_xticklabels(
         [f"{p}\n{technique_labels.get(p, '')}" for p in prompt_order],
         fontfamily='Times New Roman',
         fontsize=8,
         ha='center'
     )
+
+    legend_handles = [
+        Line2D([0], [0], marker='o', color='w',
+               markerfacecolor=colors[w], markersize=9,
+               label=w.capitalize())
+        for w in writers
+    ]
+
+    axes[1].legend(
+        handles=legend_handles,
+        loc='lower right',
+        fontsize=9,
+        frameon=False,
+        prop={'family': 'Times New Roman'}
+    )
+
 
     fig.suptitle(
         'Generate vs Tune — Score by Prompt Technique',
