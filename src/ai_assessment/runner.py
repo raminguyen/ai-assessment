@@ -106,6 +106,7 @@ class Runner:
             "gpt-5.2-2025-12-11": "chatgpt",
             "grok-4-1-fast-reasoning": "grok",
             "gemini-3-pro-preview": "gemini",
+            "gemini-3-flash-preview": "gemini",
             "claude-sonnet-4-5-20250929": "claude"
         }
         short_writer = name_map.get(writer_model, writer_model)
