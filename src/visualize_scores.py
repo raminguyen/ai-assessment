@@ -6,685 +6,262 @@ from matplotlib.patches import Patch
 from matplotlib.lines import Line2D 
 
 
-def writer_performance_by_dimension_avg(scores, dimensions, writers):
-
-    writer_colors = {
-        'chatgpt': '#4361ee',
-        'claude':  '#06d6a0',
-        'gemini':  '#f4a261',
-        'grok':    '#ef233c'
-    }
-
-    essay_types = ['generate', 'tune']
-    titles      = {
-        'generate': 'Writer Performance Across Dimensions — Generate',
-        'tune':     'Writer Performance Across Dimensions — Tune'
-    }
-
-    fig, axes = plt.subplots(1, 2, figsize=(20, 6), sharey=True)
-    fig.patch.set_facecolor('#f7f9fc')
-
-    for ax, etype in zip(axes, essay_types):
-
-        subset = scores[scores['EssayType'] == etype]
-
-        ax.set_facecolor('#f7f9fc')
-
-        for writer in writers:
-
-            means = [subset[subset['Writer'] == writer][dim].mean()
-                     for dim in dimensions]
-
-            ax.plot(dimensions, means,
-                    marker='o', markersize=10, linewidth=2.5,
-                    color=writer_colors[writer],
-                    label=writer.capitalize())
-
-            ax.text(len(dimensions) - 0.95, means[-1],
-                    writer.capitalize(),
-                    fontsize=9, color=writer_colors[writer],
-                    fontweight='bold', fontfamily='Times New Roman',
-                    va='center')
-
-        ax.set_ylim(2.8, 4.35)
-        ax.set_ylabel('Avg Score', fontfamily='Times New Roman', fontsize=11)
-        ax.set_title(titles[etype],
-                     fontfamily='Times New Roman', fontsize=13, fontweight='bold')
-        
-        ax.axhline(3.5, color='red', linewidth=1, linestyle='--', alpha=0.4)
-        
-        ax.yaxis.grid(True, linestyle='--', alpha=0.4)
-        ax.set_axisbelow(True)
-        ax.set_xlim(-0.3, len(dimensions) - 0.5)
-
-        for label in ax.get_xticklabels():
-            label.set_fontfamily('Times New Roman')
-            label.set_fontsize(10)
-        for spine in ax.spines.values():
-            spine.set_visible(False)
-
-    plt.tight_layout()
-    plt.show()
 
 
-def writer_perforamance_by_each_dimension(scores, writers, dimension):
+#
+#visualize_scores.ipynb
+#
 
-    writer_colors = {
-        'chatgpt': '#4361ee',
-        'claude':  '#06d6a0',
-        'gemini':  '#f4a261',
-        'grok':    '#ef233c'
-    }
 
-    essay_types = ['generate', 'tune']
+def plot_avg_total_by_essaytype(avg_df, prompts, techniques):
 
-    title_generate = 'Writer Performance by ' + dimension + ' Score — Generate'
-    title_tune     = 'Writer Performance by ' + dimension + ' Score — Tune'
-
-    titles = {
-        'generate': title_generate,
-        'tune':     title_tune
-    }
-
-    fig, axes = plt.subplots(1, 2, figsize=(16, 6), sharey=True)
-    fig.patch.set_facecolor('#f7f9fc')
-
-    for ax, etype in zip(axes, essay_types):
-
-        subset = scores[scores['EssayType'] == etype]
-        ax.set_facecolor('#f7f9fc')
-
-        for i, writer in enumerate(writers):
-
-            w_subset = subset[subset['Writer'] == writer]
-
-            y_vals = w_subset[dimension].values
-
-            x_vals = np.random.normal(i, 0.05, size=len(y_vals))
-
-            ax.scatter(
-                x_vals, y_vals,
-                color=writer_colors[writer],
-                alpha=0.5, s=40, zorder=2
-            )
-
-            ax.scatter(
-                i, y_vals.mean(),
-                color=writer_colors[writer],
-                s=120, zorder=3,
-                edgecolors='black', linewidths=0.8
-            )
-
-        ax.set_xticks(range(len(writers)))
-
-        ax.set_xticklabels([w.capitalize() for w in writers])
-
-        ax.set_ylim(1, 4.5)
-
-        ax.set_ylabel(
-            dimension + ' Score',
-            fontfamily='Times New Roman',
-            fontsize=11
-        )
-
-        ax.set_title(
-            titles[etype],
-            fontfamily='Times New Roman',
-            fontsize=13,
-            fontweight='bold'
-        )
-
-        ax.axhline(3.5, color='red', linewidth=1, linestyle='--', alpha=0.4)
-
-        ax.yaxis.grid(True, linestyle='--', alpha=0.4)
-
-        ax.set_axisbelow(True)
-
-        for label in ax.get_xticklabels():
-            label.set_fontfamily('Times New Roman')
-            label.set_fontsize(10)
-
-        for spine in ax.spines.values():
-            spine.set_visible(False)
-
-    legend_elements = [
-        Line2D(
-            [0], [0],
-            marker='o', color='w',
-            markerfacecolor=writer_colors[w],
-            markersize=10,
-            label=w.capitalize()
-        )
-        for w in writers
+    generate = [
+        avg_df[
+            (avg_df['Prompt']    == p) &
+            (avg_df['EssayType'] == 'generate')
+        ]['AvgTotal'].values[0]
+        for p in prompts
     ]
 
-    axes[1].legend(
-        handles=legend_elements,
-        loc='lower right',
-        fontsize=12,
-        prop={'family': 'Times New Roman'},
-        framealpha=0.5
+    tune = [
+        avg_df[
+            (avg_df['Prompt']    == p) &
+            (avg_df['EssayType'] == 'tune')
+        ]['AvgTotal'].values[0]
+        for p in prompts
+    ]
+
+    generate = np.array(generate)
+    tune     = np.array(tune)
+    x        = np.arange(len(prompts))
+
+    fig, (ax1, ax2) = plt.subplots(
+        2, 1,
+        figsize=(18, 7),
+        gridspec_kw={'height_ratios': [3, 1]}
     )
 
-    plt.tight_layout()
-    plt.show()
-
-def writer_performance_by_assignment(scores, writers):
-
-    assignments = ['A1', 'A2', 'A3']
-    labels      = ['A1: Catlove', 'A2: Economic', 'A3: Real Estate']
-    essay_types = ['generate', 'tune']
-    
-    titles      = {
-        'generate': 'Writer Performance by Assignment — Generate',
-        'tune':     'Writer Performance by Assignment — Tune'
-    }
-
-    dfs = {}
-
-    for etype in essay_types:
-
-        subset = scores[scores['EssayType'] == etype]
-
-        df = subset.groupby(['Writer', 'Assignment'])['Total'].mean().round(2).unstack()
-
-        df = df.reindex(writers)[assignments]
-
-        df.columns = labels
-
-        df.index = [w.capitalize() for w in writers]
-
-        dfs[etype] = df
-
-        fig, ax = plt.subplots(figsize=(10, 5))
-
-        fig.patch.set_facecolor('#f7f9fc')
-
-        ax.set_facecolor('#f7f9fc')
-
-        data = df.values
-
-        norm = mcolors.Normalize(vmin=data.min(), vmax=data.max())
-
-        im = ax.imshow(data, cmap='YlGnBu', norm=norm, aspect='auto')
-
-        for r in range(len(writers)):
-            for c in range(len(labels)):
-                val = data[r, c]
-                ax.text(c, r, str(round(val, 2)),
-                        ha='center', va='center',
-                        fontsize=11, fontweight='bold',
-                        color='white' if val > data.mean() else '#1a3a5c',
-                        fontfamily='Times New Roman')
-
-        ax.set_xticks(range(len(labels)))
-        ax.set_xticklabels(labels, fontfamily='Times New Roman', fontsize=10)
-        ax.set_yticks(range(len(writers)))
-        ax.set_yticklabels([w.capitalize() for w in writers],
-                            fontfamily='Times New Roman', fontsize=11)
-        ax.set_title(titles[etype],
-                     fontfamily='Times New Roman', fontsize=13, fontweight='bold')
-
-        for x in np.arange(-0.5, len(labels), 1):
-            ax.axvline(x, color='#f7f9fc', linewidth=2)
-        for y in np.arange(-0.5, len(writers), 1):
-            ax.axhline(y, color='#f7f9fc', linewidth=2)
-        for spine in ax.spines.values():
-            spine.set_visible(False)
-
-        plt.colorbar(im, ax=ax, shrink=0.8, pad=0.02, location='right')
-        plt.tight_layout()
-        plt.show()
-
-    return dfs  
-
-def avg_total_score_by_essay_type(scores, prompts, techniques):
-
-    df = scores.pivot_table(index='EssayType', columns='Prompt', values='Total').round(2)
-
-    generate = df.loc['generate', prompts].values
-    
-    tune     = df.loc['tune', prompts].values
-
-    x = np.arange(len(prompts))
-
-    fig, (ax1, ax2) = plt.subplots(2, 1, figsize=(18, 7),
-                                    gridspec_kw={'height_ratios': [3, 1]})
     fig.patch.set_facecolor('#f7f9fc')
 
-    # --- dot chart ---
+    # ── dot chart ───
     ax1.set_facecolor('#f7f9fc')
 
     for i in range(len(prompts)):
-        ax1.vlines(i, min(generate[i], tune[i]), max(generate[i], tune[i]),
-                   color='#cccccc', linewidth=2, zorder=1)
-        
-    ax1.scatter(x, generate, color='#2d6a4f', s=150, zorder=5,
-                edgecolors='white', linewidths=1.5, label='Generate')
-    
-    ax1.scatter(x, tune, color='#4361ee', s=150, zorder=5,
-                edgecolors='white', linewidths=1.5, label='Tune')
-    
-    ax1.set_xticks(x)
-    
-    ax1.set_xticklabels([f'P{i}\n{t}' for i, t in enumerate(techniques)],
-                         fontsize=8, ha='center', fontfamily='Times New Roman')
-    
-    ax1.set_ylabel('Average Total', fontfamily='Times New Roman', fontsize=11)
+        ax1.vlines(
+            i,
+            min(generate[i], tune[i]),
+            max(generate[i], tune[i]),
+            color='#cccccc', linewidth=2, zorder=1
+        )
 
-    ax1.set_title('Generate vs Tune Essays — Average Total Score by Prompt',
-                  fontfamily='Times New Roman', fontsize=13, fontweight='bold')
-    
+    ax1.scatter(
+        x, generate,
+        color='#2d6a4f', s=150, zorder=5,
+        edgecolors='white', linewidths=1.5,
+        label='Generate'
+    )
+
+    ax1.scatter(
+        x, tune,
+        color='#4361ee', s=150, zorder=5,
+        edgecolors='white', linewidths=1.5,
+        label='Tune'
+    )
+
+    ax1.set_xticks(x)
+    ax1.set_xticklabels(
+        ['P' + str(i) + '\n' + t for i, t in enumerate(techniques)],
+        fontsize=8, ha='center',
+        fontfamily='Times New Roman'
+    )
+
+    ax1.set_ylabel(
+        'Average Total',
+        fontfamily='Times New Roman', fontsize=11
+    )
+
+    ax1.set_title(
+        'Generate vs Tune Essays — Average Total Score by Prompt',
+        fontfamily='Times New Roman',
+        fontsize=13, fontweight='bold'
+    )
+
     ax1.set_ylim(16, 20.5)
-    
     ax1.yaxis.grid(True, linestyle='--', alpha=0.4)
     ax1.set_axisbelow(True)
-
     ax1.legend(fontsize=11, frameon=False)
 
     for spine in ax1.spines.values():
         spine.set_visible(False)
 
-    # --- table ---
+    # ── table ─
     ax2.set_facecolor('#f7f9fc')
     ax2.axis('off')
 
     table_data = [
-    list(generate.round(2)),
-    list(tune.round(2))
-]
+        list(generate.round(2)),
+        list(tune.round(2))
+    ]
 
     col_labels = ['P' + str(i) for i in range(len(prompts))]
     row_labels = ['Generate', 'Tune']
 
+    table = ax2.table(
+        cellText=table_data,
+        rowLabels=row_labels,
+        colLabels=col_labels,
+        loc='center', cellLoc='center'
+    )
 
-    table = ax2.table(cellText=table_data,
-                      rowLabels=row_labels,
-                      colLabels=col_labels,
-                      loc='center', cellLoc='center')
     table.auto_set_font_size(False)
     table.set_fontsize(10)
     table.scale(1, 1.8)
 
-    # highlight max in red
-    max_gen = np.argmax(generate)
+    max_gen  = np.argmax(generate)
     max_tune = np.argmax(tune)
 
     for c in range(len(prompts)):
 
-        # header row
         table[0, c].set_facecolor('#f7f9fc')
+        table[0, c].set_text_props(
+            fontweight='bold',
+            fontfamily='Times New Roman'
+        )
 
-        table[0, c].set_text_props(fontweight='bold', fontfamily='Times New Roman')
-
-        # generate row (row 1)
         table[1, c].set_facecolor('#ffcccc' if c == max_gen else '#f7f9fc')
         table[1, c].set_text_props(
             fontweight='bold' if c == max_gen else 'normal',
             color='#c1121f' if c == max_gen else '#1a1a2e',
-            fontfamily='Times New Roman')
-        
-        # tune row (row 2)
+            fontfamily='Times New Roman'
+        )
+
         table[2, c].set_facecolor('#ffcccc' if c == max_tune else '#f7f9fc')
         table[2, c].set_text_props(
             fontweight='bold' if c == max_tune else 'normal',
             color='#c1121f' if c == max_tune else '#1a1a2e',
-            fontfamily='Times New Roman')
-
-
-    plt.show()
-
-
-
-
-
-
-def writer_performance_by_technique(scores, writers, prompts, techniques, technique_groups, essay_type='generate'):
-
-    # build df
-
-    df_filtered = scores[scores['EssayType'] == essay_type]
-
-    df = df_filtered.groupby(['Writer', 'Prompt'])['Total'].mean().round(2).unstack()
-
-
-    df = df.reindex(writers)[prompts]
-
-    df.index = [w.capitalize() for w in writers]
-
-    # reorder prompts by group
-    group_order = [
-        'Baseline',
-        'Single',
-        'Double',
-        'Iterative_Prompt',
-        'Iterative_Prompt_Complex'
-    ]
-
-    prompt_order = []
-
-    group_boundaries = []
-
-    group_centers = []
-
-    for group in group_order:
-
-        ps = technique_groups[group]
-
-        group_boundaries.append(len(prompt_order) - 0.5)
-
-        group_centers.append(len(prompt_order) + len(ps) / 2 - 0.5)
-
-        prompt_order.extend(ps)
-
-    group_boundaries.append(len(prompt_order) - 0.5)
-
-    df = df[prompt_order]
-    data = df.values
-
-    fig, ax = plt.subplots(figsize=(22, 5))
-    fig.patch.set_facecolor('#f7f9fc')
-    ax.set_facecolor('#f7f9fc')
-
-    norm = mcolors.Normalize(vmin=data.min(), vmax=data.max())
-    im = ax.imshow(data, cmap='YlGnBu', norm=norm, aspect='auto')
-
-    for r in range(len(writers)):
-        for c in range(len(prompt_order)):
-            val = data[r, c]
-            ax.text(c, r, str(round(val, 2)),
-                    ha='center', va='center',
-                    fontsize=10, fontweight='bold',
-                    color='white' if val > data.mean() else '#1a3a5c',
-                    fontfamily='Times New Roman')
-
-    # group dividers
-    for b in group_boundaries[1:-1]:
-        ax.axvline(b, color='white', linewidth=3, zorder=5)
-
-    # group labels on top
-    ax2 = ax.twiny()
-
-    ax2.set_xlim(ax.get_xlim())
-
-    ax2.set_xticks(group_centers)
-
-    ax2.set_xticklabels(group_order, fontfamily='Times New Roman',
-                         fontsize=11, fontweight='bold')
-    
-    ax2.tick_params(length=0)
-    for spine in ax2.spines.values():
-        spine.set_visible(False)
-
-    # prompt labels on bottom
-    ax.set_xticks(range(len(prompt_order)))
-
-    ax.set_xticklabels(
-        [p + '\n' + techniques[prompts.index(p)] for p in prompt_order],
-        fontfamily='Times New Roman', fontsize=8, ha='center'
-    )
-
-    persona_prompts = ['p1', 'p2', 'p6', 'p8', 'p7']  # all prompts with Role-based
-
-    for tick, p in zip(ax.get_xticklabels(), prompt_order):
-        if p in persona_prompts:
-            tick.set_fontweight('bold')
-            tick.set_color('#1a3a5c')
-
-
-    for c, p in enumerate(prompt_order):
-        if p in persona_prompts:
-            ax.add_patch(plt.Rectangle(
-                (c - 0.5, -0.5),          # bottom-left corner
-                1,                          # width = one column
-                len(writers),               # height = all rows
-                linewidth=2,
-                edgecolor='red',
-                facecolor='none',
-                zorder=10,
-                clip_on=False
-            ))
-
-    legend_elements = [
-        
-    Patch(facecolor='none', edgecolor='red', linewidth=2, label='Persona prompts')
-]
-
-    ax.legend(
-        handles=legend_elements,
-        loc='lower left',
-        bbox_to_anchor=(0, -0.35),
-        fontsize=10,
-        frameon=False,
-        prop={'family': 'Times New Roman'}
-    )
-
-    ax.set_yticks(range(len(writers)))
-
-    ax.set_yticklabels([w.capitalize() for w in writers],
-                        fontfamily='Times New Roman', fontsize=11)
-    
-    ax.set_title('Writer Performance by Technique Group',
-                 fontfamily='Times New Roman', fontsize=13,
-                 fontweight='bold', pad=25)
-
-    for y in np.arange(-0.5, len(writers), 1):
-        ax.axhline(y, color='#f7f9fc', linewidth=2)
-    for spine in ax.spines.values():
-        spine.set_visible(False)
-
-    plt.colorbar(im, ax=ax, shrink=0.8, pad=0.02, location='right')
-    
-    plt.show()
-
-    return df
-
-def plot_trend(scores, writers, prompts, technique_groups):
-
-    group_order = [
-        'Baseline',
-        'Single',
-        'Double',
-        'Iterative_Prompt',
-        'Iterative_Prompt_Complex'
-    ]
-
-    prompt_order = [
-        p for g in group_order
-        for p in technique_groups[g]
-        if p in prompts
-    ]
-
-    colors = {
-        'chatgpt': '#3498DB',
-        'claude':  '#2ECC71',
-        'gemini':  '#E67E22',
-        'grok':    '#9B59B6'
-    }
-
-    technique_labels = {
-        'p0':  'Baseline',
-        'p1':  'Role-based',
-        'p2':  'Role-based\n+ Formal',
-        'p3':  'Chain of\nThought',
-        'p4':  'Generate\nKnowledge',
-        'p5':  'CoT +\nGen Know',
-        'p6':  'Role +\nGen Know',
-        'p7':  'Role + CoT\n+ Gen Know',
-        'p8':  'Iter +\nRole',
-        'p9':  'Iter +\nGen Know',
-        'p10': 'Iter + CoT\n+ Gen Know',
-        'p11': 'Iter +\nOriginal'
-    }
-
-    # one row per writer
-    fig, axes = plt.subplots(
-        len(writers), 1,
-        figsize=(16, 5 * len(writers)),
-        sharex=True
-    )
-    fig.patch.set_facecolor('#f7f9fc')
-
-    # make iterable if only one writer
-    if len(writers) == 1:
-        axes = [axes]
-
-    for ax, writer in zip(axes, writers):
-
-        color = colors.get(writer, 'gray')
-        ax.set_facecolor('#f7f9fc')
-        
-
-        # plot generate and tune lines
-        for essay_type, style, marker in [
-            ('generate', 'solid',  'o'),
-            ('tune',     'dashed', 's')
-        ]:
-            vals = (
-                scores[scores['EssayType'] == essay_type]
-                .groupby(['Writer', 'Prompt'])['Total']
-                .mean().round(2)
-                .unstack()
-                .reindex([writer])[prompt_order]
-                .values.flatten()
-            )
-
-            ax.plot(
-                range(len(prompt_order)), vals,
-                color=color, linewidth=2,
-                marker=marker, markersize=6,
-                linestyle=style,
-                label=f'{essay_type.capitalize()}',
-                zorder=5
-            )
-
-        # compute gen and tune for shaded gap + labels
-        gen = (
-            scores[scores['EssayType'] == 'generate']
-            .groupby(['Writer', 'Prompt'])['Total']
-            .mean().round(2)
-            .unstack()
-            .reindex([writer])[prompt_order]
-            .values.flatten()
+            fontfamily='Times New Roman'
         )
-
-        tune = (
-            scores[scores['EssayType'] == 'tune']
-            .groupby(['Writer', 'Prompt'])['Total']
-            .mean().round(2)
-            .unstack()
-            .reindex([writer])[prompt_order]
-            .values.flatten()
-        )
-
-        # shaded gap between generate and tune
-        ax.fill_between(
-            range(len(prompt_order)),
-            gen, tune,
-            color=color, alpha=0.08
-        )
-        for x, val in enumerate(gen):
-            t = ax.text(
-                x, val, str(val),
-                fontsize=8, color=color,
-                fontfamily='Times New Roman',
-                ha='center'
-            )
-        
-
-        for x, val in enumerate(tune):
-            t = ax.text(
-                x, val, str(val),
-                fontsize=8, color=color,
-                fontfamily='Times New Roman',
-                ha='center'
-            )
-           
-
-        # group dividers
-        pos = 0
-        for group in group_order:
-            ps = [p for p in technique_groups[group] if p in prompt_order]
-            pos += len(ps)
-            if pos < len(prompt_order):
-                ax.axvline(
-                    pos - 0.5,
-                    color='#cccccc',
-                    linewidth=1.5,
-                    linestyle='--',
-                    zorder=2
-                )
-
-        ax.set_ylabel(
-            'Mean Total Score',
-            fontfamily='Times New Roman',
-            fontsize=10
-        )
-
-        ax.set_title(
-            writer.capitalize(),
-            fontfamily='Times New Roman',
-            fontsize=12,
-            fontweight='bold',
-            loc='left'
-        )
-
-        ax.legend(
-            loc='lower right',
-            fontsize=9,
-            frameon=False,
-            prop={'family': 'Times New Roman'}
-        )
-
-        ax.grid(axis='y', linestyle='--', alpha=0.4)
-
-        for spine in ax.spines.values():
-            spine.set_visible(False)
-
-    # group labels on top — first subplot only
-    ax2 = axes[0].twiny()
-    ax2.set_xlim(axes[0].get_xlim())
-
-    group_centers = []
-    pos = 0
-    for group in group_order:
-        ps = [p for p in technique_groups[group] if p in prompt_order]
-        group_centers.append(pos + len(ps) / 2 - 0.5)
-        pos += len(ps)
-
-    ax2.set_xticks(group_centers)
-    ax2.set_xticklabels(
-        [g.replace('_', ' ') for g in group_order],
-        fontfamily='Times New Roman',
-        fontsize=10,
-        fontweight='bold'
-    )
-    ax2.tick_params(length=0)
-    for spine in ax2.spines.values():
-        spine.set_visible(False)
-
-    # x axis labels — last subplot only
-    axes[-1].set_xticks(range(len(prompt_order)))
-
-    axes[-1].set_xticklabels(
-        [f"{p}\n{technique_labels.get(p, '')}" for p in prompt_order],
-        fontfamily='Times New Roman',
-        fontsize=8,
-        ha='center'
-    )
-
-    fig.suptitle(
-        'Prompt Complexity Effects on Generate vs Tuned Essays',
-        fontfamily='Times New Roman',
-        fontsize=14,
-        fontweight='bold',
-        y=1.01
-    )
 
     plt.tight_layout()
     plt.show()
 
-def all_models_performance(scores, writers, prompts, technique_groups):
+
+def plot_bias_by_prompt_assignment(bias_df, prompt_labels):
+    """Bar chart of Mean |Bias| per prompt technique grouped by Assignment."""
+
+    assignment_colors = {
+        'A1': '#4361ee',
+        'A2': '#ef233c',
+        'A3': '#06d6a0'
+    }
+
+    prompts     = sorted(bias_df['Prompt'].unique())
+    assignments = sorted(bias_df['Assignment'].unique())
+
+    n         = len(assignments)
+    bar_width = 0.22
+    offsets   = np.linspace(
+        -(n - 1) * bar_width / 2,
+         (n - 1) * bar_width / 2,
+        n
+    )
+
+    x = np.arange(len(prompts))
+
+    for etype in ['generate', 'tune']:
+
+        subset = bias_df[bias_df['EssayType'] == etype]
+
+        fig, ax = plt.subplots(figsize=(14, 4.5))
+        fig.patch.set_facecolor('#f7f9fc')
+        ax.set_facecolor('#e8e8e8')
+
+        for ai, assignment in enumerate(assignments):
+
+            vals = [
+                subset[
+                    (subset['Prompt']     == p) &
+                    (subset['Assignment'] == assignment)
+                ]['MeanBias'].values[0]
+                for p in prompts
+            ]
+
+            bars = ax.bar(
+                x + offsets[ai],
+                vals,
+                width=bar_width,
+                color=assignment_colors[assignment],
+                alpha=0.85,
+                label=assignment,
+                zorder=3
+            )
+
+            for bar in bars:
+                h = bar.get_height()
+                if not np.isnan(h) and h > 0:
+                    ax.text(
+                        bar.get_x() + bar.get_width() / 2,
+                        h + 0.005,
+                        str(round(h, 2)),
+                        ha='center', fontsize=5,
+                        fontfamily='Times New Roman',
+                        color='#333333'
+                    )
+
+        ax.set_xticks(x)
+        ax.set_xticklabels(
+            [prompt_labels.get(p, p) for p in prompts],
+            fontfamily='Times New Roman',
+            fontsize=8, rotation=25,
+            ha='right', color='#555555'
+        )
+
+        ax.set_ylim(0, 0.6)
+        ax.set_yticks([0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6])
+        ax.set_ylabel(
+            'Mean |Bias|',
+            fontfamily='Times New Roman',
+            fontsize=9, color='#555555'
+        )
+
+        ax.yaxis.grid(True, linestyle='--', alpha=0.25, zorder=0)
+        ax.set_axisbelow(True)
+
+        for spine in ax.spines.values():
+            spine.set_visible(False)
+
+        ax.tick_params(axis='x', which='both', bottom=False)
+
+        ax.legend(
+            fontsize=9,
+            prop={'family': 'Times New Roman'},
+            framealpha=0, loc='upper right'
+        )
+
+        plt.tight_layout(rect=[0, 0.08, 1, 1])
+
+        fig.text(
+            0.5, 0.01,
+            'Mean |Bias| = average distance each grader is from group consensus per assignment. '
+            'Higher = more grader disagreement on that prompt technique.',
+            ha='center', fontsize=7,
+            fontfamily='Times New Roman',
+            color='#666666', style='italic'
+        )
+
+        plt.suptitle(
+            'Bias by Prompt Technique and Assignment: ' + etype.capitalize(),
+            fontfamily='Times New Roman',
+            fontsize=13, fontweight='bold',
+            color='#111111', y=1.02
+        )
+
+        plt.show()
+
+
+
+def all_models_performance(avg_df, writers, prompts, technique_groups, prompt_labels):
+    """Dot chart of mean Total score per writer across prompt techniques, split by EssayType."""
 
     group_order = [
         'Baseline',
@@ -705,21 +282,6 @@ def all_models_performance(scores, writers, prompts, technique_groups):
         'claude':  '#2ECC71',
         'gemini':  '#E67E22',
         'grok':    '#9B59B6'
-    }
-
-    technique_labels = {
-        'p0':  'Baseline',
-        'p1':  'Role-based',
-        'p2':  'Role-based\n+ Formal',
-        'p3':  'Chain of\nThought',
-        'p4':  'Generate\nKnowledge',
-        'p5':  'CoT +\nGen Know',
-        'p6':  'Role +\nGen Know',
-        'p7':  'Role + CoT\n+ Gen Know',
-        'p8':  'Iter +\nRole',
-        'p9':  'Iter +\nGen Know',
-        'p10': 'Iter + CoT\n+ Gen Know',
-        'p11': 'Iter +\nOriginal'
     }
 
     n_writers = len(writers)
@@ -733,34 +295,32 @@ def all_models_performance(scores, writers, prompts, technique_groups):
     )
     fig.patch.set_facecolor('#f7f9fc')
 
-    for ax, essay_type, title in zip(axes, ['generate', 'tune'], ['Generate', 'Tune']):
+    for ax, etype, title in zip(axes, ['generate', 'tune'], ['Generate', 'Tune']):
 
         ax.set_facecolor('#f7f9fc')
 
-        df = (
-            scores[scores['EssayType'] == essay_type]
-            .groupby(['Writer', 'Prompt'])['Total']
-            .mean().round(2)
-            .unstack()
-            .reindex(writers)[prompt_order]
-        )
-
         for i, writer in enumerate(writers):
+
             color  = colors.get(writer, 'gray')
             offset = (i - n_writers / 2 + 0.5) * (bar_width + group_gap / n_writers)
             x_pos  = [j + offset for j in range(n_prompts)]
-            vals   = df.loc[writer].values
 
-            # dots only — no lines
+            vals = [
+                avg_df[
+                    (avg_df['EssayType'] == etype)   &
+                    (avg_df['Writer']    == writer)   &
+                    (avg_df['Prompt']    == p)
+                ]['AvgTotal'].values[0]
+                for p in prompt_order
+            ]
+
             ax.scatter(
                 x_pos, vals,
-                color=color,
-                s=80,
+                color=color, s=80,
                 zorder=5,
                 label=writer.capitalize()
             )
 
-            # value labels above each dot
             for x, val in zip(x_pos, vals):
                 ax.text(
                     x, val + 0.05, str(val),
@@ -784,8 +344,6 @@ def all_models_performance(scores, writers, prompts, technique_groups):
                 )
 
         ax.set_ylim(16, 20.5)
-
-
         ax.set_ylabel(
             'Mean Total Score',
             fontfamily='Times New Roman',
@@ -798,21 +356,16 @@ def all_models_performance(scores, writers, prompts, technique_groups):
             fontweight='bold',
             loc='left'
         )
-
-        
-
         ax.grid(axis='y', linestyle='--', alpha=0.4, zorder=0)
-        
+
         for spine in ax.spines.values():
             spine.set_visible(False)
 
-    # group labels on top — first subplot only
+    # group labels on top
     ax2 = axes[0].twiny()
-
     ax2.set_xlim(axes[0].get_xlim())
 
     group_centers = []
-
     pos = 0
     for group in group_order:
         ps = [p for p in technique_groups[group] if p in prompt_order]
@@ -820,7 +373,6 @@ def all_models_performance(scores, writers, prompts, technique_groups):
         pos += len(ps)
 
     ax2.set_xticks(group_centers)
-
     ax2.set_xticklabels(
         [g.replace('_', ' ') for g in group_order],
         fontfamily='Times New Roman',
@@ -831,20 +383,21 @@ def all_models_performance(scores, writers, prompts, technique_groups):
     for spine in ax2.spines.values():
         spine.set_visible(False)
 
-    # x axis labels — last subplot only
+    # x axis labels
     axes[-1].set_xticks(range(n_prompts))
-
     axes[-1].set_xticklabels(
-        [f"{p}\n{technique_labels.get(p, '')}" for p in prompt_order],
+        [p + '\n' + prompt_labels.get(p, '') for p in prompt_order],
         fontfamily='Times New Roman',
         fontsize=8,
         ha='center'
     )
 
     legend_handles = [
-        Line2D([0], [0], marker='o', color='w',
-               markerfacecolor=colors[w], markersize=9,
-               label=w.capitalize())
+        Line2D(
+            [0], [0], marker='o', color='w',
+            markerfacecolor=colors[w], markersize=9,
+            label=w.capitalize()
+        )
         for w in writers
     ]
 
@@ -856,14 +409,482 @@ def all_models_performance(scores, writers, prompts, technique_groups):
         prop={'family': 'Times New Roman'}
     )
 
-
     fig.suptitle(
-        'Generate vs Tune — Score by Prompt Technique',
+        'Generate vs Tune: Score by Prompt Technique',
         fontfamily='Times New Roman',
         fontsize=14,
         fontweight='bold',
         y=1.01
     )
 
-
     plt.show()
+
+
+def plot_trend(trend_df, prompt_order, writers, technique_groups, prompt_labels):
+    """Line chart showing generate vs tune trend per writer across prompt techniques."""
+
+    group_order = [
+        'Baseline',
+        'Single',
+        'Double',
+        'Iterative_Prompt',
+        'Iterative_Prompt_Complex'
+    ]
+
+    colors = {
+        'chatgpt': '#3498DB',
+        'claude':  '#2ECC71',
+        'gemini':  '#E67E22',
+        'grok':    '#9B59B6'
+    }
+
+    fig, axes = plt.subplots(
+        len(writers), 1,
+        figsize=(16, 5 * len(writers)),
+        sharex=True
+    )
+    fig.patch.set_facecolor('#f7f9fc')
+
+    if len(writers) == 1:
+        axes = [axes]
+
+    for ax, writer in zip(axes, writers):
+
+        color = colors.get(writer, 'gray')
+        ax.set_facecolor('#f7f9fc')
+
+        for etype, style, marker in [
+            ('generate', 'solid',  'o'),
+            ('tune',     'dashed', 's')
+        ]:
+            vals = [
+                trend_df[
+                    (trend_df['EssayType'] == etype)  &
+                    (trend_df['Writer']    == writer)  &
+                    (trend_df['Prompt']    == p)
+                ]['AvgTotal'].values[0]
+                for p in prompt_order
+            ]
+
+            ax.plot(
+                range(len(prompt_order)), vals,
+                color=color, linewidth=2,
+                marker=marker, markersize=6,
+                linestyle=style,
+                label=etype.capitalize(),
+                zorder=5
+            )
+
+        # shaded gap
+        gen_vals = [
+            trend_df[
+                (trend_df['EssayType'] == 'generate') &
+                (trend_df['Writer']    == writer)      &
+                (trend_df['Prompt']    == p)
+            ]['AvgTotal'].values[0]
+            for p in prompt_order
+        ]
+
+        tune_vals = [
+            trend_df[
+                (trend_df['EssayType'] == 'tune') &
+                (trend_df['Writer']    == writer)  &
+                (trend_df['Prompt']    == p)
+            ]['AvgTotal'].values[0]
+            for p in prompt_order
+        ]
+
+        ax.fill_between(
+            range(len(prompt_order)),
+            gen_vals, tune_vals,
+            color=color, alpha=0.08
+        )
+
+        for x, val in enumerate(gen_vals):
+            ax.text(
+                x, val, str(val),
+                fontsize=8, color=color,
+                fontfamily='Times New Roman',
+                ha='center'
+            )
+
+        for x, val in enumerate(tune_vals):
+            ax.text(
+                x, val, str(val),
+                fontsize=8, color=color,
+                fontfamily='Times New Roman',
+                ha='center'
+            )
+
+        # group dividers
+        pos = 0
+        for group in group_order:
+            ps = [p for p in technique_groups[group] if p in prompt_order]
+            pos += len(ps)
+            if pos < len(prompt_order):
+                ax.axvline(
+                    pos - 0.5,
+                    color='#cccccc',
+                    linewidth=1.5,
+                    linestyle='--',
+                    zorder=2
+                )
+
+        ax.set_ylabel(
+            'Mean Total Score',
+            fontfamily='Times New Roman',
+            fontsize=10
+        )
+        ax.set_title(
+            writer.capitalize(),
+            fontfamily='Times New Roman',
+            fontsize=12,
+            fontweight='bold',
+            loc='left'
+        )
+        ax.legend(
+            loc='lower right',
+            fontsize=9,
+            frameon=False,
+            prop={'family': 'Times New Roman'}
+        )
+        ax.grid(axis='y', linestyle='--', alpha=0.4)
+
+        for spine in ax.spines.values():
+            spine.set_visible(False)
+
+    # group labels on top
+    ax2 = axes[0].twiny()
+    ax2.set_xlim(axes[0].get_xlim())
+
+    group_centers = []
+    pos = 0
+    for group in group_order:
+        ps = [p for p in technique_groups[group] if p in prompt_order]
+        group_centers.append(pos + len(ps) / 2 - 0.5)
+        pos += len(ps)
+
+    ax2.set_xticks(group_centers)
+    ax2.set_xticklabels(
+        [g.replace('_', ' ') for g in group_order],
+        fontfamily='Times New Roman',
+        fontsize=10,
+        fontweight='bold'
+    )
+    ax2.tick_params(length=0)
+    for spine in ax2.spines.values():
+        spine.set_visible(False)
+
+    # x axis labels
+    axes[-1].set_xticks(range(len(prompt_order)))
+    axes[-1].set_xticklabels(
+        [p + '\n' + prompt_labels.get(p, '') for p in prompt_order],
+        fontfamily='Times New Roman',
+        fontsize=8,
+        ha='center'
+    )
+
+    fig.suptitle(
+        'Prompt Complexity Effects on Generate vs Tuned Essays',
+        fontfamily='Times New Roman',
+        fontsize=14,
+        fontweight='bold',
+        y=1.01
+    )
+
+    plt.tight_layout()
+    plt.show()
+
+
+
+#
+#visualize_scores_p0.ipynb
+#
+
+
+#1: Compute grader stats (metric.py) before runnng the plot.
+def cross_grading_scores_by_essaytype(stats_df, writers, dimensions, target_writer=None):
+
+    grader_colors = {
+        'chatgpt': '#4361ee',
+        'claude':  '#06d6a0',
+        'gemini':  '#f4a261',
+        'grok':    '#ef233c'
+    }
+
+    for etype in ['generate', 'tune']:
+
+        targets = [target_writer] if target_writer else writers
+
+        fig, axes = plt.subplots(
+            1, len(targets),
+            figsize=(len(targets) * 3.4, 3.8),
+            sharey=True
+        )
+
+        fig.subplots_adjust(wspace=0.10)
+        axes = np.atleast_1d(axes)
+        fig.patch.set_facecolor('#f7f9fc')
+
+        offsets = np.linspace(-0.25, 0.25, len(writers))
+
+        for col, writer in enumerate(targets):
+
+            ax = axes[col]
+            ax.set_facecolor('#e8e8e8')
+
+            for i in range(len(dimensions)):
+                ax.axvline(i, color='#dddddd', linewidth=0.7, zorder=1)
+
+            for gi, grader in enumerate(writers):
+
+                for i, dimension in enumerate(dimensions):
+
+                    row = stats_df[
+                        (stats_df['EssayType'] == etype)      &
+                        (stats_df['Writer']    == writer)     &
+                        (stats_df['Grader']    == grader)     &
+                        (stats_df['Dimension'] == dimension)
+                    ]
+
+                    if row.empty or row['N'].values[0] == 0:
+                        continue
+
+                    ax.errorbar(
+                        i + offsets[gi],
+                        row['Mean'].values[0],
+                        yerr=row['Std'].values[0],
+                        fmt='o',
+                        color=grader_colors[grader],
+                        markersize=5,
+                        capsize=3,
+                        capthick=1.2,
+                        elinewidth=1.2,
+                        zorder=4
+                    )
+
+            ax.set_xticks(range(len(dimensions)))
+            ax.set_xticklabels(
+                dimensions,
+                fontfamily='Times New Roman',
+                fontsize=7,
+                color='#888888',
+                rotation=25,
+                ha='right'
+            )
+
+            ax.set_ylim(0.0, 4.5)
+            ax.set_yticks([0, 1.0, 2.0, 3.0, 4.0])
+            ax.yaxis.grid(True, linestyle='--', alpha=0.25, zorder=2)
+            ax.set_axisbelow(True)
+
+            for spine in ax.spines.values():
+                spine.set_visible(False)
+
+            ax.tick_params(axis='x', which='both', bottom=False)
+
+            if col == 0:
+                ax.tick_params(axis='y', labelsize=7)
+                ax.set_ylabel(
+                    'Avg Score',
+                    fontfamily='Times New Roman',
+                    fontsize=8,
+                    color='#555555'
+                )
+            else:
+                ax.tick_params(axis='y', labelleft=False, left=False)
+
+            ax.set_title(
+                writer.capitalize(),
+                fontfamily='Times New Roman',
+                fontsize=11,
+                fontweight='bold',
+                color='#111111',
+                pad=10
+            )
+
+        legend_elements = [
+            Line2D(
+                [0], [0],
+                marker='o', color='w',
+                markerfacecolor=grader_colors[g],
+                markersize=8,
+                label=g.capitalize()
+            )
+            for g in writers
+        ] + [
+            Line2D(
+                [0], [0],
+                color='grey', linewidth=1.2,
+                label='Error bars = ±SD'
+            )
+        ]
+
+        fig.legend(
+            handles=legend_elements,
+            loc='lower center',
+            ncol=len(writers) + 1,
+            fontsize=8.5,
+            prop={'family': 'Times New Roman'},
+            framealpha=0,
+            bbox_to_anchor=(0.5, -0.08)
+        )
+
+        plt.suptitle(
+            f'Cross Grading Performance: {etype.capitalize()}',
+            fontfamily='Times New Roman',
+            fontsize=13,
+            fontweight='bold',
+            color='#111111',
+            y=1.04
+        )
+
+        plt.tight_layout(w_pad=0)
+        fig.subplots_adjust(wspace=0.10)
+        plt.show()
+
+
+#2: Compute assignment_bias (metric.py) before runnig the plot.
+def grading_bias_by_assignment(assignment_bias, writers, target_writer=None):
+
+    assignments = sorted(assignment_bias['Assignment'].unique())
+    targets     = [target_writer] if target_writer else writers
+
+    assignment_colors = {
+        a: c for a, c in zip(
+            assignments,
+            ['#4361ee', '#ef233c', '#06d6a0', '#f4a261']
+        )
+    }
+
+    definition = (
+        'Mean |Bias| = average distance each grader is from the group consensus. '
+        '0.0 = perfect agreement. Higher = more grader disagreement on that assignment.'
+    )
+
+    for etype in ['generate', 'tune']:
+
+        fig, axes = plt.subplots(
+            1, len(targets),
+            figsize=(len(targets) * 3.4, 3.8),
+            sharey=True
+        )
+
+        fig.subplots_adjust(wspace=0.10, bottom=0.18)
+        axes = np.atleast_1d(axes)
+        fig.patch.set_facecolor('#f7f9fc')
+
+        x = np.arange(len(assignments))
+
+        for col, writer in enumerate(targets):
+
+            ax = axes[col]
+            ax.set_facecolor('#e8e8e8')
+
+            subset = assignment_bias[
+                (assignment_bias['EssayType'] == etype) &
+                (assignment_bias['Writer']    == writer)
+            ]
+
+            mean_abs_bias = [
+                subset[subset['Assignment'] == a]['Mean_AbsBias'].mean()
+                for a in assignments
+            ]
+
+            ax.bar(
+                x,
+                mean_abs_bias,
+                color=[assignment_colors[a] for a in assignments],
+                alpha=0.85,
+                zorder=3,
+                width=0.4
+            )
+
+            for i, val in enumerate(mean_abs_bias):
+                if not np.isnan(val):
+                    ax.text(
+                        x[i], val + 0.005,
+                        str(round(val, 3)),
+                        ha='center', fontsize=7,
+                        fontfamily='Times New Roman',
+                        color='#333333'
+                    )
+
+            ax.set_xticks(x)
+            ax.set_xticklabels(
+                assignments,
+                fontfamily='Times New Roman',
+                fontsize=8,
+                color='#555555'
+            )
+
+            ax.set_ylim(0, 1.0)
+            ax.set_yticks([0, 0.25, 0.5, 0.75, 1.0])
+            ax.yaxis.grid(True, linestyle='--', alpha=0.25, zorder=0)
+            ax.set_axisbelow(True)
+
+            for spine in ax.spines.values():
+                spine.set_visible(False)
+
+            ax.tick_params(axis='x', which='both', bottom=False)
+
+            if col == 0:
+                ax.tick_params(axis='y', labelsize=7)
+                ax.set_ylabel(
+                    'Mean |Bias|',
+                    fontfamily='Times New Roman',
+                    fontsize=8,
+                    color='#555555'
+                )
+            else:
+                ax.tick_params(axis='y', labelleft=False, left=False)
+
+            ax.set_title(
+                writer.capitalize() + ' (writer)',
+                fontfamily='Times New Roman',
+                fontsize=11,
+                fontweight='bold',
+                color='#111111',
+                pad=10
+            )
+
+        legend_elements = [
+            Patch(facecolor=assignment_colors[a], alpha=0.85, label=a)
+            for a in assignments
+        ]
+
+        fig.legend(
+            handles=legend_elements,
+            loc='lower center',
+            ncol=len(assignments),
+            fontsize=8.5,
+            prop={'family': 'Times New Roman'},
+            framealpha=0,
+            bbox_to_anchor=(0.5, -0.20)
+        )
+
+        # ── definition under chart ────────────────────────────────────────────
+        fig.text(
+            0.5, 0.01,
+            definition,
+            ha='center',
+            fontsize=7,
+            fontfamily='Times New Roman',
+            color='#666666',
+            style='italic',
+            wrap=True
+        )
+
+        plt.suptitle(
+            'Writer Performance by Assignment:' + etype.capitalize(),
+            fontfamily='Times New Roman',
+            fontsize=13,
+            fontweight='bold',
+            color='#111111',
+            y=1.04
+        )
+
+        plt.tight_layout(w_pad=0)
+        fig.subplots_adjust(wspace=0.10, bottom=0.18)
+        plt.show()
+
