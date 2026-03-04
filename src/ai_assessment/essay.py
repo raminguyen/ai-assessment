@@ -108,6 +108,7 @@ class Essay:
         return self.write_prompt, self.grade_prompt
 
     def load_prompt_p7(self, assignment_num=1, prompt_num=7):
+
         base_direction = os.path.dirname(os.path.abspath(__file__))
         file_path = os.path.join(base_direction, "prompt.json")
 
@@ -118,13 +119,15 @@ class Essay:
 
         context_key = "assignment_" + str(assignment_num) + "_p" + str(prompt_num) + "_context"
         generate_key = "assignment_" + str(assignment_num) + "_p" + str(prompt_num) + "_generate"
+        
         self.context_prompt = data[context_key]
         self.generate_prompt = data[generate_key]
         self.write_prompt = self.context_prompt + "\n\n" + self.generate_prompt
 
         self.grade_prompt = data["grade_prompt_p0"]
         self.reflection_prompt = data["reflection_prompt"]
-        self.tuning_prompt = data.get("tuning_p1")
+        tuning_key = "tuning_p" + str(prompt_num)
+        self.tuning_prompt = data.get(tuning_key, data.get("tuning_p1"))
 
         professor_types = {
             1: "Psychology",
