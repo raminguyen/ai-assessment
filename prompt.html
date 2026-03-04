@@ -188,7 +188,7 @@
 <body>
 
 <div class="topbar">
-  <span class="logo">PROMPT PANEL VIEW — P0 → P11  ·  Click any panel to expand</span>
+  <span class="logo">PROMPT PANEL VIEW — P0 → P12  ·  Click any panel to expand</span>
   <div class="legend">
     <div class="leg"><div class="leg-dot" style="background:var(--c-role)"></div>Role</div>
     <div class="leg"><div class="leg-dot" style="background:var(--c-cot)"></div>CoT</div>
@@ -274,6 +274,13 @@ const prompts = [
     steps:[
       {l:"STEP 1 · Context", tx:BASE},
       {l:"STEP 2 · Write", tx:`Write a five-page essay (1000 words or less) to set them straight and include at least 5 citations from peer-reviewed articles.`}
+    ],
+    tu:"{ASSIGNMENT_PROMPT}\nTune the essay using the following rubric: {rubric}" },
+
+  { id:12, name:"Iter + Context", techniques:["iter"], stripe:"var(--c-iter)",
+    steps:[
+      {l:"STEP 1 · Context", tx:BASE},
+      {l:"STEP 2 · Write", tx:`Write an academic essay.`}
     ],
     tu:"{ASSIGNMENT_PROMPT}\nTune the essay using the following rubric: {rubric}" }
 ];
