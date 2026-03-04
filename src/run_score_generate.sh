@@ -19,5 +19,5 @@ done
 wait
 echo "All p${p} scoring done!"
 
-python check_scores.py --join
-python check_formality.py
+python parse_scores.py --join
+
