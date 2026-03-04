@@ -126,7 +126,7 @@ def join_scores():
 
     dfs = []
 
-    for p_num in range(0, 12):
+    for p_num in range(0, 13):
 
         df = parse_prompt(data_dir, p_num, dimensions, short_dims) #parse all files for this prompt number
 
@@ -176,3 +176,7 @@ def main():
     files = sorted(glob.glob(pattern))
 
     print(f"Found {len(files)} score files for p{prompt_num}")
+
+
+if __name__ == '__main__':
+    main()
