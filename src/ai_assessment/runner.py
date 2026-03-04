@@ -21,7 +21,7 @@ class Runner:
         essay = Util.create_essay(assignment, rubric_folder=rubric_name)
 
         # Load prompts based on prompt number
-        if prompt_num in [7, 8, 9, 10, 11]:
+        if prompt_num in [7, 8, 9, 10, 11, 12]:
             essay.load_prompt_p7(assignment, prompt_num=prompt_num)
         else:
             essay.load_prompt_p(prompt_num, assignment)
@@ -39,8 +39,8 @@ class Runner:
 
         print("Generating essay for assignment " + str(assignment) + " with prompt " + str(prompt_num))
 
-        # Use iterative generation for p7, p8
-        if prompt_num in [7, 8, 9, 10, 11]:
+        # Use iterative generation for p7+
+        if prompt_num in [7, 8, 9, 10, 11, 12]:
             data = model.generate_iterative(essay, rubric_name)
         else:
             data = model.generate(essay, rubric_name)
@@ -56,7 +56,7 @@ class Runner:
         model = self.all_models[model_name]
 
         essay = Util.create_essay(assignment, rubric_folder=rubric_name)
-        if prompt_num in [7, 8, 9, 10, 11]:
+        if prompt_num in [7, 8, 9, 10, 11, 12]:
             essay.load_prompt_p7(assignment, prompt_num=prompt_num)
         else:
             essay.load_prompt_p(prompt_num, assignment)
@@ -89,11 +89,10 @@ class Runner:
         grader = self.all_models[grader_name]
 
         essay = Util.create_essay(assignment, rubric_folder=rubric_name)
-        if prompt_num in [7, 8, 9, 10]:
+        if prompt_num in [7, 8, 9, 10, 11, 12]:
             essay.load_prompt_p7(assignment, prompt_num=prompt_num)
         else:
             essay.load_prompt_p(prompt_num, assignment)
-        
 
         # Load essay from file
         essay_text, writer_model, essay_type = Util.load_essay_from_data(filename, rubric_name)
@@ -135,7 +134,7 @@ class Runner:
         model = self.all_models[model_name]
 
         essay = Util.create_essay(assignment, rubric_folder=rubric_name)
-        if prompt_num in [7, 8, 9, 10]:
+        if prompt_num in [7, 8, 9, 10, 11, 12]:
             essay.load_prompt_p7(assignment, prompt_num=prompt_num)
         else:
             essay.load_prompt_p(prompt_num, assignment)
