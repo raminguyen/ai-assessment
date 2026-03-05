@@ -82,7 +82,9 @@
 
   "assignment_3_p7_generate": "You are an undergrad student in the first semester. Generate a five-page essay (1000 words or less) to set them straight and include at least 5 citations from peer-reviewed articles.",
 
-  "tuning_p7": "{ASSIGNMENT_PROMPT}\n You are an undergrad student in the first semester. Tune the essay using the following rubric: {rubric}",
+  "tuning_p7_context": "{ASSIGNMENT_PROMPT}",
+
+  "tuning_p7_generate": "You are an undergrad student in the first semester. Generate a five-page tuned essay (1000 words or less) using the following rubric: {rubric} to set them straight and include at least 5 citations from peer-reviewed articles.",
 
 
   "assignment_1_p8_context": "Consider the following problem: In the morning, when Professor Catlove opens a new can of cat food, his cats run into the kitchen purring and meowing and rubbing their backs against his legs. What examples, if any, of classical conditioning, operant conditioning, and social learning are at work in this brief scene? Note that both the cats and the professor might be exhibiting conditioned behavior here.\n\nYou and some fellow classmates have been discussing this problem over coffee, and you are convinced that the other members of your group are confused about the concepts.",
@@ -97,7 +99,8 @@
 
   "assignment_3_p8_generate": "You are an undergrad student in the first semester. Write a five-page essay (1000 words or less) to set them straight and include at least 5 citations from peer-reviewed articles.",
 
-  "tuning_p8": "{ASSIGNMENT_PROMPT}\n You are an undergrad student in the first semester. Tune the essay using the following rubric: {rubric}",
+  "tuning_p8_context": "{ASSIGNMENT_PROMPT}",
+  "tuning_p8_generate": "You are an undergrad student in the first semester. Write a five-page tuned essay (1000 words or less) using the following rubric: {rubric} to set them straight and include at least 5 citations from peer-reviewed articles.",
 
   
   "assignment_1_p9_context": "Consider the following problem: In the morning, when Professor Catlove opens a new can of cat food, his cats run into the kitchen purring and meowing and rubbing their backs against his legs. What examples, if any, of classical conditioning, operant conditioning, and social learning are at work in this brief scene? Note that both the cats and the professor might be exhibiting conditioned behavior here.\n\nYou and some fellow classmates have been discussing this problem over coffee, and you are convinced that the other members of your group are confused about the concepts.",
@@ -112,7 +115,8 @@
 
   "assignment_3_p9_generate": "Generate a five-page essay (1000 words or less) to set them straight and include at least 5 citations from peer-reviewed articles.",
 
-  "tuning_p9": "{ASSIGNMENT_PROMPT}\n Tune the essay using the following rubric: {rubric}",
+  "tuning_p9_context": "{ASSIGNMENT_PROMPT}",
+  "tuning_p9_generate": "Generate a five-page tuned essay (1000 words or less) using the following rubric: {rubric} to set them straight and include at least 5 citations from peer-reviewed articles.",
 
   
   "assignment_1_p10_context": "Consider the following problem: In the morning, when Professor Catlove opens a new can of cat food, his cats run into the kitchen purring and meowing and rubbing their backs against his legs. What examples, if any, of classical conditioning, operant conditioning, and social learning are at work in this brief scene? Note that both the cats and the professor might be exhibiting conditioned behavior here.\n\nYou and some fellow classmates have been discussing this problem over coffee, and you are convinced that the other members of your group are confused about the concepts.",
@@ -127,7 +131,8 @@
 
   "assignment_3_p10_generate": "Let's think step by step. Generate a five-page essay (1000 words or less) to set them straight and include at least 5 citations from peer-reviewed articles.",
 
-  "tuning_p10": "{ASSIGNMENT_PROMPT}\n Let's think step by step. Tune the essay using the following rubric: {rubric}",
+  "tuning_p10_context": "{ASSIGNMENT_PROMPT}",
+  "tuning_p10_generate": "Let's think step by step. Generate a five-page tuned essay (1000 words or less) using the following rubric: {rubric} to set them straight and include at least 5 citations from peer-reviewed articles.",
 
 
   "assignment_1_p11_context": "Consider the following problem: In the morning, when Professor Catlove opens a new can of cat food, his cats run into the kitchen purring and meowing and rubbing their backs against his legs. What examples, if any, of classical conditioning, operant conditioning, and social learning are at work in this brief scene? Note that both the cats and the professor might be exhibiting conditioned behavior here.\n\nYou and some fellow classmates have been discussing this problem over coffee, and you are convinced that the other members of your group are confused about the concepts.",
@@ -142,8 +147,10 @@
 
   "assignment_3_p11_generate": "Write a five-page essay (1000 words or less) to set them straight and include at least 5 citations from peer-reviewed articles.",
 
-  "tuning_p11": "{ASSIGNMENT_PROMPT}\n Tune the essay using the following rubric: {rubric}",
+  "tuning_p11_context": "{ASSIGNMENT_PROMPT}",
+  "tuning_p11_generate": "Write a five-page tuned essay (1000 words or less) using the following rubric: {rubric} to set them straight and include at least 5 citations from peer-reviewed articles.",
 
+  
   "assignment_1_p12_context": "Consider the following problem: In the morning, when Professor Catlove opens a new can of cat food, his cats run into the kitchen purring and meowing and rubbing their backs against his legs. What examples, if any, of classical conditioning, operant conditioning, and social learning are at work in this brief scene? Note that both the cats and the professor might be exhibiting conditioned behavior here.\n\nYou and some fellow classmates have been discussing this problem over coffee, and you are convinced that the other members of your group are confused about the concepts. Write a five-page essay (1000 words or less) to set them straight and include at least 5 citations from peer-reviewed articles.",
 
   "assignment_1_p12_generate": "Write an academic essay.",
@@ -156,7 +163,8 @@
 
   "assignment_3_p12_generate": "Write an academic essay.",
 
-  "tuning_p12": "{ASSIGNMENT_PROMPT}\n Tune the essay using the following rubric: {rubric}",
+  "tuning_p12_context": "{ASSIGNMENT_PROMPT}",
+  "tuning_p12_generate": "Write a tuned academic essay using the following rubric: {rubric}.",
 
   
   
