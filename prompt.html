@@ -247,42 +247,60 @@ const prompts = [
       {l:"STEP 1 · Context", tx:BASE},
       {l:"STEP 2 · Generate", tx:`[ROLE]You are an undergrad student in the first semester.[/ROLE] [GEN]Generate[/GEN] a five-page essay (1000 words or less) to set them straight and include at least 5 citations from peer-reviewed articles.`}
     ],
-    tu:"{ASSIGNMENT_PROMPT}\nYou are an undergrad student in the first semester. Tune the essay using the following rubric: {rubric}" },
+    tuSteps:[
+      {l:"STEP 1 · Context", tx:"{ASSIGNMENT_PROMPT}"},
+      {l:"STEP 2 · Tune", tx:`[ROLE]You are an undergrad student in the first semester.[/ROLE] [GEN]Generate[/GEN] a five-page tuned essay (1000 words or less) using the following rubric: {rubric} to set them straight and include at least 5 citations from peer-reviewed articles.`}
+    ]},
 
   { id:8, name:"Iter + Role", techniques:["iter","role"], stripe:"linear-gradient(90deg,var(--c-iter),var(--c-role))",
     steps:[
       {l:"STEP 1 · Context", tx:BASE},
       {l:"STEP 2 · Write", tx:`[ROLE]You are an undergrad student in the first semester.[/ROLE] Write a five-page essay (1000 words or less) to set them straight and include at least 5 citations from peer-reviewed articles.`}
     ],
-    tu:"{ASSIGNMENT_PROMPT}\nYou are an undergrad student in the first semester. Tune the essay using the following rubric: {rubric}" },
+    tuSteps:[
+      {l:"STEP 1 · Context", tx:"{ASSIGNMENT_PROMPT}"},
+      {l:"STEP 2 · Tune", tx:`[ROLE]You are an undergrad student in the first semester.[/ROLE] Write a five-page tuned essay (1000 words or less) using the following rubric: {rubric} to set them straight and include at least 5 citations from peer-reviewed articles.`}
+    ]},
 
   { id:9, name:"Iter + Gen.", techniques:["iter","gen"], stripe:"linear-gradient(90deg,var(--c-iter),var(--c-gen))",
     steps:[
       {l:"STEP 1 · Context", tx:BASE},
       {l:"STEP 2 · Generate", tx:`[GEN]Generate[/GEN] a five-page essay (1000 words or less) to set them straight and include at least 5 citations from peer-reviewed articles.`}
     ],
-    tu:"{ASSIGNMENT_PROMPT}\nTune the essay using the following rubric: {rubric}" },
+    tuSteps:[
+      {l:"STEP 1 · Context", tx:"{ASSIGNMENT_PROMPT}"},
+      {l:"STEP 2 · Tune", tx:`[GEN]Generate[/GEN] a five-page tuned essay (1000 words or less) using the following rubric: {rubric} to set them straight and include at least 5 citations from peer-reviewed articles.`}
+    ]},
 
   { id:10, name:"Iter+CoT+Gen.", techniques:["iter","cot","gen"], stripe:"linear-gradient(90deg,var(--c-iter),var(--c-cot),var(--c-gen))",
     steps:[
       {l:"STEP 1 · Context", tx:BASE},
       {l:"STEP 2 · Generate", tx:`[COT]Let's think step by step.[/COT] [GEN]Generate[/GEN] a five-page essay (1000 words or less) to set them straight and include at least 5 citations from peer-reviewed articles.`}
     ],
-    tu:"{ASSIGNMENT_PROMPT}\nLet's think step by step. Tune the essay using the following rubric: {rubric}" },
+    tuSteps:[
+      {l:"STEP 1 · Context", tx:"{ASSIGNMENT_PROMPT}"},
+      {l:"STEP 2 · Tune", tx:`[COT]Let's think step by step.[/COT] [GEN]Generate[/GEN] a five-page tuned essay (1000 words or less) using the following rubric: {rubric} to set them straight and include at least 5 citations from peer-reviewed articles.`}
+    ]},
 
   { id:11, name:"Iter + Original", techniques:["iter"], stripe:"var(--c-iter)",
     steps:[
       {l:"STEP 1 · Context", tx:BASE},
       {l:"STEP 2 · Write", tx:`Write a five-page essay (1000 words or less) to set them straight and include at least 5 citations from peer-reviewed articles.`}
     ],
-    tu:"{ASSIGNMENT_PROMPT}\nTune the essay using the following rubric: {rubric}" },
+    tuSteps:[
+      {l:"STEP 1 · Context", tx:"{ASSIGNMENT_PROMPT}"},
+      {l:"STEP 2 · Tune", tx:`Write a five-page tuned essay (1000 words or less) using the following rubric: {rubric} to set them straight and include at least 5 citations from peer-reviewed articles.`}
+    ]},
 
   { id:12, name:"Iter + Context", techniques:["iter"], stripe:"var(--c-iter)",
     steps:[
       {l:"STEP 1 · Context", tx:BASE},
       {l:"STEP 2 · Write", tx:`Write an academic essay.`}
     ],
-    tu:"{ASSIGNMENT_PROMPT}\nTune the essay using the following rubric: {rubric}" }
+    tuSteps:[
+      {l:"STEP 1 · Context", tx:"{ASSIGNMENT_PROMPT}"},
+      {l:"STEP 2 · Tune", tx:`Write a tuned academic essay using the following rubric: {rubric}.`}
+    ]}
 ];
 
 const techColor = { role:'var(--c-role)', cot:'var(--c-cot)', gen:'var(--c-gen)', iter:'var(--c-iter)', formal:'var(--c-formal)' };
@@ -319,9 +337,18 @@ function buildPanels() {
         </div>`).join('');
     }
 
-    const tuningHTML = p.tu
-      .replace(/\n/g,'<br>')
-      .replace(/\{(\w+)\}/g,'<span class="t-key">{$1}</span>');
+    let tuningHTML = '';
+    if (p.tuSteps) {
+      tuningHTML = p.tuSteps.map(s=>`
+        <div class="step-block">
+          <div class="step-tag">${s.l}</div>
+          <div class="tuning-text">${highlight(s.tx).replace(/\{(\w+)\}/g,'<span class="t-key">{$1}</span>')}</div>
+        </div>`).join('');
+    } else {
+      tuningHTML = p.tu
+        .replace(/\n/g,'<br>')
+        .replace(/\{(\w+)\}/g,'<span class="t-key">{$1}</span>');
+    }
 
     const el = document.createElement('div');
     el.className = 'panel' + (idx===0 ? ' open' : '');

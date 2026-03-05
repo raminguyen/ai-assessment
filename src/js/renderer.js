@@ -450,6 +450,10 @@ function displayResponseText(elements, item) {
         var step2Prompt = removeMarkdown(item.data.prompt_step2 || '');
         var step2Result = removeMarkdown(item.data.result || '');
 
+        var isTune = item.command === 'tune';
+        var step2PromptLabel = isTune ? 'Step 2: Tune Prompt' : 'Step 2: Generate Prompt';
+        var step2ResultLabel = isTune ? 'Step 2: Tuned Essay' : 'Step 2: Final Essay';
+
         elements.responseContent.innerHTML =
             '<div style="display:flex; gap:1rem; margin-bottom:1rem;">' +
                 '<div style="flex:1; min-width:0;">' +
@@ -457,7 +461,7 @@ function displayResponseText(elements, item) {
                     '<div style="background:#1a1a2e; padding:1rem; border-radius:8px; white-space:pre-wrap; font-size:0.85rem; max-height:250px; overflow-y:auto;">' + step1Prompt + '</div>' +
                 '</div>' +
                 '<div style="flex:1; min-width:0;">' +
-                    '<h4 style="color:#27ae60; margin-bottom:0.5rem;">Step 2: Generate Prompt</h4>' +
+                    '<h4 style="color:#27ae60; margin-bottom:0.5rem;">' + step2PromptLabel + '</h4>' +
                     '<div style="background:#1a1a2e; padding:1rem; border-radius:8px; white-space:pre-wrap; font-size:0.85rem; max-height:250px; overflow-y:auto;">' + step2Prompt + '</div>' +
                 '</div>' +
             '</div>' +
@@ -467,7 +471,7 @@ function displayResponseText(elements, item) {
                     '<div style="background:#1a1a2e; padding:1rem; border-radius:8px; white-space:pre-wrap; font-size:0.85rem; max-height:400px; overflow-y:auto;">' + step1Result + '</div>' +
                 '</div>' +
                 '<div style="flex:1; min-width:0;">' +
-                    '<h4 style="color:#27ae60; margin-bottom:0.5rem;">Step 2: Final Essay</h4>' +
+                    '<h4 style="color:#27ae60; margin-bottom:0.5rem;">' + step2ResultLabel + '</h4>' +
                     '<div style="background:#1a1a2e; padding:1rem; border-radius:8px; white-space:pre-wrap; font-size:0.85rem; max-height:400px; overflow-y:auto;">' + step2Result + '</div>' +
                 '</div>' +
             '</div>';
