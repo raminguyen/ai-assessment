@@ -1,5 +1,7 @@
 import os
 import json
+import sys
+
 
 
 class Essay:
@@ -117,17 +119,35 @@ class Essay:
 
         print("Loading iterative prompt p" + str(prompt_num) + " from: " + file_path)
 
+        #generating
+
         context_key = "assignment_" + str(assignment_num) + "_p" + str(prompt_num) + "_context"
         generate_key = "assignment_" + str(assignment_num) + "_p" + str(prompt_num) + "_generate"
         
         self.context_prompt = data[context_key]
+
         self.generate_prompt = data[generate_key]
+
         self.write_prompt = self.context_prompt + "\n\n" + self.generate_prompt
 
         self.grade_prompt = data["grade_prompt_p0"]
+
         self.reflection_prompt = data["reflection_prompt"]
-        tuning_key = "tuning_p" + str(prompt_num)
-        self.tuning_prompt = data.get(tuning_key, data.get("tuning_p1"))
+
+        #tuning
+
+        tuning_context_key = "tuning_p" + str(prompt_num) + "_context"
+    
+
+        tuning_generate_key = "tuning_p" + str(prompt_num) + "_generate"
+
+        tuning_context = data.get(tuning_context_key, data.get("tuning_p1_context", ""))
+        tuning_generate = data.get(tuning_generate_key, data.get("tuning_p1_generate", ""))
+
+        # For p7-p12 iterative tuning: store steps separately
+        self.tuning_context_prompt = tuning_context.replace("{ASSIGNMENT_PROMPT}", self.context_prompt)
+        self.tuning_generate_prompt = tuning_generate
+        self.tuning_prompt = self.tuning_context_prompt + "\n\n" + self.tuning_generate_prompt
 
         professor_types = {
             1: "Psychology",
@@ -135,6 +155,7 @@ class Essay:
             3: "Real Estate"
         }
         professor_type = professor_types.get(assignment_num, "Psychology")
+
         self.grade_prompt = self.grade_prompt.replace("{PROFESSOR_TYPE}", professor_type)
 
         return self.context_prompt, self.generate_prompt

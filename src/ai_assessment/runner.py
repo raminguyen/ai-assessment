@@ -76,7 +76,10 @@ class Runner:
 
         print("Tuning essay for assignment " + str(assignment) + " with prompt " + str(prompt_num))
 
-        data = model.tune(essay, rubric_obj)
+        if prompt_num in [7, 8, 9, 10, 11, 12]:
+            data = model.tune_iterative(essay, rubric_obj)
+        else:
+            data = model.tune(essay, rubric_obj)
         data['prompt_num'] = prompt_num
         data['rubric'] = rubric_name
 

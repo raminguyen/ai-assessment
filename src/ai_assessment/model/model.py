@@ -86,25 +86,19 @@ class Model:
         print("Tuning with rubric")
         # Use template
         tuning_prompt = essay.tuning_prompt
-        tuning_prompt = tuning_prompt.replace("{ASSIGNMENT_PROMPT}", essay.write_prompt)
         tuning_prompt = tuning_prompt.replace("{rubric}", rubric.text)
         print("Tuning prompt:", tuning_prompt)
 
-        # Save prompt
-        # with open('tuning_prompt.txt', 'w') as f:
-        #     f.write("=" * 10 + "\nTUNING PROMPT\n" + "=" * 10 + "\n\n")
-        #     f.write(tuning_prompt)
-
         start = time.time()
         result = self.api_call(tuning_prompt)
-        
+
         essay.essay_text = result
         essay.status = 2
         essay.time = time.time() - start
         print(f"Done in {essay.time/60:.2f} mins")
 
         time.sleep(5)
-        
+
         data = {
             "command": "tune",
             "model": self.name,
@@ -114,7 +108,49 @@ class Model:
             "timestamp": datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         }
         return data
-    
+
+    def tune_iterative(self, essay, rubric):
+
+        print("Tuning (iterative 2-step)")
+        print("Step 1 prompt:", essay.tuning_context_prompt)
+
+        step2_prompt = essay.tuning_generate_prompt.replace("{rubric}", rubric.text)
+        print("Step 2 prompt:", step2_prompt)
+
+        start = time.time()
+
+        # Step 1: Send assignment context, get analysis
+        step1_result = self.api_call(essay.tuning_context_prompt)
+        print("Step 1 complete")
+        time.sleep(5)
+
+        # Step 2: Send tuning instruction with rubric in same conversation
+        messages = [
+            {"role": "user", "content": essay.tuning_context_prompt},
+            {"role": "assistant", "content": step1_result},
+            {"role": "user", "content": step2_prompt}
+        ]
+        result = self.api_call_multi(messages)
+
+        essay.essay_text = result
+        essay.status = 2
+        essay.time = time.time() - start
+        print(f"Done in {essay.time/60:.2f} mins")
+        time.sleep(5)
+
+        data = {
+            "command": "tune",
+            "model": self.name,
+            "essay_name": essay.name,
+            "prompt": essay.tuning_context_prompt,
+            "prompt_step2": step2_prompt,
+            "step1_result": step1_result,
+            "result": result,
+            "time_minutes": round(essay.time / 60, 2),
+            "timestamp": datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        }
+        return data
+
     def score(self, essay, rubric, writer=None, essay_type=None):
 
         print("Grading essay")
@@ -159,8 +195,9 @@ class Model:
 
         # Use template
         reflection_prompt = essay.reflection_prompt
-        # Remove intro from assignment prompt
-        assignment_prompt = essay.write_prompt.replace('You are an undergrad student in the first semester.\n\n', '')
+        # For p7-p12, use context_prompt only; for p1-p6, use write_prompt
+        assignment_prompt = getattr(essay, 'context_prompt', essay.write_prompt)
+        assignment_prompt = assignment_prompt.replace('You are an undergrad student in the first semester.\n\n', '')
         assignment_prompt = assignment_prompt.replace('You are an undergrad student in the first semester. ', '')
         reflection_prompt = reflection_prompt.replace("{ASSIGNMENT_PROMPT}", assignment_prompt)
         reflection_prompt = reflection_prompt.replace("{original essay}", original_essay)
