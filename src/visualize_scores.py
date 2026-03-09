@@ -117,7 +117,9 @@ def plot_avg_total_by_essaytype(avg_df, prompts, techniques):
     table.set_fontsize(10)
     table.scale(1, 1.8)
 
-    max_gen  = np.argmax(generate)
+    #max_gen  = np.argmax(generate)
+    top3_gen = set(np.argsort(generate)[-3:])
+
     max_tune = np.argmax(tune)
 
     for c in range(len(prompts)):
@@ -128,10 +130,10 @@ def plot_avg_total_by_essaytype(avg_df, prompts, techniques):
             fontfamily='Times New Roman'
         )
 
-        table[1, c].set_facecolor('#ffcccc' if c == max_gen else '#f7f9fc')
+        table[1, c].set_facecolor('#ffcccc' if c in top3_gen else '#f7f9fc')
         table[1, c].set_text_props(
-            fontweight='bold' if c == max_gen else 'normal',
-            color='#c1121f' if c == max_gen else '#1a1a2e',
+            fontweight='bold' if c in top3_gen else 'normal',
+            color='#c1121f' if c in top3_gen else '#1a1a2e',
             fontfamily='Times New Roman'
         )
 
