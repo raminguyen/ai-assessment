@@ -13,139 +13,157 @@ from matplotlib.lines import Line2D
 #
 
 
-def plot_avg_total_by_essaytype(avg_df, prompts, techniques):
+import matplotlib.pyplot as plt
+import numpy as np
 
-    generate = [
-        avg_df[
-            (avg_df['Prompt']    == p) &
-            (avg_df['EssayType'] == 'generate')
-        ]['AvgTotal'].values[0]
-        for p in prompts
+def plot_generate_vs_tune_dumbbell(avg_df, prompts, techniques):
+
+    # Your preferred technique names
+    techniques = [
+        'Baseline',
+        'Role-based',
+        'Role-based + Formal',
+        'CoT',
+        'Generate',
+        'CoT + Generate',
+        'Role-based + Gen',
+        'Iter: A + Role-based + Generate',
+        'Iter: A + Role-based',
+        'Iter: A + Gen',
+        'Iter: A + CoT',
+        'Iter: A + Write',
+        'Iter: A&S + Write'
     ]
 
-    tune = [
-        avg_df[
-            (avg_df['Prompt']    == p) &
-            (avg_df['EssayType'] == 'tune')
-        ]['AvgTotal'].values[0]
+    
+    generate = np.array([
+        avg_df[(avg_df['Prompt'] == p) & (avg_df['EssayType'] == 'generate')]['AvgTotal'].values[0]
         for p in prompts
-    ]
-
-    generate = np.array(generate)
-    tune     = np.array(tune)
-    x        = np.arange(len(prompts))
-
+    ])
+    
+    tune = np.array([
+        avg_df[(avg_df['Prompt'] == p) & (avg_df['EssayType'] == 'tune')]['AvgTotal'].values[0]
+        for p in prompts
+    ])
+    
+    labels = ['P' + str(i) + ' ' + t for i, t in enumerate(techniques)]
+    y = np.arange(len(prompts))
+    
     fig, (ax1, ax2) = plt.subplots(
         2, 1,
-        figsize=(18, 7),
-        gridspec_kw={'height_ratios': [3, 1]}
+        figsize=(14, 11),
+        gridspec_kw={'height_ratios': [4, 1]}
     )
-
-    fig.patch.set_facecolor('#f7f9fc')
-
-    # ── dot chart ───
-    ax1.set_facecolor('#f7f9fc')
-
+    
+    fig.patch.set_facecolor('white')
+    ax1.set_facecolor('white')
+    
+    # Draw connecting lines
     for i in range(len(prompts)):
-        ax1.vlines(
-            i,
-            min(generate[i], tune[i]),
-            max(generate[i], tune[i]),
-            color='#cccccc', linewidth=2, zorder=1
+        ax1.hlines(
+            i, generate[i], tune[i],
+            color="#4361ee", linewidth=1, zorder=1
         )
-
+    
+    # Generate dots (green)
     ax1.scatter(
-        x, generate,
-        color='#2d6a4f', s=150, zorder=5,
+        generate, y,
+        color='#2d6a4f', s=120, zorder=5,
         edgecolors='white', linewidths=1.5,
         label='Generate'
     )
-
+    
+    # Tune dots (blue)
     ax1.scatter(
-        x, tune,
-        color='#4361ee', s=150, zorder=5,
+        tune, y,
+        color='#4361ee', s=120, zorder=5,
         edgecolors='white', linewidths=1.5,
         label='Tune'
     )
+    
+    # Find max tune index
+    max_tune_idx = np.argmax(tune)
 
-    ax1.set_xticks(x)
-    ax1.set_xticklabels(
-        ['P' + str(i) + '\n' + t for i, t in enumerate(techniques)],
-        fontsize=8, ha='center',
-        fontfamily='Times New Roman'
+    ax1.set_yticks(y)
+    ax1.set_yticklabels(labels, fontsize=10, fontfamily='Times New Roman', color='black')
+
+    # Highlight max label with red box
+    ax1.get_yticklabels()[max_tune_idx].set_bbox(
+        dict(boxstyle='round,pad=0.3', facecolor='#ffcccc', edgecolor='#c1121f', linewidth=1.5)
     )
+    ax1.get_yticklabels()[max_tune_idx].set_color('#c1121f')
 
-    ax1.set_ylabel(
-        'Average Total',
-        fontfamily='Times New Roman', fontsize=11
+    # Highlight best tune dot
+    ax1.scatter(
+        tune[max_tune_idx], max_tune_idx,
+        color='#4361ee', s=150, zorder=6,
+        edgecolors='#e33232', linewidths=2.5
     )
+    
+    ax1.set_yticks(y)
 
+    ax1.set_yticklabels(labels, fontsize=14, fontfamily='Arial Narrow', color='black', fontweight="bold")
+
+
+    ax1.set_xlabel('Total Average Score', fontsize=14, fontfamily='Arial Narrow', color='black')
+    
     ax1.set_title(
-        'Generate vs Tune Essays — Average Total Score by Prompt',
-        fontfamily='Times New Roman',
-        fontsize=13, fontweight='bold'
+        'Average Total AI Score from Generate to Tune By Prompt Techniques (Highest Score:20)',
+        fontfamily='Arial Narrow', fontsize=16, fontweight='bold', color='black'
     )
-
-    ax1.set_ylim(16, 20.5)
-    ax1.yaxis.grid(True, linestyle='--', alpha=0.4)
+    
+    ax1.set_xlim(17, 20.5)
+    ax1.set_xticks([17.0, 18.0, 19.0, 20.0])
+    ax1.xaxis.grid(True, linestyle='-', alpha=0.5)
     ax1.set_axisbelow(True)
-    ax1.legend(fontsize=11, frameon=False)
 
+
+    ax1.legend(loc='upper right', fontsize=12, frameon=False)
+    ax1.invert_yaxis()
+    ax1.tick_params(axis='x', colors='black')
+    
+    ax1.text(0.02, -0.08, 'P: Prompt    A: Assignment    S: Student prompt', 
+         transform=ax1.transAxes,
+         fontsize=14, fontfamily='Times New Roman', style='italic',
+         color='gray')
+    
     for spine in ax1.spines.values():
         spine.set_visible(False)
-
-    # ── table ─
-    ax2.set_facecolor('#f7f9fc')
+    
+    # Legend table
+    ax2.set_facecolor('white')
     ax2.axis('off')
-
+    
     table_data = [
-        list(generate.round(2)),
-        list(tune.round(2))
-    ]
-
-    col_labels = ['P' + str(i) for i in range(len(prompts))]
-    row_labels = ['Generate', 'Tune']
+    ['Baseline', 'Role-based', 'Chain of Thought (CoT)', 'Generate', 'Iterative (Iter)'],
+    ['Write essay', 'You are anundergrad student.', 'Think step by step', 'Generate essay', 'Multi-turn conversation']
+]
 
     table = ax2.table(
         cellText=table_data,
-        rowLabels=row_labels,
-        colLabels=col_labels,
-        loc='center', cellLoc='center'
+        loc='center',
+        cellLoc='center',
+        colWidths=[0.20, 0.20, 0.20, 0.20, 0.20]
     )
 
-    table.auto_set_font_size(False)
-    table.set_fontsize(10)
-    table.scale(1, 1.8)
-
-    #max_gen  = np.argmax(generate)
-    top3_gen = set(np.argsort(generate)[-3:])
-
-    max_tune = np.argmax(tune)
-
-    for c in range(len(prompts)):
-
-        table[0, c].set_facecolor('#f7f9fc')
-        table[0, c].set_text_props(
-            fontweight='bold',
-            fontfamily='Times New Roman'
-        )
-
-        table[1, c].set_facecolor('#ffcccc' if c in top3_gen else '#f7f9fc')
-        table[1, c].set_text_props(
-            fontweight='bold' if c in top3_gen else 'normal',
-            color='#c1121f' if c in top3_gen else '#1a1a2e',
-            fontfamily='Times New Roman'
-        )
-
-        table[2, c].set_facecolor('#ffcccc' if c == max_tune else '#f7f9fc')
-        table[2, c].set_text_props(
-            fontweight='bold' if c == max_tune else 'normal',
-            color='#c1121f' if c == max_tune else '#1a1a2e',
-            fontfamily='Times New Roman'
-        )
-
+    table.auto_set_font_size(True)
+    table.set_fontsize(12)
+    table.scale(1, 2)
+    
+    # Style header row
+    for c in range(5):
+        table[0, c].set_facecolor('#e8e8e8')
+        table[0, c].set_text_props(fontweight='bold', fontfamily='Arial Narrow', color='black')
+        table[1, c].set_facecolor('white')
+        table[1, c].set_text_props(fontfamily='Arial Narrow', color='black')
+    
+    
     plt.tight_layout()
+    plt.savefig('averagetotalaiscore.png', dpi=600)
     plt.show()
+    
+
+
 
 
 def plot_bias_by_prompt_assignment(bias_df, prompt_labels):
