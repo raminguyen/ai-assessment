@@ -49,12 +49,8 @@ def plot_generate_vs_tune_dumbbell(avg_df, prompts, techniques):
     labels = ['P' + str(i) + ' ' + t for i, t in enumerate(techniques)]
     y = np.arange(len(prompts))
     
-    fig, (ax1, ax2) = plt.subplots(
-        2, 1,
-        figsize=(14, 11),
-        gridspec_kw={'height_ratios': [4, 1]}
-    )
-    
+    fig, ax1 = plt.subplots(1, 1, figsize=(32, 24))
+
     fig.patch.set_facecolor('white')
     ax1.set_facecolor('white')
     
@@ -68,16 +64,16 @@ def plot_generate_vs_tune_dumbbell(avg_df, prompts, techniques):
     # Generate dots (green)
     ax1.scatter(
         generate, y,
-        color='#2d6a4f', s=120, zorder=5,
-        edgecolors='white', linewidths=1.5,
+        color='#2d6a4f', s=1500, zorder=10,
+        edgecolors='white', linewidths=10,
         label='Generate'
     )
-    
+
     # Tune dots (blue)
     ax1.scatter(
         tune, y,
-        color='#4361ee', s=120, zorder=5,
-        edgecolors='white', linewidths=1.5,
+        color='#4361ee', s=1500, zorder=10,
+        edgecolors='white', linewidths=10,
         label='Tune'
     )
     
@@ -85,7 +81,7 @@ def plot_generate_vs_tune_dumbbell(avg_df, prompts, techniques):
     max_tune_idx = np.argmax(tune)
 
     ax1.set_yticks(y)
-    ax1.set_yticklabels(labels, fontsize=10, fontfamily='Times New Roman', color='black')
+    ax1.set_yticklabels(labels, fontsize=30, fontfamily='Times New Roman', color='black')
 
     # Highlight max label with red box
     ax1.get_yticklabels()[max_tune_idx].set_bbox(
@@ -96,20 +92,20 @@ def plot_generate_vs_tune_dumbbell(avg_df, prompts, techniques):
     # Highlight best tune dot
     ax1.scatter(
         tune[max_tune_idx], max_tune_idx,
-        color='#4361ee', s=150, zorder=6,
-        edgecolors='#e33232', linewidths=2.5
+        color='#4361ee', s=1700, zorder=11,
+        edgecolors='#e33232', linewidths=10
     )
     
     ax1.set_yticks(y)
 
-    ax1.set_yticklabels(labels, fontsize=14, fontfamily='Arial Narrow', color='black', fontweight="bold")
+    ax1.set_yticklabels(labels, fontsize=45, fontfamily='Arial Narrow', color='black', fontweight="bold")
 
 
-    ax1.set_xlabel('Total Average Score', fontsize=14, fontfamily='Arial Narrow', color='black')
+    ax1.set_xlabel('Total Average Score', fontsize=45, fontfamily='Arial Narrow', color='black')
     
     ax1.set_title(
         'Average Total AI Score from Generate to Tune By Prompt Techniques (Highest Score:20)',
-        fontfamily='Arial Narrow', fontsize=16, fontweight='bold', color='black'
+        fontfamily='Arial Narrow', fontsize=60, fontweight='bold', color='black'
     )
     
     ax1.set_xlim(17, 20.5)
@@ -118,46 +114,18 @@ def plot_generate_vs_tune_dumbbell(avg_df, prompts, techniques):
     ax1.set_axisbelow(True)
 
 
-    ax1.legend(loc='upper right', fontsize=12, frameon=False)
+    ax1.legend(loc='upper right', fontsize=35, frameon=False)
     ax1.invert_yaxis()
-    ax1.tick_params(axis='x', colors='black')
+    ax1.tick_params(axis='x', colors='black', labelsize=45)
     
     ax1.text(0.02, -0.08, 'P: Prompt    A: Assignment    S: Student prompt', 
          transform=ax1.transAxes,
-         fontsize=14, fontfamily='Times New Roman', style='italic',
+         fontsize=40, fontfamily='Times New Roman', style='italic',
          color='gray')
     
     for spine in ax1.spines.values():
         spine.set_visible(False)
-    
-    # Legend table
-    ax2.set_facecolor('white')
-    ax2.axis('off')
-    
-    table_data = [
-    ['Baseline', 'Role-based', 'Chain of Thought (CoT)', 'Generate', 'Iterative (Iter)'],
-    ['Write essay', 'You are anundergrad student.', 'Think step by step', 'Generate essay', 'Multi-turn conversation']
-]
 
-    table = ax2.table(
-        cellText=table_data,
-        loc='center',
-        cellLoc='center',
-        colWidths=[0.20, 0.20, 0.20, 0.20, 0.20]
-    )
-
-    table.auto_set_font_size(True)
-    table.set_fontsize(12)
-    table.scale(1, 2)
-    
-    # Style header row
-    for c in range(5):
-        table[0, c].set_facecolor('#e8e8e8')
-        table[0, c].set_text_props(fontweight='bold', fontfamily='Arial Narrow', color='black')
-        table[1, c].set_facecolor('white')
-        table[1, c].set_text_props(fontfamily='Arial Narrow', color='black')
-    
-    
     plt.tight_layout()
     plt.savefig('averagetotalaiscore.png', dpi=600)
     plt.show()
