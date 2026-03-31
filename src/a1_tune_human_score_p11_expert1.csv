@@ -1,0 +1,13 @@
+Expert,LLM,Essay,Explanation,Evidence,Influence,Student_Pos,Conclusions,Total
+Expert 1,ChatGPT,Essay 1,4,4,4,2.5,3.5,18
+Expert 1,ChatGPT,Essay 2,4,4,4,4,4,20
+Expert 1,ChatGPT,Essay 3,4,4,3.5,4,4,19.5
+Expert 1,Gemini,Essay 1,4,4,4,3.5,4,19.5
+Expert 1,Gemini,Essay 2,4,3,3.5,3.5,4,18
+Expert 1,Gemini,Essay 3,4,4,4,4,4,20
+Expert 1,Claude,Essay 1,4,4,4,3.5,4,19.5
+Expert 1,Claude,Essay 2,4,4,4,4,4,20
+Expert 1,Claude,Essay 3,4,4,4,4,4,20
+Expert 1,Grok,Essay 1,2,3,4,2,2,13
+Expert 1,Grok,Essay 2,4,3,4,1,2,14
+Expert 1,Grok,Essay 3,4,3.5,3,1,2,13.5
