@@ -6,6 +6,35 @@
     <title>AI Essay Explorer - Rami's Research Tool</title>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="style.css">
+    <style>
+        .prompt-tabs {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 4px;
+            margin-bottom: 1rem;
+        }
+        .prompt-tab {
+            background: transparent;
+            border: 1px solid #555;
+            color: #999;
+            padding: 3px 9px;
+            border-radius: 4px;
+            font-family: 'Poppins', sans-serif;
+            font-size: 0.72rem;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .prompt-tab.active {
+            background: var(--rami-highlight);
+            border-color: var(--rami-highlight);
+            color: #171515;
+            font-weight: 600;
+        }
+        .prompt-tab:hover:not(.active) {
+            border-color: var(--rami-highlight);
+            color: var(--rami-highlight);
+        }
+    </style>
 </head>
 <body>
     <!-- Main Container -->
@@ -13,31 +42,22 @@
         <!-- Left Panel -->
         <div class="left-panel">
             <button class="load-btn" id="githubBtn">Load from GitHub</button>
-            <!-- <button class="load-btn" id="localBtn">Load from Local Files</button> -->
 
-            <!-- Homepage Dropdown Navigation -->
-            <div style="margin-bottom: 1rem;">
-                <div class="dropdown" style="position: relative;">
-                    
-    <div id="dropdownContent" class="dropdown-content" style="display:none; position:absolute; left:0; top:100%; background: #333; min-width:160px; z-index:1000; border-radius:8px;">
-        <a href="index1.html" style="display:block; padding:0.5rem 1rem; color:#fff; text-decoration:none;">Prompt 1</a>
-        <a href="index2.html" style="display:block; padding:0.5rem 1rem; color:#fff; text-decoration:none;">Prompt 2</a>
-        <a href="work.html" style="display:block; padding:0.5rem 1rem; color:#fff; text-decoration:none;">Work</a>
-    </div>
-</div>
-<script>
-function toggleDropdown() {
-    var dropdown = document.getElementById('dropdownContent');
-    dropdown.style.display = dropdown.style.display === 'block' ? 'none' : 'block';
-}
-document.addEventListener('click', function(event) {
-    var dropdown = document.getElementById('dropdownContent');
-    var button = event.target.closest('.load-btn-secondary');
-    if (!button && dropdown && event.target.closest('.dropdown') === null) {
-        dropdown.style.display = 'none';
-    }
-});
-</script>
+            <!-- Prompt Tabs -->
+            <div class="prompt-tabs">
+                <button class="prompt-tab active" data-prompt="0">p0</button>
+                <button class="prompt-tab" data-prompt="1">p1</button>
+                <button class="prompt-tab" data-prompt="2">p2</button>
+                <button class="prompt-tab" data-prompt="3">p3</button>
+                <button class="prompt-tab" data-prompt="4">p4</button>
+                <button class="prompt-tab" data-prompt="5">p5</button>
+                <button class="prompt-tab" data-prompt="6">p6</button>
+                <button class="prompt-tab" data-prompt="7">p7</button>
+                <button class="prompt-tab" data-prompt="8">p8</button>
+                <button class="prompt-tab" data-prompt="9">p9</button>
+                <button class="prompt-tab" data-prompt="10">p10</button>
+                <button class="prompt-tab" data-prompt="11">p11</button>
+                <button class="prompt-tab" data-prompt="12">p12</button>
             </div>
 
             <!-- Assignment Filter -->
@@ -140,7 +160,7 @@ document.addEventListener('click', function(event) {
     <!-- Footer -->
     <footer class="footer">
         <div class="footer-left">
-            © Dec 2025 Developed by Rami Huu Nguyen - AI Researcher 
+            © Dec 2025 Developed by Rami Huu Nguyen - AI Researcher
         </div>
         <div class="footer-right">
             <a href="https://www.linkedin.com/in/raminguyen/" target="_blank">LinkedIn</a>
@@ -152,23 +172,102 @@ document.addEventListener('click', function(event) {
 
     <!-- Scripts - Load in order -->
     <!-- Core Data & Utilities -->
-    <script src="src/js/data.js?v=9"></script>
-    <script src="src/js/content.js?v=9"></script>
-    <script src="src/js/parser.js?v=14"></script>
-    <script src="src/js/data-processor.js?v=9"></script>
-
-    
+    <script src="src/js/data.js?v=10"></script>
+    <script src="src/js/content.js?v=10"></script>
+    <script src="src/js/parser.js?v=15"></script>
+    <script src="src/js/data-processor.js?v=10"></script>
 
     <!-- UI Components -->
-    <script src="src/js/element.js?v=9"></script>
-    <script src="src/js/filter.js?v=9"></script>
-    <script src="src/js/renderer.js?v=11"></script>
+    <script src="src/js/element.js?v=11"></script>
+    <script src="src/js/filter.js?v=10"></script>
+    <script src="src/js/renderer.js?v=17"></script>
 
-    <!-- Data Loaders -->
-    <script src="src/js/github-loader.js?v=9"></script>
-    <script src="src/js/local-loader.js?v=9"></script>
+    <!-- Unified GitHub Loader (replaces all github-loader-pN.js files) -->
+    <script>
+        async function loadFromGitHub() {
+            const folder = 'critical_thinking';
+            const suffix = '_p' + (window.PROMPT_NUMBER || '0') + '.json';
+            let totalLoaded = 0;
+
+            const treeUrl = 'https://api.github.com/repos/raminguyen/ai-assessment/git/trees/main?recursive=1';
+            const rawBase = 'https://raw.githubusercontent.com/raminguyen/ai-assessment/main/';
+
+            const response = await fetch(treeUrl);
+            if (!response.ok) return totalLoaded;
+
+            const treeData = await response.json();
+
+            const jsonFiles = treeData.tree.filter(function(item) {
+                return item.type === 'blob' &&
+                       item.path.startsWith('data/' + folder + '/') &&
+                       item.path.endsWith(suffix);
+            });
+
+            for (const file of jsonFiles) {
+                const fileName = file.path.split('/').pop();
+                const cacheBuster = '?t=' + Date.now();
+                const fileResponse = await fetch(rawBase + file.path + cacheBuster);
+                const fileText = await fileResponse.text();
+
+                try {
+                    const data = JSON.parse(fileText);
+                    processData(data, folder, fileName);
+                    totalLoaded++;
+                } catch (error) {
+                    console.error('JSON parse error in file:', fileName);
+                    console.error('Error:', error.message);
+                    throw error;
+                }
+            }
+
+            return totalLoaded;
+        }
+    </script>
+
+    <script src="src/js/local-loader.js?v=10"></script>
+
+    <!-- Default prompt: p0 -->
+    <script>
+        window.PROMPT_NUMBER = '0';
+    </script>
 
     <!-- Application Entry -->
-    <script src="src/js/application.js?v=9"></script>
+    <script src="src/js/application.js?v=11"></script>
+
+    <!-- Prompt Tab Switching -->
+    <script>
+        document.querySelectorAll('.prompt-tab').forEach(function(tab) {
+            tab.addEventListener('click', async function() {
+                var num = this.getAttribute('data-prompt');
+                if (num === window.PROMPT_NUMBER) return;
+
+                // Update active tab
+                document.querySelectorAll('.prompt-tab').forEach(function(t) {
+                    t.classList.remove('active');
+                });
+                this.classList.add('active');
+
+                // Update prompt number and clear data
+                window.PROMPT_NUMBER = num;
+                clearData();
+
+                // Reset UI
+                document.getElementById('promptContent').textContent = 'Select an item from the left panel to view details';
+                document.getElementById('responseContent').textContent = 'Select an item to view the response';
+                document.getElementById('scoreBody').innerHTML = '';
+                document.getElementById('rubricSection').style.display = 'none';
+                document.getElementById('dateDisplay').textContent = 'Date: --';
+                document.getElementById('scoreModal').style.display = 'none';
+
+                // Remove active from action buttons
+                document.querySelectorAll('.action-btn').forEach(function(btn) {
+                    btn.classList.remove('active');
+                });
+
+                // Re-initialize renderer with new prompt
+                await initRenderer(num);
+            });
+        });
+    </script>
 </body>
 </html>
